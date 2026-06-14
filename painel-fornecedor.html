@@ -1,0 +1,811 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Painel do Fornecedor — AluguelDeChácaras.com.br</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,700;1,700&family=Inter:wght@400;500;600;700&display=swap');
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --terra: #c8622a;
+      --terra-escuro: #9c4a1a;
+      --terra-claro: #fdf0e8;
+      --terra-mid: #e8874d;
+      --verde: #2d7a45;
+      --verde-claro: #e8f5ed;
+      --creme: #faf8f3;
+      --cinza: #6b7280;
+      --cinza-bg: #f3f4f6;
+      --cinza-borda: #e5e7eb;
+      --preto: #111827;
+      --branco: #ffffff;
+      --vermelho: #ef4444;
+      --amarelo: #f59e0b;
+    }
+
+    body { font-family: 'Inter', sans-serif; background: var(--cinza-bg); color: var(--preto); min-height: 100vh; }
+
+    /* LOGIN */
+    .login-page {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(135deg, var(--terra-escuro) 0%, var(--terra) 100%);
+      padding: 24px;
+    }
+
+    .login-card {
+      background: #fff;
+      border-radius: 24px;
+      padding: 48px 40px;
+      width: 100%;
+      max-width: 420px;
+      box-shadow: 0 24px 60px rgba(0,0,0,0.2);
+    }
+
+    .login-logo { font-family: 'Fraunces', serif; font-size: 22px; color: var(--terra-escuro); margin-bottom: 6px; text-align: center; }
+    .login-logo span { color: var(--verde); }
+    .login-sub { text-align: center; font-size: 13px; color: var(--cinza); margin-bottom: 36px; }
+    .login-title { font-size: 22px; font-weight: 700; margin-bottom: 24px; }
+
+    .field { display: flex; flex-direction: column; gap: 6px; margin-bottom: 16px; }
+    .field label { font-size: 13px; font-weight: 600; }
+    .field input, .field select, .field textarea {
+      border: 1.5px solid var(--cinza-borda); border-radius: 10px; padding: 11px 14px;
+      font-size: 14px; font-family: 'Inter', sans-serif; outline: none; transition: border 0.15s; color: var(--preto);
+    }
+    .field input:focus, .field select:focus, .field textarea:focus { border-color: var(--terra); }
+    .field textarea { resize: vertical; min-height: 100px; }
+
+    .btn {
+      display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+      padding: 12px 20px; border-radius: 10px; font-size: 14px; font-weight: 700;
+      cursor: pointer; border: none; transition: all 0.15s; font-family: 'Inter', sans-serif; text-decoration: none;
+    }
+    .btn-terra { background: var(--terra); color: #fff; width: 100%; }
+    .btn-terra:hover { background: var(--terra-escuro); }
+    .btn-terra-sm { background: var(--terra); color: #fff; }
+    .btn-terra-sm:hover { background: var(--terra-escuro); }
+    .btn-outline { background: transparent; color: var(--terra-escuro); border: 1.5px solid var(--terra); }
+    .btn-outline:hover { background: var(--terra-claro); }
+    .btn-verde { background: var(--verde); color: #fff; }
+    .btn-verde:hover { background: #1e5c33; }
+    .btn-danger { background: #fff; color: var(--vermelho); border: 1.5px solid #fecaca; }
+    .btn-danger:hover { background: #fff5f5; }
+    .btn-sm { padding: 7px 14px; font-size: 13px; }
+
+    /* PAINEL */
+    .painel { display: none; }
+    .painel.ativo { display: flex; min-height: 100vh; }
+
+    /* SIDEBAR */
+    .sidebar {
+      width: 240px; background: var(--terra-escuro); display: flex; flex-direction: column;
+      padding: 28px 16px; position: fixed; top: 0; left: 0; height: 100vh; z-index: 50;
+    }
+    .sidebar-logo { font-family: 'Fraunces', serif; font-size: 18px; color: #fff; margin-bottom: 4px; padding: 0 8px; }
+    .sidebar-logo span { color: #fbd38d; }
+    .sidebar-sub { font-size: 11px; color: rgba(255,255,255,0.4); padding: 0 8px; margin-bottom: 32px; text-transform: uppercase; letter-spacing: 1px; }
+    .sidebar-section { font-size: 10px; font-weight: 700; color: rgba(255,255,255,0.3); text-transform: uppercase; letter-spacing: 1px; padding: 0 8px; margin: 20px 0 8px; }
+
+    .nav-item {
+      display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 8px;
+      color: rgba(255,255,255,0.65); font-size: 14px; font-weight: 500; cursor: pointer;
+      border: none; background: none; width: 100%; text-align: left; transition: all 0.15s;
+    }
+    .nav-item:hover { background: rgba(255,255,255,0.08); color: #fff; }
+    .nav-item.ativo { background: rgba(255,255,255,0.15); color: #fff; }
+    .nav-icon { font-size: 16px; width: 22px; text-align: center; }
+
+    .sidebar-bottom { margin-top: auto; padding-top: 16px; border-top: 1px solid rgba(255,255,255,0.1); }
+    .user-info { display: flex; align-items: center; gap: 10px; padding: 8px; }
+    .user-avatar { width: 36px; height: 36px; border-radius: 50%; background: #fbd38d; display: flex; align-items: center; justify-content: center; font-weight: 700; color: var(--terra-escuro); font-size: 14px; flex-shrink: 0; }
+    .user-nome { color: #fff; font-size: 13px; font-weight: 600; }
+    .user-plano { color: rgba(255,255,255,0.4); font-size: 11px; }
+
+    /* MAIN */
+    .main { margin-left: 240px; flex: 1; padding: 32px; }
+
+    .topbar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 28px; }
+    .page-title { font-size: 20px; font-weight: 700; }
+    .page-sub { font-size: 13px; color: var(--cinza); margin-top: 2px; }
+
+    .tabs { display: none; }
+    .tabs.ativo { display: block; }
+
+    /* STATS */
+    .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 24px; }
+    .stat-card { background: #fff; border-radius: 12px; padding: 20px; border: 1px solid var(--cinza-borda); }
+    .stat-label { font-size: 12px; color: var(--cinza); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; }
+    .stat-value { font-size: 26px; font-weight: 700; font-family: 'Fraunces', serif; color: var(--terra-escuro); }
+    .stat-tag { display: inline-block; margin-top: 6px; font-size: 11px; padding: 2px 8px; border-radius: 20px; font-weight: 600; }
+    .tag-terra { background: var(--terra-claro); color: var(--terra-escuro); }
+    .tag-verde { background: var(--verde-claro); color: var(--verde); }
+    .tag-cinza { background: #f3f4f6; color: #6b7280; }
+    .tag-amarelo { background: #fef3c7; color: #92400e; }
+
+    /* CARD */
+    .card { background: #fff; border-radius: 14px; border: 1px solid var(--cinza-borda); padding: 24px; margin-bottom: 24px; }
+    .card-title { font-size: 16px; font-weight: 700; margin-bottom: 20px; color: var(--terra-escuro); display: flex; align-items: center; gap: 8px; }
+
+    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    .form-full { grid-column: 1 / -1; }
+
+    /* TAGS */
+    .tags-grid { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 4px; }
+    .tag-check {
+      display: flex; align-items: center; gap: 6px; background: var(--creme);
+      border: 1.5px solid var(--cinza-borda); border-radius: 8px; padding: 7px 12px;
+      cursor: pointer; font-size: 13px; font-weight: 500; transition: all 0.15s; user-select: none;
+    }
+    .tag-check.selecionado { background: var(--terra-claro); border-color: var(--terra); color: var(--terra-escuro); font-weight: 600; }
+    .tag-check input { display: none; }
+
+    /* UPLOAD */
+    .upload-area {
+      border: 2px dashed var(--cinza-borda); border-radius: 12px; padding: 32px;
+      text-align: center; cursor: pointer; transition: all 0.15s; background: var(--creme);
+    }
+    .upload-area:hover { border-color: var(--terra); background: var(--terra-claro); }
+    .upload-icon { font-size: 36px; margin-bottom: 10px; }
+    .upload-title { font-weight: 600; font-size: 15px; color: var(--terra-escuro); margin-bottom: 4px; }
+    .upload-sub { font-size: 13px; color: var(--cinza); }
+
+    .fotos-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-top: 16px; }
+    .foto-item { aspect-ratio: 1; border-radius: 10px; overflow: hidden; position: relative; display: flex; align-items: center; justify-content: center; font-size: 32px; }
+    .foto-remove { position: absolute; top: 4px; right: 4px; background: rgba(0,0,0,0.55); color: #fff; border: none; border-radius: 50%; width: 24px; height: 24px; cursor: pointer; font-size: 12px; display: flex; align-items: center; justify-content: center; }
+    .foto-principal-badge { position: absolute; bottom: 4px; left: 4px; background: var(--terra-escuro); color: #fff; font-size: 10px; padding: 2px 8px; border-radius: 20px; font-weight: 700; }
+
+    /* PREVIEW CARD */
+    .preview-card { background: var(--creme); border: 1.5px solid var(--cinza-borda); border-radius: 14px; overflow: hidden; }
+    .preview-foto { height: 140px; background: linear-gradient(135deg, #fbd38d, #ed8936); display: flex; align-items: center; justify-content: center; font-size: 56px; }
+    .preview-info { padding: 14px; }
+    .preview-cat { font-size: 11px; font-weight: 700; color: var(--terra); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; }
+    .preview-nome { font-family: 'Fraunces', serif; font-size: 17px; color: var(--terra-escuro); margin-bottom: 4px; }
+    .preview-local { font-size: 12px; color: var(--cinza); }
+
+    /* STATUS */
+    .status-badge { display: inline-flex; align-items: center; gap: 6px; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 700; }
+    .status-badge::before { content: ''; width: 7px; height: 7px; border-radius: 50%; }
+    .badge-ativo { background: var(--verde-claro); color: var(--verde); }
+    .badge-ativo::before { background: var(--verde); }
+
+    /* DICAS */
+    .dicas-box {
+      background: linear-gradient(135deg, #fff7ed, #fef3c7);
+      border: 1.5px solid #f59e0b;
+      border-radius: 16px;
+      padding: 24px;
+      margin-bottom: 24px;
+    }
+    .dicas-header { display: flex; align-items: center; gap:10px; margin-bottom: 16px; }
+    .dicas-titulo { font-size: 15px; font-weight: 700; color: #92400e; }
+    .dicas-sub { font-size: 13px; color: #b45309; }
+    .dicas-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .dica-item { background: #fff; border-radius: 10px; padding: 14px; border: 1px solid #fde68a; }
+    .dica-item-titulo { font-size: 13px; font-weight: 700; color: #92400e; margin-bottom: 8px; }
+    .dica-item ul { list-style: none; display: flex; flex-direction: column; gap: 6px; }
+    .dica-item li { font-size: 12px; color: #374151; line-height: 1.5; }
+
+    /* TOAST */
+    .toast { position: fixed; bottom: 24px; right: 24px; background: var(--terra-escuro); color: #fff; padding: 14px 20px; border-radius: 10px; font-size: 14px; font-weight: 500; display: none; align-items: center; gap: 8px; z-index: 999; box-shadow: 0 4px 20px rgba(0,0,0,0.2); }
+    .toast.show { display: flex; }
+
+    /* CATEGORIAS LISTA */
+    .cat-lista { display: flex; flex-direction: column; gap: 8px; }
+    .cat-item {
+      display: flex; align-items: center; gap: 12px; padding: 12px 16px;
+      background: var(--creme); border: 1.5px solid var(--cinza-borda); border-radius: 10px;
+      cursor: pointer; transition: all 0.15s;
+    }
+    .cat-item:hover { border-color: var(--terra); background: var(--terra-claro); }
+    .cat-item.selecionado { border-color: var(--terra); background: var(--terra-claro); }
+    .cat-item-icon { font-size: 24px; width: 36px; text-align: center; }
+    .cat-item-nome { font-size: 14px; font-weight: 600; color: var(--terra-escuro); }
+    .cat-item-desc { font-size: 12px; color: var(--cinza); margin-top: 2px; }
+    .cat-check { margin-left: auto; width: 20px; height: 20px; border-radius: 50%; border: 2px solid var(--cinza-borda); display: flex; align-items: center; justify-content: center; font-size: 11px; }
+    .cat-item.selecionado .cat-check { background: var(--terra); border-color: var(--terra); color: #fff; }
+
+    @media (max-width: 768px) {
+      .sidebar { display: none; }
+      .main { margin-left: 0; padding: 20px; }
+      .stats-grid { grid-template-columns: repeat(2, 1fr); }
+      .form-grid { grid-template-columns: 1fr; }
+      .fotos-grid { grid-template-columns: repeat(3, 1fr); }
+      .dicas-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div class="login-page" id="login-page">
+  <div class="login-card">
+    <div class="login-logo">🌿 Aluguel de <span>Chácaras</span></div>
+    <div class="login-sub">Painel do Fornecedor</div>
+    <div class="login-title">Bem-vindo de volta!</div>
+    <div class="field">
+      <label>E-mail</label>
+      <input type="email" id="login-email" value="dj@marquinhosevents.com.br" placeholder="seu@email.com"/>
+    </div>
+    <div class="field">
+      <label>Senha</label>
+      <input type="password" id="login-senha" value="123456" placeholder="••••••••"/>
+    </div>
+    <button class="btn btn-terra" onclick="fazerLogin()" style="margin-top:8px;">Entrar no painel</button>
+    <div style="text-align:center; font-size:13px; color:var(--cinza); margin-top:20px;">
+      Ainda não tem conta? <a href="#" style="color:var(--terra); font-weight:600;">Cadastre-se grátis</a>
+    </div>
+    <div style="margin-top:20px; padding:12px; background:var(--terra-claro); border-radius:8px; font-size:12px; color:var(--terra-escuro); text-align:center;">
+      💡 <strong>Demonstração:</strong> clique em "Entrar no painel" para explorar
+    </div>
+  </div>
+</div>
+
+<!-- PAINEL -->
+<div class="painel" id="painel">
+  <aside class="sidebar">
+    <div class="sidebar-logo">🌿 Aluguel de <span>Chácaras</span></div>
+    <div class="sidebar-sub">Painel do Fornecedor</div>
+
+    <div class="sidebar-section">Meu Anúncio</div>
+    <button class="nav-item ativo" onclick="mostrarTab('visao-geral', this)">
+      <span class="nav-icon">📊</span> Visão Geral
+    </button>
+    <button class="nav-item" onclick="mostrarTab('meu-servico', this)">
+      <span class="nav-icon">🎯</span> Meu Serviço
+    </button>
+    <button class="nav-item" onclick="mostrarTab('fotos', this)">
+      <span class="nav-icon">📷</span> Fotos e Vídeos
+    </button>
+
+    <div class="sidebar-section">Conta</div>
+    <button class="nav-item" onclick="mostrarTab('configuracoes', this)">
+      <span class="nav-icon">⚙️</span> Configurações
+    </button>
+    <button class="nav-item" onclick="mostrarTab('plano', this)">
+      <span class="nav-icon">💳</span> Meu Plano
+    </button>
+
+    <div class="sidebar-bottom">
+      <div class="user-info">
+        <div class="user-avatar">DM</div>
+        <div>
+          <div class="user-nome">DJ Marquinhos</div>
+          <div class="user-plano">Plano Gratuito</div>
+        </div>
+      </div>
+      <button class="nav-item" onclick="fazerLogout()" style="margin-top:8px; color:rgba(255,255,255,0.4);">
+        <span class="nav-icon">🚪</span> Sair
+      </button>
+    </div>
+  </aside>
+
+  <main class="main">
+
+    <!-- VISÃO GERAL -->
+    <div class="tabs ativo" id="tab-visao-geral">
+      <div class="topbar">
+        <div>
+          <div class="page-title">Visão Geral</div>
+          <div class="page-sub">Acompanhe o desempenho do seu anúncio</div>
+        </div>
+        <span class="status-badge badge-ativo">Anúncio ativo</span>
+      </div>
+
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-label">Visualizações</div>
+          <div class="stat-value">183</div>
+          <span class="stat-tag tag-terra">este mês</span>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Contatos recebidos</div>
+          <div class="stat-value">12</div>
+          <span class="stat-tag tag-verde">este mês</span>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Eventos atendidos</div>
+          <div class="stat-value">4</div>
+          <span class="stat-tag tag-amarelo">em junho</span>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Avaliação média</div>
+          <div class="stat-value">4.9</div>
+          <span class="stat-tag tag-verde">⭐ de 5</span>
+        </div>
+      </div>
+
+      <div style="display:grid; grid-template-columns: 2fr 1fr; gap:20px;">
+        <div class="card">
+          <div class="card-title">🎯 Status do seu anúncio</div>
+          <div class="preview-card">
+            <div class="preview-foto">🎵</div>
+            <div class="preview-info">
+              <div class="preview-cat">DJ e Música</div>
+              <div class="preview-nome">DJ Marquinhos Events</div>
+              <div class="preview-local">📍 Maringá — PR</div>
+              <div style="margin-top:10px; font-size:13px; color:var(--cinza); line-height:1.5;">
+                Som profissional para festas e eventos. Iluminação LED inclusa. Atende Maringá e região.
+              </div>
+              <div style="margin-top:10px; display:flex; flex-wrap:wrap; gap:6px;">
+                <span style="background:var(--terra-claro);color:var(--terra-escuro);font-size:11px;font-weight:600;padding:3px 10px;border-radius:20px;">🎵 DJ</span>
+                <span style="background:var(--terra-claro);color:var(--terra-escuro);font-size:11px;font-weight:600;padding:3px 10px;border-radius:20px;">💡 Iluminação LED</span>
+                <span style="background:var(--terra-claro);color:var(--terra-escuro);font-size:11px;font-weight:600;padding:3px 10px;border-radius:20px;">🎤 Microfone</span>
+              </div>
+            </div>
+          </div>
+          <div style="display:flex; gap:10px; margin-top:16px;">
+            <button class="btn btn-outline btn-sm" onclick="mostrarTab('meu-servico', document.querySelectorAll('.nav-item')[1])">✏️ Editar anúncio</button>
+            <button class="btn btn-outline btn-sm" onclick="mostrarTab('fotos', document.querySelectorAll('.nav-item')[2])">📷 Gerenciar fotos</button>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">✅ Completude do perfil</div>
+          <div style="display:flex; flex-direction:column; gap:12px;">
+            <div style="display:flex; align-items:center; justify-content:space-between; font-size:13px;">
+              <span>Categoria selecionada</span>
+              <span style="color:var(--verde); font-weight:700;">✓</span>
+            </div>
+            <div style="display:flex; align-items:center; justify-content:space-between; font-size:13px;">
+              <span>Descrição do serviço</span>
+              <span style="color:var(--verde); font-weight:700;">✓</span>
+            </div>
+            <div style="display:flex; align-items:center; justify-content:space-between; font-size:13px;">
+              <span>Fotos cadastradas</span>
+              <span style="color:var(--verde); font-weight:700;">✓</span>
+            </div>
+            <div style="display:flex; align-items:center; justify-content:space-between; font-size:13px;">
+              <span>Valores informados</span>
+              <span style="color:var(--verde); font-weight:700;">✓</span>
+            </div>
+            <div style="display:flex; align-items:center; justify-content:space-between; font-size:13px;">
+              <span>Vídeo cadastrado</span>
+              <span style="color:#d1d5db; font-weight:700;">✗</span>
+            </div>
+            <div style="display:flex; align-items:center; justify-content:space-between; font-size:13px;">
+              <span>Área de atuação</span>
+              <span style="color:#f59e0b; font-weight:700;">⚠</span>
+            </div>
+            <div style="height:6px; background:#f3f4f6; border-radius:10px; margin-top:8px;">
+              <div style="height:100%; width:68%; background:var(--terra); border-radius:10px;"></div>
+            </div>
+            <div style="font-size:12px; color:var(--cinza); text-align:right;">68% completo</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- MEU SERVIÇO -->
+    <div class="tabs" id="tab-meu-servico">
+      <div class="topbar">
+        <div style="display:flex; align-items:center; gap:14px;">
+          <button class="btn btn-outline btn-sm" onclick="mostrarTab('visao-geral', document.querySelector('.nav-item'))">← Voltar</button>
+          <div>
+            <div class="page-title">Meu Serviço</div>
+            <div class="page-sub">Edite as informações do seu anúncio</div>
+          </div>
+        </div>
+        <button class="btn btn-terra-sm btn-sm" onclick="salvar('servico')">💾 Salvar alterações</button>
+      </div>
+
+      <!-- DICAS -->
+      <div class="dicas-box">
+        <div class="dicas-header">
+          <span style="font-size:24px;">💡</span>
+          <div>
+            <div class="dicas-titulo">Dicas para um anúncio de sucesso</div>
+            <div class="dicas-sub">Fornecedores com perfil completo recebem até 4x mais contatos</div>
+          </div>
+        </div>
+        <div class="dicas-grid">
+          <div class="dica-item">
+            <div class="dica-item-titulo">📝 Descrição que convence</div>
+            <ul>
+              <li>✅ Descreva <strong>exatamente o que está incluso</strong> no serviço</li>
+              <li>✅ Informe a <strong>área de atuação:</strong> ex. "Atendo Maringá, Sarandi e Paiçandu"</li>
+              <li>✅ Mencione sua <strong>experiência:</strong> ex. "10 anos atendendo eventos na região"</li>
+              <li>✅ Cite <strong>diferenciais:</strong> ex. "entrega e montagem inclusa", "kit completo"</li>
+              <li>✅ Informe se tem <strong>pacotes ou combos</strong> disponíveis</li>
+            </ul>
+          </div>
+          <div class="dica-item">
+            <div class="dica-item-titulo">💰 Valores e condições</div>
+            <ul>
+              <li>✅ Informe um <strong>valor mínimo ou a partir de</strong> — evita contatos sem perfil</li>
+              <li>✅ Explique <strong>como funciona o pagamento:</strong> sinal, Pix, cartão</li>
+              <li>✅ Mencione se há <strong>taxa de deslocamento</strong> para cidades distantes</li>
+              <li>✅ Informe <strong>antecedência mínima</strong> para reserva</li>
+            </ul>
+          </div>
+          <div class="dica-item">
+            <div class="dica-item-titulo">📷 Fotos e portfólio</div>
+            <ul>
+              <li>✅ Use fotos de <strong>eventos reais que você atendeu</strong></li>
+              <li>✅ Mostre seu <strong>equipamento ou produto</strong> com qualidade</li>
+              <li>✅ Inclua fotos <strong>antes e depois</strong> (decoração, buffet, etc.)</li>
+              <li>✅ Foto de capa: <strong>a mais impactante e representativa</strong></li>
+              <li>❌ Evite fotos de catálogo ou banco de imagens genéricas</li>
+            </ul>
+          </div>
+          <div class="dica-item">
+            <div class="dica-item-titulo">🎬 Vídeo faz diferença</div>
+            <ul>
+              <li>✅ Grave um vídeo curto <strong>mostrando seu trabalho em ação</strong></li>
+              <li>✅ Para DJ: grave um trecho de uma festa que você tocou</li>
+              <li>✅ Para bolo/doces: mostre o processo de decoração</li>
+              <li>✅ Para brinquedos: mostre as crianças usando</li>
+              <li>✅ Pode ser feito no <strong>celular</strong> — o conteúdo é o que importa</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- CATEGORIA -->
+      <div class="card">
+        <div class="card-title">🗂️ Categoria do serviço</div>
+        <div class="field" style="margin-bottom:0;">
+          <label>Selecione a categoria que melhor descreve seu serviço</label>
+          <select id="select-categoria" style="font-size:14px; padding:12px 14px;">
+            <optgroup label="🎵 Música e Entretenimento">
+              <option value="dj">🎵 DJ</option>
+              <option value="banda">🎸 Banda</option>
+              <option value="musico">🎹 Músico / Instrumentista</option>
+              <option value="trio_dupla">🎶 Trio / Dupla / Solo</option>
+              <option value="karaoke">🎤 Karaokê</option>
+            </optgroup>
+            <optgroup label="📸 Foto e Vídeo">
+              <option value="fotografo">📷 Fotógrafo</option>
+              <option value="filmagem">🎬 Filmagem / Videógrafo</option>
+              <option value="drone">🚁 Drone / Filmagem aérea</option>
+              <option value="cabine_foto">🤳 Cabine de Fotos / Totem</option>
+            </optgroup>
+            <optgroup label="🍽️ Alimentação e Bebidas">
+              <option value="buffet">🍽️ Buffet completo</option>
+              <option value="churrasqueiro">🥩 Churrasqueiro profissional</option>
+              <option value="salgados">🍡 Salgados</option>
+              <option value="bolos_doces">🎂 Bolos e Doces</option>
+              <option value="cozinheiro">👨‍🍳 Cozinheiro / Chef</option>
+              <option value="chopeira">🍺 Chopeira / Serviço de Chope</option>
+              <option value="bebidas">🥤 Fornecedor de Bebidas</option>
+              <option value="bartender">🍹 Bartender / Bar móvel</option>
+              <option value="pizzaria">🍕 Pizzaria / Forno a lenha</option>
+              <option value="food_truck">🚚 Food Truck</option>
+            </optgroup>
+            <optgroup label="🎈 Decoração e Ambientação">
+              <option value="decoracao">🎈 Decorador(a) de Festas</option>
+              <option value="baloes">🎊 Balões / Baloeiros</option>
+              <option value="flores">💐 Flores e Arranjos florais</option>
+              <option value="cenografia">🎭 Cenografia / Painéis</option>
+              <option value="iluminacao">💡 Iluminação Cênica / LED</option>
+              <option value="som_iluminacao">🔊 Som e Iluminação (pacote)</option>
+            </optgroup>
+            <optgroup label="🎠 Infantil">
+              <option value="brinquedos">🎠 Brinquedos Infantis (pula-pula, tobogã)</option>
+              <option value="recreador">🤹 Recreador Infantil</option>
+              <option value="animador">🎪 Animador de Festa</option>
+              <option value="personagem">🦸 Personagens Fantasiados</option>
+              <option value="magico">🪄 Mágico</option>
+              <option value="palhaco">🤡 Palhaço</option>
+            </optgroup>
+            <optgroup label="👗 Beleza e Estética">
+              <option value="maquiador">💄 Maquiador(a)</option>
+              <option value="cabeleireiro">💇 Cabeleireiro(a)</option>
+              <option value="salao_beleza">💅 Salão de Beleza (equipe)</option>
+              <option value="manicure">💅 Manicure / Pedicure</option>
+            </optgroup>
+            <optgroup label="💃 Atrações e Shows">
+              <option value="dancarina">💃 Dançarina(o) / Grupo de dança</option>
+              <option value="show">🎤 Show ao vivo / Cantor(a)</option>
+              <option value="stand_up">😂 Stand-up Comedy</option>
+              <option value="drag">🌟 Drag Queen / Artista</option>
+              <option value="fogo">🔥 Show de Fogo / Malabares</option>
+            </optgroup>
+            <optgroup label="🧑‍🤝‍🧑 Equipe e Staff">
+              <option value="garcom">🍷 Garçom / Garçonete</option>
+              <option value="recepcao">👋 Recepcionista</option>
+              <option value="manobrista">🚗 Manobrista</option>
+              <option value="porteiro">🚪 Porteiro</option>
+              <option value="seguranca">🔒 Segurança / Vigilância</option>
+              <option value="copeira">☕ Copeira / Auxiliar de serviço</option>
+            </optgroup>
+            <optgroup label="🏗️ Estrutura e Locação">
+              <option value="tendas">⛺ Tendas e Coberturas</option>
+              <option value="mesas_cadeiras">🪑 Mesas, Cadeiras e Móveis</option>
+              <option value="geradores">⚡ Geradores de energia</option>
+              <option value="banheiros">🚻 Banheiros químicos / Trailers</option>
+              <option value="pista_danca">🕺 Pista de dança / Tablado</option>
+              <option value="palco">🎤 Palco / Estrutura de palco</option>
+              <option value="carro_luxo">🚘 Carro de luxo / Limusine</option>
+            </optgroup>
+            <optgroup label="🎁 Lembranças e Presentes">
+              <option value="lembrancas">🎁 Lembranças personalizadas</option>
+              <option value="convites">📨 Convites e Papelaria</option>
+              <option value="grafica">🖨️ Gráfica / Impressão</option>
+              <option value="bem_casado">🍬 Bem-casados / Docinhos</option>
+            </optgroup>
+            <optgroup label="🐾 Outros">
+              <option value="cerimonialista">📋 Cerimonialista / Wedding Planner</option>
+              <option value="assessoria">🗂️ Assessoria de eventos</option>
+              <option value="transporte">🚌 Transporte / Van / Ônibus</option>
+              <option value="pet">🐾 Pet sitter / Cuidador de animais</option>
+              <option value="outros">➕ Outro serviço não listado</option>
+            </optgroup>
+          </select>
+        </div>
+        <div style="margin-top:10px; padding:10px 14px; background:var(--terra-claro); border-radius:8px; font-size:12px; color:var(--terra-escuro);">
+          💡 Não encontrou sua categoria? Selecione <strong>"Outro serviço não listado"</strong> e descreva no campo de descrição abaixo.
+        </div>
+      </div>
+
+      <!-- INFORMAÇÕES -->
+      <div class="card">
+        <div class="card-title">📝 Informações do serviço</div>
+        <div class="form-grid">
+          <div class="field form-full">
+            <label>Nome do negócio / serviço</label>
+            <input type="text" value="DJ Marquinhos Events"/>
+          </div>
+          <div class="field">
+            <label>WhatsApp para contato</label>
+            <input type="text" value="(44) 9 9999-9999"/>
+          </div>
+          <div class="field">
+            <label>Instagram (opcional)</label>
+            <input type="text" placeholder="@seuperfil"/>
+          </div>
+          <div class="field form-full">
+            <label>Descrição do serviço</label>
+            <textarea>Som profissional para festas e eventos de todos os tamanhos. Iluminação LED inclusa em todos os pacotes. Sistema de som potente para até 500 pessoas. Atendo Maringá, Sarandi, Paiçandu e região.</textarea>
+          </div>
+          <div class="field form-full">
+            <label>Área de atuação</label>
+            <input type="text" value="Maringá, Sarandi, Paiçandu, Marialva e região"/>
+          </div>
+        </div>
+      </div>
+
+      <!-- VALORES -->
+      <div class="card">
+        <div class="card-title">💰 Valores e condições</div>
+        <div class="form-grid">
+          <div class="field">
+            <label>Valor mínimo (R$)</label>
+            <input type="text" placeholder="Ex: 800" value="800"/>
+          </div>
+          <div class="field">
+            <label>Como informar o valor</label>
+            <select>
+              <option>A partir de R$ 800</option>
+              <option>Sob consulta</option>
+              <option>Pacotes a partir de R$ 800</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Pagamento aceito</label>
+            <select>
+              <option>Pix e transferência</option>
+              <option>Pix, transferência e dinheiro</option>
+              <option>Cartão de crédito</option>
+              <option>Qualquer forma</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Antecedência mínima para reserva</label>
+            <input type="text" placeholder="Ex: 1 semana, 15 dias, 1 mês, sem restrição..."/>
+          </div>
+          <div class="field form-full">
+            <label>Observações sobre valores (opcional)</label>
+            <input type="text" placeholder="Ex: Taxa de deslocamento para cidades acima de 30km, sinal de 30% na reserva"/>
+          </div>
+        </div>
+      </div>
+
+      <!-- DIFERENCIAIS -->
+      <div class="card">
+        <div class="card-title">⭐ Diferenciais do serviço</div>
+        <div class="tags-grid">
+          <label class="tag-check selecionado"><input type="checkbox" checked/> 🚚 Entrega e montagem inclusa</label>
+          <label class="tag-check selecionado"><input type="checkbox" checked/> 💡 Iluminação inclusa</label>
+          <label class="tag-check"><input type="checkbox"/> 🎤 Microfone sem fio</label>
+          <label class="tag-check selecionado"><input type="checkbox" checked/> 📻 Playlist personalizada</label>
+          <label class="tag-check"><input type="checkbox"/> 🏆 Mais de 5 anos de experiência</label>
+          <label class="tag-check"><input type="checkbox"/> 📋 Contrato de serviço</label>
+          <label class="tag-check"><input type="checkbox"/> 🔄 Reposição em caso de problema</label>
+          <label class="tag-check"><input type="checkbox"/> 🎓 Profissional certificado</label>
+          <label class="tag-check selecionado"><input type="checkbox" checked/> 📍 Atende toda a região</label>
+          <label class="tag-check"><input type="checkbox"/> 💳 Aceita parcelamento</label>
+        </div>
+      </div>
+
+      <div style="display:flex; justify-content:flex-end; gap:10px;">
+        <button class="btn btn-danger btn-sm">Desativar anúncio</button>
+        <button class="btn btn-terra-sm" onclick="salvar('servico')">💾 Salvar alterações</button>
+      </div>
+    </div>
+
+    <!-- FOTOS -->
+    <div class="tabs" id="tab-fotos">
+      <div class="topbar">
+        <div>
+          <div class="page-title">Fotos e Vídeos</div>
+          <div class="page-sub">Mostre seu trabalho com qualidade</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">📷 Fotos do serviço / portfólio</div>
+        <div class="upload-area" onclick="document.getElementById('input-fotos').click()">
+          <div class="upload-icon">📸</div>
+          <div class="upload-title">Clique para adicionar fotos</div>
+          <div class="upload-sub">JPG, PNG ou WEBP • Até 10MB cada • Máximo 15 fotos</div>
+          <input type="file" id="input-fotos" multiple accept="image/*" style="display:none" onchange="adicionarFotos(this)"/>
+        </div>
+        <div class="fotos-grid" id="fotos-grid">
+          <div class="foto-item" style="background:linear-gradient(135deg,#fbd38d,#ed8936);">
+            🎵
+            <span class="foto-principal-badge">Capa</span>
+            <button class="foto-remove">✕</button>
+          </div>
+          <div class="foto-item" style="background:linear-gradient(135deg,#b3e5fc,#4fc3f7);">
+            💡
+            <button class="foto-remove">✕</button>
+          </div>
+          <div class="foto-item" style="background:linear-gradient(135deg,#f8bbd0,#f48fb1);">
+            🎤
+            <button class="foto-remove">✕</button>
+          </div>
+        </div>
+        <div style="font-size:12px; color:var(--cinza); margin-top:12px;">
+          💡 A primeira foto é a capa do anúncio. Use fotos de eventos reais que você atendeu.
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">🎬 Vídeo do serviço</div>
+        <div class="field">
+          <label>Link do vídeo (YouTube ou Instagram)</label>
+          <input type="text" placeholder="https://youtube.com/watch?v=..."/>
+        </div>
+        <div style="font-size:12px; color:var(--cinza); margin-top:4px;">
+          Mostre seu trabalho em ação! Um vídeo curto aumenta muito a confiança do cliente.
+        </div>
+        <button class="btn btn-terra-sm btn-sm" style="margin-top:16px;" onclick="salvar('video')">Salvar vídeo</button>
+      </div>
+    </div>
+
+    <!-- CONFIGURAÇÕES -->
+    <div class="tabs" id="tab-configuracoes">
+      <div class="topbar">
+        <div>
+          <div class="page-title">Configurações</div>
+          <div class="page-sub">Dados da sua conta</div>
+        </div>
+        <button class="btn btn-terra-sm btn-sm" onclick="salvar('config')">💾 Salvar</button>
+      </div>
+      <div class="card">
+        <div class="card-title">👤 Dados pessoais</div>
+        <div class="form-grid">
+          <div class="field"><label>Nome completo</label><input type="text" value="Marcos Silva"/></div>
+          <div class="field"><label>CPF</label><input type="text" value="000.000.000-00"/></div>
+          <div class="field"><label>E-mail</label><input type="email" value="dj@marquinhosevents.com.br"/></div>
+          <div class="field"><label>WhatsApp</label><input type="text" value="(44) 9 9999-9999"/></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title">🔒 Alterar senha</div>
+        <div class="form-grid">
+          <div class="field"><label>Senha atual</label><input type="password" placeholder="••••••••"/></div>
+          <div class="field"><label>Nova senha</label><input type="password" placeholder="••••••••"/></div>
+        </div>
+        <button class="btn btn-outline btn-sm" style="margin-top:4px;" onclick="salvar('senha')">Alterar senha</button>
+      </div>
+    </div>
+
+    <!-- PLANO -->
+    <div class="tabs" id="tab-plano">
+      <div class="topbar">
+        <div>
+          <div class="page-title">Meu Plano</div>
+          <div class="page-sub">Gerencie sua assinatura</div>
+        </div>
+      </div>
+      <div class="card" style="border:2px solid var(--terra);">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+          <div class="card-title" style="margin-bottom:0;">🎉 Plano Gratuito — Período de Lançamento</div>
+          <span class="status-badge badge-ativo">Ativo</span>
+        </div>
+        <div style="font-size:14px; color:var(--cinza); margin-bottom:20px; line-height:1.7;">
+          Durante o período de lançamento, seu anúncio é <strong>completamente gratuito</strong>. Cadastre todas as informações e fotos do seu serviço agora!
+        </div>
+        <div style="background:var(--terra-claro); border-radius:10px; padding:16px; font-size:13px; color:var(--terra-escuro);">
+          📢 Em breve lançaremos o <strong>Plano Pro por R$ 25/mês</strong>, com destaque nas buscas e mais visibilidade. Você será avisado com antecedência.
+        </div>
+      </div>
+      <div class="card" style="opacity:0.6;">
+        <div class="card-title">🚀 Plano Pro — Em breve</div>
+        <div style="font-size:14px; color:var(--cinza); margin-bottom:16px;">R$ 25/mês • Cancele quando quiser</div>
+        <div style="display:flex; flex-direction:column; gap:10px; font-size:14px;">
+          <div>✅ Destaque na categoria</div>
+          <div>✅ Aparece antes dos anúncios gratuitos</div>
+          <div>✅ Selo "Verificado" no perfil</div>
+          <div>✅ Estatísticas detalhadas</div>
+          <div>✅ Até 15 fotos no portfólio</div>
+        </div>
+        <button class="btn" style="margin-top:20px; opacity:0.5; cursor:not-allowed; background:#e5e7eb; color:#9ca3af;">Em breve</button>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+  function fazerLogin() {
+    document.getElementById('login-page').style.display = 'none';
+    document.getElementById('painel').classList.add('ativo');
+  }
+
+  function fazerLogout() {
+    document.getElementById('painel').classList.remove('ativo');
+    document.getElementById('login-page').style.display = 'flex';
+  }
+
+  function mostrarTab(id, btn) {
+    document.querySelectorAll('.tabs').forEach(t => t.classList.remove('ativo'));
+    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('ativo'));
+    document.getElementById('tab-' + id).classList.add('ativo');
+    if (btn) btn.classList.add('ativo');
+  }
+
+  function selecionarCat(el) {
+    document.querySelectorAll('.cat-item').forEach(c => {
+      c.classList.remove('selecionado');
+      c.querySelector('.cat-check').textContent = '';
+    });
+    el.classList.add('selecionado');
+    el.querySelector('.cat-check').textContent = '✓';
+  }
+
+  document.addEventListener('click', function(e) {
+    const tag = e.target.closest('.tag-check');
+    if (tag) tag.classList.toggle('selecionado');
+  });
+
+  function adicionarFotos(input) {
+    const grid = document.getElementById('fotos-grid');
+    Array.from(input.files).forEach(file => {
+      const reader = new FileReader();
+      reader.onload = function(ev) {
+        const div = document.createElement('div');
+        div.className = 'foto-item';
+        div.style.background = '#eee';
+        div.innerHTML = `<img src="${ev.target.result}" style="width:100%;height:100%;object-fit:cover;"/><button class="foto-remove" onclick="this.parentElement.remove()">✕</button>`;
+        grid.appendChild(div);
+      };
+      reader.readAsDataURL(file);
+    });
+    input.value = '';
+  }
+
+  function salvar(tipo) {
+    const msgs = {
+      servico: '✅ Serviço salvo com sucesso!',
+      video: '✅ Vídeo salvo!',
+      config: '✅ Configurações salvas!',
+      senha: '✅ Senha alterada!'
+    };
+    const t = document.getElementById('toast');
+    t.textContent = msgs[tipo] || '✅ Salvo!';
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 3000);
+  }
+</script>
+</body>
+</html>

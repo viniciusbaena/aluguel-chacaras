@@ -1,0 +1,1256 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Painel do Proprietário — AluguelDeChácaras.com.br</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,700;1,700&family=Inter:wght@400;500;600;700&display=swap');
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --verde-escuro: #1e4d2b;
+      --verde: #2d7a45;
+      --verde-claro: #e8f5ed;
+      --terra: #c8622a;
+      --terra-claro: #fdf0e8;
+      --creme: #faf8f3;
+      --cinza: #6b7280;
+      --cinza-bg: #f3f4f6;
+      --cinza-borda: #e5e7eb;
+      --preto: #111827;
+      --branco: #ffffff;
+      --vermelho: #ef4444;
+      --amarelo: #f59e0b;
+    }
+
+    body { font-family: 'Inter', sans-serif; background: var(--cinza-bg); color: var(--preto); min-height: 100vh; }
+
+    /* LOGIN */
+    .login-page {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(135deg, var(--verde-escuro) 0%, #2d7a45 100%);
+      padding: 24px;
+    }
+
+    .login-card {
+      background: #fff;
+      border-radius: 24px;
+      padding: 48px 40px;
+      width: 100%;
+      max-width: 420px;
+      box-shadow: 0 24px 60px rgba(0,0,0,0.2);
+    }
+
+    .login-logo {
+      font-family: 'Fraunces', serif;
+      font-size: 22px;
+      color: var(--verde-escuro);
+      margin-bottom: 6px;
+      text-align: center;
+    }
+
+    .login-logo span { color: var(--terra); }
+    .login-sub { text-align: center; font-size: 13px; color: var(--cinza); margin-bottom: 36px; }
+    .login-title { font-size: 22px; font-weight: 700; margin-bottom: 24px; color: var(--preto); }
+
+    .field { display: flex; flex-direction: column; gap: 6px; margin-bottom: 16px; }
+    .field label { font-size: 13px; font-weight: 600; color: var(--preto); }
+    .field input, .field select, .field textarea {
+      border: 1.5px solid var(--cinza-borda);
+      border-radius: 10px;
+      padding: 11px 14px;
+      font-size: 14px;
+      font-family: 'Inter', sans-serif;
+      outline: none;
+      transition: border 0.15s;
+      color: var(--preto);
+      background: #fff;
+    }
+    .field input:focus, .field select:focus, .field textarea:focus { border-color: var(--verde); }
+    .field textarea { resize: vertical; min-height: 100px; }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 12px 20px;
+      border-radius: 10px;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      border: none;
+      transition: all 0.15s;
+      font-family: 'Inter', sans-serif;
+      text-decoration: none;
+    }
+
+    .btn-verde { background: var(--verde-escuro); color: #fff; width: 100%; }
+    .btn-verde:hover { background: #163820; }
+    .btn-outline { background: transparent; color: var(--verde-escuro); border: 1.5px solid var(--verde); }
+    .btn-outline:hover { background: var(--verde-claro); }
+    .btn-terra { background: var(--terra); color: #fff; }
+    .btn-terra:hover { background: #b3561f; }
+    .btn-danger { background: #fff; color: var(--vermelho); border: 1.5px solid #fecaca; }
+    .btn-danger:hover { background: #fff5f5; }
+    .btn-sm { padding: 7px 14px; font-size: 13px; }
+    .btn-xs { padding: 5px 10px; font-size: 12px; border-radius: 7px; }
+
+    .login-hint { text-align: center; font-size: 13px; color: var(--cinza); margin-top: 20px; }
+    .login-hint a { color: var(--verde); font-weight: 600; cursor: pointer; }
+
+    /* PAINEL */
+    .painel { display: none; }
+    .painel.ativo { display: flex; min-height: 100vh; }
+
+    /* SIDEBAR */
+    .sidebar {
+      width: 240px;
+      background: var(--verde-escuro);
+      display: flex;
+      flex-direction: column;
+      padding: 28px 16px;
+      position: fixed;
+      top: 0; left: 0;
+      height: 100vh;
+      z-index: 50;
+    }
+
+    .sidebar-logo {
+      font-family: 'Fraunces', serif;
+      font-size: 18px;
+      color: #fff;
+      margin-bottom: 4px;
+      padding: 0 8px;
+    }
+
+    .sidebar-logo span { color: #7ee8b0; }
+    .sidebar-sub { font-size: 11px; color: rgba(255,255,255,0.4); padding: 0 8px; margin-bottom: 32px; text-transform: uppercase; letter-spacing: 1px; }
+
+    .sidebar-section { font-size: 10px; font-weight: 700; color: rgba(255,255,255,0.3); text-transform: uppercase; letter-spacing: 1px; padding: 0 8px; margin: 20px 0 8px; }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 12px;
+      border-radius: 8px;
+      color: rgba(255,255,255,0.65);
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      border: none;
+      background: none;
+      width: 100%;
+      text-align: left;
+      transition: all 0.15s;
+    }
+
+    .nav-item:hover { background: rgba(255,255,255,0.08); color: #fff; }
+    .nav-item.ativo { background: rgba(255,255,255,0.13); color: #fff; }
+    .nav-icon { font-size: 16px; width: 22px; text-align: center; }
+
+    .sidebar-bottom {
+      margin-top: auto;
+      padding-top: 16px;
+      border-top: 1px solid rgba(255,255,255,0.1);
+    }
+
+    .user-info { display: flex; align-items: center; gap: 10px; padding: 8px; }
+    .user-avatar {
+      width: 36px; height: 36px;
+      border-radius: 50%;
+      background: #7ee8b0;
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 700; color: var(--verde-escuro); font-size: 14px;
+      flex-shrink: 0;
+    }
+    .user-nome { color: #fff; font-size: 13px; font-weight: 600; }
+    .user-plano { color: rgba(255,255,255,0.4); font-size: 11px; }
+
+    /* MAIN */
+    .main { margin-left: 240px; flex: 1; padding: 32px; }
+
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 28px;
+    }
+
+    .page-title { font-size: 20px; font-weight: 700; }
+    .page-sub { font-size: 13px; color: var(--cinza); margin-top: 2px; }
+
+    /* TABS */
+    .tabs { display: none; }
+    .tabs.ativo { display: block; }
+
+    /* STATS */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+
+    .stat-card {
+      background: #fff;
+      border-radius: 12px;
+      padding: 20px;
+      border: 1px solid var(--cinza-borda);
+    }
+
+    .stat-label { font-size: 12px; color: var(--cinza); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; }
+    .stat-value { font-size: 26px; font-weight: 700; font-family: 'Fraunces', serif; color: var(--verde-escuro); }
+    .stat-tag { display: inline-block; margin-top: 6px; font-size: 11px; padding: 2px 8px; border-radius: 20px; font-weight: 600; }
+    .tag-verde { background: var(--verde-claro); color: var(--verde-escuro); }
+    .tag-amarelo { background: #fef3c7; color: #92400e; }
+    .tag-cinza { background: #f3f4f6; color: #6b7280; }
+
+    /* CARD */
+    .card {
+      background: #fff;
+      border-radius: 14px;
+      border: 1px solid var(--cinza-borda);
+      padding: 24px;
+      margin-bottom: 24px;
+    }
+
+    .card-title {
+      font-size: 16px;
+      font-weight: 700;
+      margin-bottom: 20px;
+      color: var(--verde-escuro);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    /* FORM GRID */
+    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    .form-full { grid-column: 1 / -1; }
+    .form-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; }
+
+    /* UPLOAD FOTOS */
+    .upload-area {
+      border: 2px dashed var(--cinza-borda);
+      border-radius: 12px;
+      padding: 32px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.15s;
+      background: var(--creme);
+    }
+
+    .upload-area:hover { border-color: var(--verde); background: var(--verde-claro); }
+    .upload-icon { font-size: 36px; margin-bottom: 10px; }
+    .upload-title { font-weight: 600; font-size: 15px; color: var(--verde-escuro); margin-bottom: 4px; }
+    .upload-sub { font-size: 13px; color: var(--cinza); }
+
+    .fotos-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+      margin-top: 16px;
+    }
+
+    .foto-item {
+      aspect-ratio: 1;
+      border-radius: 10px;
+      overflow: hidden;
+      position: relative;
+      background: linear-gradient(135deg, #c8e6c9, #81c784);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 32px;
+    }
+
+    .foto-remove {
+      position: absolute;
+      top: 4px; right: 4px;
+      background: rgba(0,0,0,0.55);
+      color: #fff;
+      border: none;
+      border-radius: 50%;
+      width: 24px; height: 24px;
+      cursor: pointer;
+      font-size: 12px;
+      display: flex; align-items: center; justify-content: center;
+    }
+
+    .foto-principal-badge {
+      position: absolute;
+      bottom: 4px; left: 4px;
+      background: var(--verde-escuro);
+      color: #fff;
+      font-size: 10px;
+      padding: 2px 8px;
+      border-radius: 20px;
+      font-weight: 700;
+    }
+
+    /* TAGS */
+    .tags-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 4px;
+    }
+
+    .tag-check {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: var(--creme);
+      border: 1.5px solid var(--cinza-borda);
+      border-radius: 8px;
+      padding: 7px 12px;
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 500;
+      transition: all 0.15s;
+      user-select: none;
+    }
+
+    .tag-check.selecionado {
+      background: var(--verde-claro);
+      border-color: var(--verde);
+      color: var(--verde-escuro);
+      font-weight: 600;
+    }
+
+    .tag-check input { display: none; }
+
+    /* CALENDÁRIO */
+    .calendario-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 16px;
+    }
+
+    .calendario-mes {
+      font-weight: 700;
+      font-size: 16px;
+      color: var(--verde-escuro);
+    }
+
+    .cal-nav {
+      background: var(--verde-claro);
+      border: none;
+      border-radius: 8px;
+      width: 32px; height: 32px;
+      cursor: pointer;
+      font-size: 16px;
+      display: flex; align-items: center; justify-content: center;
+      color: var(--verde-escuro);
+    }
+
+    .cal-nav:hover { background: #d1ead9; }
+
+    .calendario-grid {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 4px;
+    }
+
+    .cal-dow {
+      text-align: center;
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--cinza);
+      padding: 4px;
+      text-transform: uppercase;
+    }
+
+    .cal-day {
+      aspect-ratio: 1;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 13px;
+      cursor: pointer;
+      transition: all 0.15s;
+      font-weight: 500;
+      position: relative;
+    }
+
+    .cal-day:hover:not(.cal-vazio):not(.cal-passado) { opacity: 0.75; }
+    .cal-day:active:not(.cal-vazio):not(.cal-passado) { transform: scale(0.93); }
+    .cal-day.cal-vazio { cursor: default; }
+    .cal-day.cal-passado { color: #d1d5db; cursor: not-allowed; }
+    .cal-day.disponivel { background: #dcfce7; color: #14532d; font-weight: 700; border: 2px solid #16a34a; }
+    .modo-btn { display:inline-flex; align-items:center; gap:6px; padding:8px 16px; border-radius:8px; font-size:13px; font-weight:700; cursor:pointer; font-family:"Inter",sans-serif; transition:all 0.15s; border:2px solid transparent; }
+    .modo-ativo-verde { background: var(--verde); color: #fff; border-color: var(--verde); }
+    .modo-ativo-vermelho { background: #dc2626; color: #fff; border-color: #dc2626; }
+    .modo-ativo-cinza { background: #6b7280; color: #fff; border-color: #6b7280; }
+    .modo-inativo { background: #fff; color: var(--cinza); border-color: var(--cinza-borda); }
+    .cal-day.indisponivel { background: #fee2e2; color: #991b1b; font-weight: 700; }
+    .cal-day.hoje { border: 2px solid var(--verde); font-weight: 700; }
+
+    .cal-legenda {
+      display: flex;
+      gap: 16px;
+      margin-top: 14px;
+      font-size: 12px;
+    }
+
+    .legenda-item { display: flex; align-items: center; gap: 6px; }
+    .legenda-cor { width: 14px; height: 14px; border-radius: 4px; }
+
+    /* TOAST */
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      background: var(--verde-escuro);
+      color: #fff;
+      padding: 14px 20px;
+      border-radius: 10px;
+      font-size: 14px;
+      font-weight: 500;
+      display: none;
+      align-items: center;
+      gap: 8px;
+      z-index: 999;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+    }
+
+    .toast.show { display: flex; }
+
+    /* STATUS BADGE */
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .status-badge::before { content: ''; width: 7px; height: 7px; border-radius: 50%; }
+    .badge-ativo { background: var(--verde-claro); color: var(--verde-escuro); }
+    .badge-ativo::before { background: var(--verde); }
+    .badge-inativo { background: #f3f4f6; color: #6b7280; }
+    .badge-inativo::before { background: #9ca3af; }
+
+    /* PREVIEW */
+    .preview-card {
+      background: var(--creme);
+      border: 1.5px solid var(--cinza-borda);
+      border-radius: 14px;
+      overflow: hidden;
+    }
+
+    .preview-foto {
+      height: 160px;
+      background: linear-gradient(135deg, #c8e6c9, #81c784);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 64px;
+    }
+
+    .preview-info { padding: 16px; }
+    .preview-nome { font-family: 'Fraunces', serif; font-size: 18px; color: var(--verde-escuro); margin-bottom: 6px; }
+    .preview-local { font-size: 12px; color: var(--cinza); margin-bottom: 8px; }
+    .preview-preco { font-size: 14px; color: var(--cinza); }
+    .preview-preco strong { font-size: 18px; color: var(--verde-escuro); }
+
+    @media (max-width: 768px) {
+      .sidebar { display: none; }
+      .main { margin-left: 0; padding: 20px; }
+      .stats-grid { grid-template-columns: repeat(2, 1fr); }
+      .form-grid, .form-3 { grid-template-columns: 1fr; }
+      .fotos-grid { grid-template-columns: repeat(3, 1fr); }
+    }
+  </style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div class="login-page" id="login-page">
+  <div class="login-card">
+    <div class="login-logo">🌿 Aluguel de <span>Chácaras</span></div>
+    <div class="login-sub">Painel do Proprietário</div>
+    <div class="login-title">Bem-vindo de volta!</div>
+
+    <div class="field">
+      <label>E-mail</label>
+      <input type="email" id="login-email" placeholder="seu@email.com" value="joao@chacarapalmeiras.com.br"/>
+    </div>
+    <div class="field">
+      <label>Senha</label>
+      <input type="password" id="login-senha" placeholder="••••••••" value="123456"/>
+    </div>
+
+    <button class="btn btn-verde" onclick="fazerLogin()" style="margin-top:8px;">Entrar no painel</button>
+
+    <div class="login-hint">
+      Ainda não tem conta? <a onclick="mostrarCadastro()">Cadastre-se grátis</a>
+    </div>
+
+    <div style="margin-top:20px; padding:12px; background:var(--verde-claro); border-radius:8px; font-size:12px; color:var(--verde-escuro); text-align:center;">
+      💡 <strong>Demonstração:</strong> clique em "Entrar no painel" para explorar
+    </div>
+  </div>
+</div>
+
+<!-- PAINEL -->
+<div class="painel" id="painel">
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sidebar-logo">🌿 Aluguel de <span>Chácaras</span></div>
+    <div class="sidebar-sub">Painel do Proprietário</div>
+
+    <div class="sidebar-section">Meu Anúncio</div>
+    <button class="nav-item ativo" onclick="mostrarTab('visao-geral', this)">
+      <span class="nav-icon">📊</span> Visão Geral
+    </button>
+    <button class="nav-item" onclick="mostrarTab('minha-chacara', this)">
+      <span class="nav-icon">🏡</span> Minha Chácara
+    </button>
+    <button class="nav-item" onclick="mostrarTab('fotos', this)">
+      <span class="nav-icon">📷</span> Fotos e Vídeos
+    </button>
+    <button class="nav-item" onclick="mostrarTab('calendario', this)">
+      <span class="nav-icon">📅</span> Disponibilidade
+    </button>
+
+    <div class="sidebar-section">Conta</div>
+    <button class="nav-item" onclick="mostrarTab('configuracoes', this)">
+      <span class="nav-icon">⚙️</span> Configurações
+    </button>
+    <button class="nav-item" onclick="mostrarTab('plano', this)">
+      <span class="nav-icon">💳</span> Meu Plano
+    </button>
+
+    <div class="sidebar-bottom">
+      <div class="user-info">
+        <div class="user-avatar">JP</div>
+        <div>
+          <div class="user-nome">João Proprietário</div>
+          <div class="user-plano">Plano Gratuito</div>
+        </div>
+      </div>
+      <button class="nav-item" onclick="fazerLogout()" style="margin-top:8px; color:rgba(255,255,255,0.4);">
+        <span class="nav-icon">🚪</span> Sair
+      </button>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="main">
+
+    <!-- VISÃO GERAL -->
+    <div class="tabs ativo" id="tab-visao-geral">
+      <div class="topbar">
+        <div>
+          <div class="page-title">Visão Geral</div>
+          <div class="page-sub">Acompanhe o desempenho do seu anúncio</div>
+        </div>
+        <span class="status-badge badge-ativo">Anúncio ativo</span>
+      </div>
+
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-label">Visualizações</div>
+          <div class="stat-value">247</div>
+          <span class="stat-tag tag-verde">este mês</span>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Contatos recebidos</div>
+          <div class="stat-value">18</div>
+          <span class="stat-tag tag-verde">este mês</span>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Dias reservados</div>
+          <div class="stat-value">6</div>
+          <span class="stat-tag tag-amarelo">em junho</span>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Avaliação média</div>
+          <div class="stat-value">4.8</div>
+          <span class="stat-tag tag-verde">⭐ de 5</span>
+        </div>
+      </div>
+
+      <div style="display:grid; grid-template-columns: 2fr 1fr; gap:20px;">
+        <div class="card">
+          <div class="card-title">📋 Status do seu anúncio</div>
+          <div class="preview-card">
+            <div class="preview-foto">🏡</div>
+            <div class="preview-info">
+              <div class="preview-nome">Chácara das Palmeiras</div>
+              <div class="preview-local">📍 Maringá — Zona Rural</div>
+              <div style="display:flex; flex-wrap:wrap; gap:6px; margin:8px 0;">
+                <span style="background:var(--verde-claro);color:var(--verde-escuro);font-size:11px;font-weight:600;padding:3px 10px;border-radius:20px;">🏊 Piscina</span>
+                <span style="background:var(--verde-claro);color:var(--verde-escuro);font-size:11px;font-weight:600;padding:3px 10px;border-radius:20px;">⚽ Campo</span>
+                <span style="background:var(--verde-claro);color:var(--verde-escuro);font-size:11px;font-weight:600;padding:3px 10px;border-radius:20px;">🍖 Churrasqueira</span>
+              </div>
+              <div class="preview-preco">a partir de <strong>R$ 1.200</strong>/dia</div>
+            </div>
+          </div>
+          <div style="display:flex; gap:10px; margin-top:16px;">
+            <button class="btn btn-outline btn-sm" onclick="mostrarTab('minha-chacara', document.querySelector('.nav-item:nth-child(4))'))">✏️ Editar anúncio</button>
+            <button class="btn btn-outline btn-sm" onclick="mostrarTab('calendario', null)">📅 Ver calendário</button>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">✅ Completude do perfil</div>
+          <div style="display:flex; flex-direction:column; gap:12px;">
+            <div style="display:flex; align-items:center; justify-content:space-between; font-size:13px;">
+              <span>Informações básicas</span>
+              <span style="color:var(--verde); font-weight:700;">✓</span>
+            </div>
+            <div style="display:flex; align-items:center; justify-content:space-between; font-size:13px;">
+              <span>Fotos cadastradas</span>
+              <span style="color:var(--verde); font-weight:700;">✓</span>
+            </div>
+            <div style="display:flex; align-items:center; justify-content:space-between; font-size:13px;">
+              <span>Valores e capacidade</span>
+              <span style="color:var(--verde); font-weight:700;">✓</span>
+            </div>
+            <div style="display:flex; align-items:center; justify-content:space-between; font-size:13px;">
+              <span>Calendário atualizado</span>
+              <span style="color:var(--amarelo); font-weight:700;">⚠</span>
+            </div>
+            <div style="display:flex; align-items:center; justify-content:space-between; font-size:13px;">
+              <span>Vídeo cadastrado</span>
+              <span style="color:#d1d5db; font-weight:700;">✗</span>
+            </div>
+            <div style="height:6px; background:#f3f4f6; border-radius:10px; margin-top:8px;">
+              <div style="height:100%; width:72%; background:var(--verde); border-radius:10px;"></div>
+            </div>
+            <div style="font-size:12px; color:var(--cinza); text-align:right;">72% completo</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- MINHA CHÁCARA -->
+    <div class="tabs" id="tab-minha-chacara">
+      <div class="topbar">
+        <div>
+          <div class="page-title">Minha Chácara</div>
+          <div class="page-sub">Edite as informações do seu anúncio</div>
+        </div>
+        <button class="btn btn-verde btn-sm" onclick="salvar('anuncio')">💾 Salvar alterações</button>
+      </div>
+
+
+      <!-- DICAS DE ANÚNCIO -->
+      <div style="background: linear-gradient(135deg, #f0fdf4, #dcfce7); border: 1.5px solid #16a34a; border-radius: 16px; padding: 24px; margin-bottom: 24px;">
+        <div style="display:flex; align-items:center; gap:10px; margin-bottom:16px;">
+          <span style="font-size:24px;">💡</span>
+          <div>
+            <div style="font-size:15px; font-weight:700; color:#14532d;">Dicas para um anúncio de sucesso</div>
+            <div style="font-size:13px; color:#16a34a;">Anúncios completos recebem até 5x mais contatos</div>
+          </div>
+        </div>
+
+        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px;">
+
+          <div style="background:#fff; border-radius:12px; padding:16px; border:1px solid #bbf7d0;">
+            <div style="font-size:14px; font-weight:700; color:#14532d; margin-bottom:10px;">📝 Informações essenciais</div>
+            <div style="display:flex; flex-direction:column; gap:7px; font-size:13px; color:#374151;">
+              <div>✅ <strong>Capacidade exata:</strong> ex. "comporta até 150 pessoas sentadas"</div>
+              <div>✅ <strong>Área total:</strong> ex. "5.000 m² de área verde"</div>
+              <div>✅ <strong>Estacionamento:</strong> ex. "vagas para 30 carros dentro da propriedade"</div>
+              <div>✅ <strong>Localização:</strong> ex. "a 8 km do centro de Maringá, acesso asfaltado"</div>
+              <div>✅ <strong>Horários:</strong> ex. "check-in às 10h, devolução até 22h"</div>
+              <div>✅ <strong>Regras:</strong> ex. "permitido som até meia-noite, aceita pets"</div>
+            </div>
+          </div>
+
+          <div style="background:#fff; border-radius:12px; padding:16px; border:1px solid #bbf7d0;">
+            <div style="font-size:14px; font-weight:700; color:#14532d; margin-bottom:10px;">🏗️ Estrutura — seja específico</div>
+            <div style="display:flex; flex-direction:column; gap:7px; font-size:13px; color:#374151;">
+              <div>✅ <strong>Piscina:</strong> ex. "piscina adulto 10x5m + piscina infantil"</div>
+              <div>✅ <strong>Churrasqueira:</strong> ex. "churrasqueira coberta com bancada e pia"</div>
+              <div>✅ <strong>Campo:</strong> ex. "campo de futebol gramado com iluminação"</div>
+              <div>✅ <strong>Casa sede:</strong> ex. "3 quartos, 2 banheiros, cozinha equipada"</div>
+              <div>✅ <strong>Salão:</strong> ex. "salão coberto para 80 pessoas com mesas"</div>
+              <div>✅ <strong>Outros:</strong> lago, quadra, playground, espaço gourmet...</div>
+            </div>
+          </div>
+
+          <div style="background:#fff; border-radius:12px; padding:16px; border:1px solid #bbf7d0;">
+            <div style="font-size:14px; font-weight:700; color:#14532d; margin-bottom:10px;">📷 Fotos que convertem</div>
+            <div style="display:flex; flex-direction:column; gap:7px; font-size:13px; color:#374151;">
+              <div>✅ <strong>Mínimo 8 fotos</strong> — quanto mais, melhor</div>
+              <div>✅ <strong>Foto de capa:</strong> escolha a melhor vista geral da chácara</div>
+              <div>✅ Fotografe em <strong>dia ensolarado</strong>, luz natural</div>
+              <div>✅ Mostre <strong>todos os ambientes:</strong> piscina, churrasqueira, salão, quartos</div>
+              <div>✅ Inclua fotos <strong>com pessoas e eventos</strong> reais — passa confiança</div>
+              <div>❌ Evite fotos escuras, tortas ou de baixa qualidade</div>
+            </div>
+          </div>
+
+          <div style="background:#fff; border-radius:12px; padding:16px; border:1px solid #bbf7d0;">
+            <div style="font-size:14px; font-weight:700; color:#14532d; margin-bottom:10px;">✍️ Descrição que vende</div>
+            <div style="display:flex; flex-direction:column; gap:7px; font-size:13px; color:#374151;">
+              <div>✅ <strong>Comece destacando o diferencial:</strong> ex. "A maior chácara com lago particular de Maringá"</div>
+              <div>✅ <strong>Descreva a experiência:</strong> ex. "Ideal para reunir família e amigos num ambiente tranquilo e arborizado"</div>
+              <div>✅ Mencione <strong>o que está incluso</strong> no valor (mesas, cadeiras, etc.)</div>
+              <div>✅ Informe <strong>o que não está incluso</strong> para evitar surpresas</div>
+              <div>✅ Adicione o <strong>link do Google Maps</strong> ou endereço completo</div>
+            </div>
+          </div>
+
+        </div>
+
+        <div style="margin-top:12px; padding:12px 16px; background:#fff; border-radius:10px; border:1px solid #bbf7d0; font-size:13px; color:#374151;">
+          🎬 <strong>Dica extra — Vídeo:</strong> grave um vídeo de 1 a 2 minutos caminhando pela chácara e publique no YouTube ou Instagram. Anúncios com vídeo recebem <strong>3x mais contatos</strong>. Não precisa ser profissional — um vídeo feito no celular já faz diferença!
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">🏡 Informações básicas</div>
+        <div class="form-grid">
+          <div class="field form-full">
+            <label>Nome da chácara</label>
+            <input type="text" value="Chácara das Palmeiras"/>
+          </div>
+          <div class="field">
+            <label>Cidade</label>
+            <input type="text" value="Maringá"/>
+          </div>
+          <div class="field">
+            <label>Bairro / Localidade</label>
+            <input type="text" value="Zona Rural"/>
+          </div>
+          <div class="field">
+            <label>WhatsApp para contato</label>
+            <input type="text" value="(44) 9 9999-9999"/>
+          </div>
+          <div class="field">
+            <label>Telefone alternativo</label>
+            <input type="text" placeholder="Opcional"/>
+          </div>
+          <div class="field form-full">
+            <label>Descrição do espaço</label>
+            <textarea>Espaço amplo com piscina, churrasqueira coberta, campo de futebol e casa sede. Ideal para festas, confraternizações e eventos em família. Contamos com estacionamento para 30 carros e área verde com muito verde e sombra.</textarea>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">💰 Capacidade e valores</div>
+        <div class="form-3">
+          <div class="field">
+            <label>Capacidade máxima (pessoas)</label>
+            <input type="number" value="150"/>
+          </div>
+          <div class="field">
+            <label>Valor diária (R$)</label>
+            <input type="number" value="1200"/>
+          </div>
+          <div class="field">
+            <label>Valor fim de semana (R$)</label>
+            <input type="number" value="1800"/>
+          </div>
+        </div>
+        <div class="form-grid" style="margin-top:16px;">
+          <div class="field">
+            <label>Aceita pagamento</label>
+            <select>
+              <option>Pix, transferência e dinheiro</option>
+              <option>Apenas Pix</option>
+              <option>Cartão de crédito</option>
+              <option>Qualquer forma</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Exige sinal/reserva?</label>
+            <select>
+              <option>Sim — 50% antecipado</option>
+              <option>Sim — 30% antecipado</option>
+              <option>Não</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">🏗️ Estrutura e comodidades</div>
+        <div class="tags-grid" id="tags-estrutura">
+          <label class="tag-check selecionado"><input type="checkbox" checked/> 🏊 Piscina</label>
+          <label class="tag-check selecionado"><input type="checkbox" checked/> 🍖 Churrasqueira</label>
+          <label class="tag-check selecionado"><input type="checkbox" checked/> ⚽ Campo de futebol</label>
+          <label class="tag-check"><input type="checkbox"/> 🎣 Lago / Pesca</label>
+          <label class="tag-check selecionado"><input type="checkbox" checked/> 🅿️ Estacionamento</label>
+          <label class="tag-check"><input type="checkbox"/> 🛌 Hospedagem / Quartos</label>
+          <label class="tag-check selecionado"><input type="checkbox" checked/> 🏠 Casa sede</label>
+          <label class="tag-check"><input type="checkbox"/> 🎮 Salão de jogos</label>
+          <label class="tag-check"><input type="checkbox"/> 🏐 Quadra poliesportiva</label>
+          <label class="tag-check selecionado"><input type="checkbox" checked/> 💡 Energia elétrica</label>
+          <label class="tag-check selecionado"><input type="checkbox" checked/> 💧 Água encanada</label>
+          <label class="tag-check"><input type="checkbox"/> ♿ Acessibilidade</label>
+          <label class="tag-check"><input type="checkbox"/> 🐾 Aceita pets</label>
+          <label class="tag-check"><input type="checkbox"/> 🍽️ Espaço gourmet</label>
+          <label class="tag-check"><input type="checkbox"/> 🎪 Salão coberto</label>
+          <label class="tag-check"><input type="checkbox"/> 🌳 Pomar</label>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">🎉 Tipos de evento aceitos</div>
+        <div class="tags-grid">
+          <label class="tag-check selecionado"><input type="checkbox" checked/> 🎂 Aniversários</label>
+          <label class="tag-check selecionado"><input type="checkbox" checked/> 💒 Casamentos</label>
+          <label class="tag-check selecionado"><input type="checkbox" checked/> 🤝 Confraternizações</label>
+          <label class="tag-check selecionado"><input type="checkbox" checked/> 🏖️ Lazer / Final de semana</label>
+          <label class="tag-check"><input type="checkbox"/> 👔 Eventos corporativos</label>
+          <label class="tag-check selecionado"><input type="checkbox" checked/> 🍖 Churrascos</label>
+          <label class="tag-check"><input type="checkbox"/> 🎓 Formaturas</label>
+          <label class="tag-check"><input type="checkbox"/> 👧 Festas infantis</label>
+        </div>
+      </div>
+
+      <div style="display:flex; justify-content:flex-end; gap:10px;">
+        <button class="btn btn-danger btn-sm">Desativar anúncio</button>
+        <button class="btn btn-verde" onclick="salvar('anuncio')">💾 Salvar alterações</button>
+      </div>
+    </div>
+
+    <!-- FOTOS -->
+    <div class="tabs" id="tab-fotos">
+      <div class="topbar">
+        <div>
+          <div class="page-title">Fotos e Vídeos</div>
+          <div class="page-sub">Boas fotos aumentam muito as chances de contato</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">📷 Fotos da chácara</div>
+
+        <div class="upload-area" onclick="document.getElementById('input-fotos').click()">
+          <div class="upload-icon">📸</div>
+          <div class="upload-title">Clique para adicionar fotos</div>
+          <div class="upload-sub">JPG, PNG ou WEBP • Até 10MB cada • Máximo 20 fotos</div>
+          <input type="file" id="input-fotos" multiple accept="image/*" style="display:none" onchange="adicionarFotos(this)"/>
+        </div>
+
+        <div class="fotos-grid" id="fotos-grid">
+          <div class="foto-item" style="background:linear-gradient(135deg,#c8e6c9,#81c784);">
+            🏡
+            <span class="foto-principal-badge">Principal</span>
+            <button class="foto-remove">✕</button>
+          </div>
+          <div class="foto-item" style="background:linear-gradient(135deg,#b3e5fc,#4fc3f7);">
+            🏊
+            <button class="foto-remove">✕</button>
+          </div>
+          <div class="foto-item" style="background:linear-gradient(135deg,#ffe0b2,#ffb74d);">
+            🍖
+            <button class="foto-remove">✕</button>
+          </div>
+          <div class="foto-item" style="background:linear-gradient(135deg,#f8bbd0,#f48fb1);">
+            ⚽
+            <button class="foto-remove">✕</button>
+          </div>
+        </div>
+
+        <div style="font-size:12px; color:var(--cinza); margin-top:12px;">
+          💡 A primeira foto é a principal e aparece como capa do anúncio. Arraste para reordenar.
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">🎬 Vídeo da chácara</div>
+        <div class="field">
+          <label>Link do vídeo (YouTube ou Instagram)</label>
+          <input type="text" placeholder="https://youtube.com/watch?v=..."/>
+        </div>
+        <div style="font-size:12px; color:var(--cinza); margin-top:4px;">
+          Anúncios com vídeo recebem 3x mais contatos. Cole o link do YouTube ou Instagram.
+        </div>
+        <button class="btn btn-verde btn-sm" style="margin-top:16px;" onclick="salvar('video')">Salvar vídeo</button>
+      </div>
+    </div>
+
+    <!-- CALENDÁRIO -->
+    <div class="tabs" id="tab-calendario">
+      <div class="topbar">
+        <div style="display:flex; align-items:center; gap:14px;">
+          <button class="btn btn-outline btn-sm" onclick="mostrarTab('visao-geral', document.querySelector('.nav-item'))">&#8592; Voltar</button>
+          <div>
+            <div class="page-title">Disponibilidade</div>
+            <div class="page-sub">Selecione o modo e clique nos dias para marcar</div>
+          </div>
+        </div>
+        <button class="btn btn-verde btn-sm" onclick="salvar('calendario')">&#128190; Salvar calendário</button>
+      </div>
+
+      <!-- MODO DE MARCAÇÃO -->
+      <div style="display:flex; align-items:center; gap:10px; margin-bottom:20px; background:#fff; padding:14px 20px; border-radius:12px; border:1px solid var(--cinza-borda); flex-wrap:wrap;">
+        <span style="font-size:13px; font-weight:600; color:var(--cinza); margin-right:4px;">Modo de marcação:</span>
+        <button id="modo-disponivel" onclick="setModo('disponivel')" class="modo-btn modo-ativo-verde">&#10003; Disponível</button>
+        <button id="modo-indisponivel" onclick="setModo('indisponivel')" class="modo-btn modo-inativo">&#128683; Indisponível</button>
+        <button id="modo-limpar" onclick="setModo('neutro')" class="modo-btn modo-inativo">&#8629; Limpar</button>
+        <span style="margin-left:auto; font-size:12px; color:var(--cinza);">&#128161; Selecione o modo e clique nos dias</span>
+      </div>
+
+      <div style="display:grid; grid-template-columns: 1fr 1fr; gap:20px;">
+        <div class="card">
+          <div class="calendario-header">
+            <button class="cal-nav" onclick="mudarMes(-1)">&#8249;</button>
+            <div class="calendario-mes" id="cal-mes-titulo"></div>
+            <button class="cal-nav" onclick="mudarMes(1)">&#8250;</button>
+          </div>
+
+          <div class="calendario-grid" id="calendario-grid"></div>
+
+          <div class="cal-legenda">
+            <div class="legenda-item">
+              <div class="legenda-cor" style="background:#dcfce7; border:2px solid #16a34a;"></div>
+              <span style="font-size:12px; color:var(--cinza);">Disponível</span>
+            </div>
+            <div class="legenda-item">
+              <div class="legenda-cor" style="background:#fee2e2; border:2px solid #dc2626;"></div>
+              <span style="font-size:12px; color:var(--cinza);">Indisponível</span>
+            </div>
+            <div class="legenda-item">
+              <div class="legenda-cor" style="background:#f9fafb; border:1px solid #e5e7eb;"></div>
+              <span style="font-size:12px; color:var(--cinza);">Não definido</span>
+            </div>
+            <div class="legenda-item">
+              <div class="legenda-cor" style="background:#fff; border:2px solid var(--verde);"></div>
+              <span style="font-size:12px; color:var(--cinza);">Hoje</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">&#128203; Resumo — <span id="resumo-mes-nome"></span></div>
+          <div style="display:flex; flex-direction:column; gap:10px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; padding:14px 16px; background:#dcfce7; border-radius:10px; border:1.5px solid #16a34a;">
+              <div style="display:flex;align-items:center;gap:8px;">
+                <span style="font-size:20px;">&#10003;</span>
+                <span style="font-size:13px; font-weight:600; color:#14532d;">Dias disponíveis</span>
+              </div>
+              <span style="font-family:'Fraunces',serif; font-size:26px; color:#16a34a; font-weight:700;" id="count-disp">—</span>
+            </div>
+            <div style="display:flex; justify-content:space-between; align-items:center; padding:14px 16px; background:#fee2e2; border-radius:10px; border:1.5px solid #dc2626;">
+              <div style="display:flex;align-items:center;gap:8px;">
+                <span style="font-size:20px;">&#128683;</span>
+                <span style="font-size:13px; font-weight:600; color:#991b1b;">Dias indisponíveis</span>
+              </div>
+              <span style="font-family:'Fraunces',serif; font-size:26px; color:#dc2626; font-weight:700;" id="count-indisp">—</span>
+            </div>
+            <div style="display:flex; justify-content:space-between; align-items:center; padding:14px 16px; background:#f9fafb; border-radius:10px; border:1.5px solid #e5e7eb;">
+              <div style="display:flex;align-items:center;gap:8px;">
+                <span style="font-size:20px;">&#63;</span>
+                <span style="font-size:13px; font-weight:600; color:var(--cinza);">Não definidos</span>
+              </div>
+              <span style="font-family:'Fraunces',serif; font-size:26px; color:var(--cinza); font-weight:700;" id="count-neutro">—</span>
+            </div>
+          </div>
+
+          <div style="margin-top:20px; padding-top:16px; border-top:1px solid var(--cinza-borda);">
+            <div style="font-size:13px; font-weight:600; margin-bottom:10px; color:var(--verde-escuro);">Ações rápidas para o mês inteiro</div>
+            <div style="display:flex; flex-direction:column; gap:8px;">
+              <button class="btn btn-sm" onclick="marcarTodosMes('disponivel')" style="background:#dcfce7;color:#14532d;border:1.5px solid #16a34a;justify-content:flex-start;font-family:'Inter',sans-serif;">&#10003; Marcar todo o mês como disponível</button>
+              <button class="btn btn-sm" onclick="marcarTodosMes('indisponivel')" style="background:#fee2e2;color:#991b1b;border:1.5px solid #dc2626;justify-content:flex-start;font-family:'Inter',sans-serif;">&#128683; Marcar todo o mês como indisponível</button>
+              <button class="btn btn-outline btn-sm" onclick="marcarTodosMes('neutro')" style="justify-content:flex-start;">&#8629; Limpar todas as marcações do mês</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CONFIGURAÇÕES -->
+    <div class="tabs" id="tab-configuracoes">
+      <div class="topbar">
+        <div>
+          <div class="page-title">Configurações</div>
+          <div class="page-sub">Dados da sua conta</div>
+        </div>
+        <button class="btn btn-verde btn-sm" onclick="salvar('config')">💾 Salvar</button>
+      </div>
+
+      <div class="card">
+        <div class="card-title">👤 Dados pessoais</div>
+        <div class="form-grid">
+          <div class="field">
+            <label>Nome completo</label>
+            <input type="text" value="João Proprietário"/>
+          </div>
+          <div class="field">
+            <label>CPF</label>
+            <input type="text" value="000.000.000-00"/>
+          </div>
+          <div class="field">
+            <label>E-mail</label>
+            <input type="email" value="joao@chacarapalmeiras.com.br"/>
+          </div>
+          <div class="field">
+            <label>WhatsApp</label>
+            <input type="text" value="(44) 9 9999-9999"/>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">🔒 Alterar senha</div>
+        <div class="form-grid">
+          <div class="field">
+            <label>Senha atual</label>
+            <input type="password" placeholder="••••••••"/>
+          </div>
+          <div class="field">
+            <label>Nova senha</label>
+            <input type="password" placeholder="••••••••"/>
+          </div>
+        </div>
+        <button class="btn btn-outline btn-sm" style="margin-top:4px;" onclick="salvar('senha')">Alterar senha</button>
+      </div>
+    </div>
+
+    <!-- PLANO -->
+    <div class="tabs" id="tab-plano">
+      <div class="topbar">
+        <div>
+          <div class="page-title">Meu Plano</div>
+          <div class="page-sub">Gerencie sua assinatura</div>
+        </div>
+      </div>
+
+      <div class="card" style="border:2px solid var(--verde);">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+          <div class="card-title" style="margin-bottom:0;">🌿 Plano Gratuito — Período de Lançamento</div>
+          <span class="status-badge badge-ativo">Ativo</span>
+        </div>
+        <div style="font-size:14px; color:var(--cinza); margin-bottom:20px; line-height:1.7;">
+          Durante o período de lançamento, seu anúncio é <strong>completamente gratuito</strong>. Aproveite para cadastrar todas as informações e fotos da sua chácara.
+        </div>
+        <div style="background:var(--verde-claro); border-radius:10px; padding:16px; font-size:13px; color:var(--verde-escuro);">
+          📢 Em breve lançaremos o <strong>Plano Pro por R$ 50/mês</strong>, com destaque nas buscas e estatísticas avançadas. Você será avisado com antecedência.
+        </div>
+      </div>
+
+      <div class="card" style="opacity:0.6;">
+        <div class="card-title">🚀 Plano Pro — Em breve</div>
+        <div style="font-size:14px; color:var(--cinza); margin-bottom:16px;">R$ 50/mês • Cancele quando quiser</div>
+        <div style="display:flex; flex-direction:column; gap:10px; font-size:14px;">
+          <div>✅ Anúncio em destaque nas buscas</div>
+          <div>✅ Estatísticas detalhadas de visualizações</div>
+          <div>✅ Selo "Verificado" no anúncio</div>
+          <div>✅ Suporte prioritário</div>
+          <div>✅ Até 20 fotos (vs 10 no gratuito)</div>
+        </div>
+        <button class="btn btn-verde" style="margin-top:20px; opacity:0.5; cursor:not-allowed;">Em breve</button>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script>
+  // Estado do calendário
+  let calMesAtual = new Date().getMonth();
+  let calAnoAtual = new Date().getFullYear();
+  let diasStatus = {}; // { 'YYYY-MM-DD': 'disponivel' | 'indisponivel' | 'neutro' }
+
+  // LOGIN
+  function fazerLogin() {
+    document.getElementById('login-page').style.display = 'none';
+    document.getElementById('painel').classList.add('ativo');
+    renderCalendario();
+  }
+
+  function fazerLogout() {
+    document.getElementById('painel').classList.remove('ativo');
+    document.getElementById('login-page').style.display = 'flex';
+  }
+
+  function mostrarCadastro() {
+    mostrarToast('Cadastro será implementado em breve!');
+  }
+
+  // TABS
+  function mostrarTab(id, btn) {
+    document.querySelectorAll('.tabs').forEach(t => t.classList.remove('ativo'));
+    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('ativo'));
+    document.getElementById('tab-' + id).classList.add('ativo');
+    if (btn) btn.classList.add('ativo');
+    if (id === 'calendario') renderCalendario();
+  }
+
+  // TAGS CLICÁVEIS
+  document.addEventListener('click', function(e) {
+    const tag = e.target.closest('.tag-check');
+    if (tag) tag.classList.toggle('selecionado');
+  });
+
+  // FOTOS
+  function adicionarFotos(input) {
+    const grid = document.getElementById('fotos-grid');
+    Array.from(input.files).forEach((file, i) => {
+      const reader = new FileReader();
+      reader.onload = function(ev) {
+        const div = document.createElement('div');
+        div.className = 'foto-item';
+        div.style.background = '#eee';
+        div.innerHTML = `<img src="${ev.target.result}" style="width:100%;height:100%;object-fit:cover;"/><button class="foto-remove" onclick="this.parentElement.remove()">✕</button>`;
+        grid.appendChild(div);
+      };
+      reader.readAsDataURL(file);
+    });
+    input.value = '';
+  }
+
+  // CALENDÁRIO
+  let modoAtual = 'disponivel';
+  const meses = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+  const dows = ['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];
+
+  function renderCalendario() {
+    const hoje = new Date();
+    const titulo = document.getElementById('cal-mes-titulo');
+    titulo.textContent = `${meses[calMesAtual]} ${calAnoAtual}`;
+
+    const grid = document.getElementById('calendario-grid');
+    grid.innerHTML = '';
+
+    // Cabeçalho dias da semana
+    dows.forEach(d => {
+      const el = document.createElement('div');
+      el.className = 'cal-dow';
+      el.textContent = d;
+      grid.appendChild(el);
+    });
+
+    const primeiroDia = new Date(calAnoAtual, calMesAtual, 1).getDay();
+    const totalDias = new Date(calAnoAtual, calMesAtual + 1, 0).getDate();
+
+    // Vazios antes
+    for (let i = 0; i < primeiroDia; i++) {
+      const el = document.createElement('div');
+      el.className = 'cal-day cal-vazio';
+      grid.appendChild(el);
+    }
+
+    // Dias
+    for (let d = 1; d <= totalDias; d++) {
+      const key = `${calAnoAtual}-${String(calMesAtual+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+      const data = new Date(calAnoAtual, calMesAtual, d);
+      const passado = data < new Date(hoje.getFullYear(), hoje.getMonth(), hoje.getDate());
+
+      const el = document.createElement('div');
+      el.className = 'cal-day';
+      el.textContent = d;
+
+      if (passado) {
+        el.classList.add('cal-passado');
+      } else {
+        const isHoje = d === hoje.getDate() && calMesAtual === hoje.getMonth() && calAnoAtual === hoje.getFullYear();
+        if (isHoje) el.classList.add('hoje');
+
+        const status = diasStatus[key] || 'neutro';
+        if (status === 'disponivel') el.classList.add('disponivel');
+        else if (status === 'indisponivel') el.classList.add('indisponivel');
+
+        el.onclick = () => toggleDia(key, el);
+      }
+
+      grid.appendChild(el);
+    }
+
+    atualizarResumo();
+  }
+
+  function setModo(modo) {
+    modoAtual = modo;
+    const btns = { disponivel: 'modo-disponivel', indisponivel: 'modo-indisponivel', neutro: 'modo-limpar' };
+    const classes = { disponivel: 'modo-ativo-verde', indisponivel: 'modo-ativo-vermelho', neutro: 'modo-ativo-cinza' };
+    ['disponivel','indisponivel','neutro'].forEach(m => {
+      const btn = document.getElementById('modo-' + (m === 'neutro' ? 'limpar' : m));
+      btn.className = 'modo-btn ' + (m === modo ? classes[m] : 'modo-inativo');
+    });
+  }
+
+  function toggleDia(key, el) {
+    diasStatus[key] = modoAtual;
+    el.classList.remove('disponivel', 'indisponivel');
+    if (modoAtual === 'disponivel') el.classList.add('disponivel');
+    else if (modoAtual === 'indisponivel') el.classList.add('indisponivel');
+    atualizarResumo();
+  }
+
+  function mudarMes(delta) {
+    calMesAtual += delta;
+    if (calMesAtual > 11) { calMesAtual = 0; calAnoAtual++; }
+    if (calMesAtual < 0) { calMesAtual = 11; calAnoAtual--; }
+    renderCalendario();
+  }
+
+  function marcarTodosMes(status) {
+    const total = new Date(calAnoAtual, calMesAtual + 1, 0).getDate();
+    const hoje = new Date();
+    for (let d = 1; d <= total; d++) {
+      const key = `${calAnoAtual}-${String(calMesAtual+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+      const data = new Date(calAnoAtual, calMesAtual, d);
+      if (data >= new Date(hoje.getFullYear(), hoje.getMonth(), hoje.getDate())) {
+        diasStatus[key] = status;
+      }
+    }
+    renderCalendario();
+  }
+
+  function atualizarResumo() {
+    const total = new Date(calAnoAtual, calMesAtual + 1, 0).getDate();
+    const hoje = new Date();
+    let disp = 0, indisp = 0, neutro = 0;
+
+    for (let d = 1; d <= total; d++) {
+      const key = `${calAnoAtual}-${String(calMesAtual+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+      const data = new Date(calAnoAtual, calMesAtual, d);
+      if (data >= new Date(hoje.getFullYear(), hoje.getMonth(), hoje.getDate())) {
+        const s = diasStatus[key] || 'neutro';
+        if (s === 'disponivel') disp++;
+        else if (s === 'indisponivel') indisp++;
+        else neutro++;
+      }
+    }
+
+    document.getElementById('count-disp').textContent = disp;
+    document.getElementById('count-indisp').textContent = indisp;
+    document.getElementById('count-neutro').textContent = neutro;
+  }
+
+  // TOAST
+  function mostrarToast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 3000);
+  }
+
+  function salvar(tipo) {
+    const msgs = {
+      anuncio: '✅ Anúncio salvo com sucesso!',
+      video: '✅ Vídeo salvo!',
+      calendario: '✅ Calendário atualizado!',
+      config: '✅ Configurações salvas!',
+      senha: '✅ Senha alterada!'
+    };
+    mostrarToast(msgs[tipo] || '✅ Salvo!');
+  }
+</script>
+</body>
+</html>
