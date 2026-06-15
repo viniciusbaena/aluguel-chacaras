@@ -276,6 +276,114 @@
     .modal-thumb.ativo { opacity: 1; outline: 2px solid #fff; }
 
     /* TOAST */
+
+    /* FLUXO DE RESERVA */
+    .reserva-etapa { display: none; }
+    .reserva-etapa.ativa { display: block; }
+
+    .etapas-progress {
+      display: flex; align-items: center; gap: 0;
+      margin-bottom: 20px;
+    }
+    .etapa-dot {
+      display: flex; flex-direction: column; align-items: center; gap: 4px;
+      flex: 1; position: relative;
+    }
+    .etapa-dot:not(:last-child)::after {
+      content: ''; position: absolute; top: 13px; left: 60%; width: 80%;
+      height: 2px; background: var(--cinza-borda);
+    }
+    .etapa-dot.concluida:not(:last-child)::after { background: var(--verde); }
+    .etapa-circulo {
+      width: 26px; height: 26px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 11px; font-weight: 700; z-index: 1;
+      border: 2px solid var(--cinza-borda); background: #fff; color: var(--cinza);
+      transition: all 0.3s;
+    }
+    .etapa-dot.ativa .etapa-circulo { border-color: var(--verde-escuro); background: var(--verde-escuro); color: #fff; }
+    .etapa-dot.concluida .etapa-circulo { border-color: var(--verde); background: var(--verde); color: #fff; }
+    .etapa-label { font-size: 10px; color: var(--cinza); font-weight: 500; text-align: center; }
+    .etapa-dot.ativa .etapa-label { color: var(--verde-escuro); font-weight: 700; }
+    .etapa-dot.concluida .etapa-label { color: var(--verde); }
+
+    .reserva-titulo { font-size: 16px; font-weight: 700; color: var(--verde-escuro); margin-bottom: 16px; }
+
+    .campo-reserva { display: flex; flex-direction: column; gap: 5px; margin-bottom: 12px; }
+    .campo-reserva label { font-size: 12px; font-weight: 600; color: var(--preto); }
+    .campo-reserva input, .campo-reserva select, .campo-reserva textarea {
+      border: 1.5px solid var(--cinza-borda); border-radius: 8px;
+      padding: 9px 12px; font-size: 13px; font-family: 'Inter', sans-serif;
+      outline: none; transition: border 0.15s; color: var(--preto); background: #fff;
+    }
+    .campo-reserva input:focus, .campo-reserva select:focus, .campo-reserva textarea:focus { border-color: var(--verde); }
+    .campo-reserva textarea { resize: none; height: 70px; }
+
+    .btn-reservar {
+      background: var(--verde-escuro); color: #fff; border: none; border-radius: 10px;
+      padding: 13px; font-size: 14px; font-weight: 700; cursor: pointer;
+      width: 100%; font-family: 'Inter', sans-serif; transition: background 0.15s;
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+    }
+    .btn-reservar:hover { background: #163820; }
+    .btn-reservar:disabled { background: #9ca3af; cursor: not-allowed; }
+
+    .aguardo-box {
+      background: #fef3c7; border: 1.5px solid #f59e0b;
+      border-radius: 12px; padding: 16px; text-align: center; margin-bottom: 16px;
+    }
+    .aguardo-icon { font-size: 32px; margin-bottom: 8px; }
+    .aguardo-titulo { font-weight: 700; font-size: 14px; color: #92400e; margin-bottom: 6px; }
+    .aguardo-desc { font-size: 12px; color: #b45309; line-height: 1.6; }
+
+    .confirmado-box {
+      background: var(--verde-claro); border: 1.5px solid var(--verde);
+      border-radius: 12px; padding: 16px; text-align: center; margin-bottom: 16px;
+    }
+
+    .pagamento-resumo {
+      background: var(--cinza-bg); border-radius: 10px;
+      padding: 14px; margin-bottom: 16px;
+    }
+    .pagamento-linha {
+      display: flex; justify-content: space-between;
+      font-size: 13px; padding: 5px 0;
+    }
+    .pagamento-linha.total {
+      border-top: 1px solid var(--cinza-borda); margin-top: 8px;
+      padding-top: 10px; font-weight: 700; font-size: 15px;
+    }
+
+    .btn-pagar {
+      background: #009ee3; color: #fff; border: none; border-radius: 10px;
+      padding: 13px; font-size: 14px; font-weight: 700; cursor: pointer;
+      width: 100%; font-family: 'Inter', sans-serif; transition: background 0.15s;
+      display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 8px;
+    }
+    .btn-pagar:hover { background: #007ab5; }
+
+    .dados-liberados {
+      background: var(--verde-claro); border: 1.5px solid var(--verde);
+      border-radius: 12px; padding: 16px; margin-bottom: 16px;
+    }
+    .dado-item {
+      display: flex; align-items: center; gap: 10px;
+      padding: 10px 0; border-bottom: 1px solid rgba(45,122,69,0.15);
+      font-size: 13px;
+    }
+    .dado-item:last-child { border-bottom: none; }
+    .dado-icon { font-size: 18px; width: 24px; text-align: center; }
+    .dado-label { font-size: 11px; color: var(--verde); font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px; }
+    .dado-valor { font-weight: 600; color: var(--verde-escuro); }
+
+    .aviso-plat {
+      font-size: 11px; color: var(--cinza); text-align: center;
+      margin-top: 12px; line-height: 1.6;
+      display: flex; align-items: flex-start; gap: 6px;
+    }
+    .aviso-plat::before { content: '🔒'; font-size: 12px; flex-shrink: 0; }
+
+
     .toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); background: var(--verde-escuro); color: #fff; padding: 12px 24px; border-radius: 10px; font-size: 14px; font-weight: 500; display: none; align-items: center; gap: 8px; z-index: 999; white-space: nowrap; }
     .toast.show { display: flex; }
 
@@ -532,6 +640,7 @@
   <div>
     <div class="card-contato">
 
+      <!-- PREÇO -->
       <div class="preco-destaque">
         <div class="preco-label">A partir de</div>
         <div>
@@ -541,45 +650,217 @@
         <div class="preco-fds">Final de semana: <strong>R$ 1.800</strong></div>
       </div>
 
-      <div class="contato-info">
-        <div class="contato-row">
-          <span class="contato-row-label">Capacidade</span>
-          <span class="contato-row-val">Até 150 pessoas</span>
+      <!-- PROGRESS DAS ETAPAS -->
+      <div class="etapas-progress" id="etapas-progress">
+        <div class="etapa-dot ativa" id="dot-1">
+          <div class="etapa-circulo">1</div>
+          <div class="etapa-label">Solicitar</div>
         </div>
-        <div class="contato-row">
-          <span class="contato-row-label">Check-in</span>
-          <span class="contato-row-val">A partir das 10h</span>
+        <div class="etapa-dot" id="dot-2">
+          <div class="etapa-circulo">2</div>
+          <div class="etapa-label">Aguardar</div>
         </div>
-        <div class="contato-row">
-          <span class="contato-row-label">Devolução</span>
-          <span class="contato-row-val">Até 23h</span>
+        <div class="etapa-dot" id="dot-3">
+          <div class="etapa-circulo">3</div>
+          <div class="etapa-label">Pagar</div>
         </div>
-        <div class="contato-row">
-          <span class="contato-row-label">Sinal</span>
-          <span class="contato-row-val">50% na reserva</span>
+        <div class="etapa-dot" id="dot-4">
+          <div class="etapa-circulo">4</div>
+          <div class="etapa-label">Confirmado</div>
         </div>
       </div>
 
-      <button class="btn-whatsapp" onclick="abrirWhatsapp()">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.127.558 4.126 1.535 5.858L.057 23.25a.75.75 0 00.916.916l5.392-1.478A11.952 11.952 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.75a9.718 9.718 0 01-4.983-1.373l-.358-.214-3.712 1.017 1.017-3.712-.214-.358A9.718 9.718 0 012.25 12C2.25 6.615 6.615 2.25 12 2.25S21.75 6.615 21.75 12 17.385 21.75 12 21.75z"/></svg>
-        Chamar no WhatsApp
-      </button>
+      <!-- ETAPA 1: SOLICITAR RESERVA -->
+      <div class="reserva-etapa ativa" id="etapa-1">
+        <div class="reserva-titulo">📅 Solicitar reserva</div>
 
-      <button class="btn-ligar" onclick="ligar()">
-        📞 Ligar para o proprietário
-      </button>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+          <div class="campo-reserva">
+            <label>📅 Check-in</label>
+            <input type="date" id="r-checkin" min="2026-06-15" onchange="validarDatas()"/>
+          </div>
+          <div class="campo-reserva">
+            <label>📅 Check-out</label>
+            <input type="date" id="r-checkout" min="2026-06-16" onchange="calcularTotal()"/>
+          </div>
+        </div>
+        <div id="resumo-periodo" style="display:none; background:var(--verde-claro); border-radius:8px; padding:8px 12px; font-size:12px; color:var(--verde-escuro); font-weight:600; margin-bottom:4px;"></div>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+          <div class="campo-reserva">
+            <label>Nº de convidados</label>
+            <select id="r-pessoas">
+              <option>Até 50</option>
+              <option>50 a 100</option>
+              <option selected>100 a 150</option>
+            </select>
+          </div>
+          <div class="campo-reserva">
+            <label>Tipo de evento</label>
+            <select id="r-tipo">
+              <option>Aniversário</option>
+              <option>Casamento</option>
+              <option>Confraternização</option>
+              <option>Churrasco</option>
+              <option>Outro</option>
+            </select>
+          </div>
+        </div>
+        <div class="campo-reserva">
+          <label>Seu nome</label>
+          <input type="text" id="r-nome" placeholder="Nome completo"/>
+        </div>
+        <div class="campo-reserva">
+          <label>WhatsApp</label>
+          <input type="text" id="r-wpp" placeholder="(44) 9 0000-0000"/>
+        </div>
+        <div class="campo-reserva">
+          <label>E-mail</label>
+          <input type="email" id="r-email" placeholder="seu@email.com"/>
+        </div>
+        <div class="campo-reserva">
+          <label>Mensagem para o proprietário (opcional)</label>
+          <textarea id="r-msg" placeholder="Ex: Será uma festa surpresa para 80 pessoas, precisamos entrar às 9h..."></textarea>
+        </div>
 
-      <div class="card-contato-aviso">
-        O contato é direto com o proprietário.<br/>Sem taxas de intermediação.
+        <div class="aviso-plat">
+          Endereço e contato do proprietário serão liberados somente após confirmação e pagamento.
+        </div>
+
+        <button class="btn-reservar" style="margin-top:12px;" onclick="enviarSolicitacao()">
+          📅 Solicitar reserva
+        </button>
+
+        <div class="proprietario-info" style="margin-top:16px; padding-top:14px; border-top:1px solid var(--cinza-borda);">
+          <div class="prop-avatar">JP</div>
+          <div style="flex:1;">
+            <div class="prop-nome">João Proprietário</div>
+            <div class="prop-membro">Anunciante desde 2026</div>
+            <div class="prop-verificado">✓ Perfil verificado</div>
+          </div>
+        </div>
       </div>
 
-      <div class="proprietario-info">
-        <div class="prop-avatar">JP</div>
-        <div style="flex:1;">
-          <div class="prop-nome">João Proprietário</div>
-          <div class="prop-membro">Anunciante desde 2026</div>
-          <div class="prop-verificado">✓ Perfil verificado</div>
+      <!-- ETAPA 2: AGUARDANDO CONFIRMAÇÃO -->
+      <div class="reserva-etapa" id="etapa-2">
+        <div class="aguardo-box">
+          <div class="aguardo-icon">⏳</div>
+          <div class="aguardo-titulo">Solicitação enviada!</div>
+          <div class="aguardo-desc">
+            O proprietário foi notificado por <strong>WhatsApp e e-mail</strong> e tem até <strong>24 horas</strong> para confirmar ou recusar sua solicitação.<br/><br/>
+            Você receberá uma notificação assim que ele responder.
+          </div>
         </div>
+
+        <div style="background:#fff; border:1px solid var(--cinza-borda); border-radius:10px; padding:14px; margin-bottom:14px;">
+          <div style="font-size:12px; font-weight:700; color:var(--cinza); text-transform:uppercase; letter-spacing:0.5px; margin-bottom:10px;">Resumo da solicitação</div>
+          <div class="contato-row"><span class="contato-row-label">Data</span><span class="contato-row-val" id="resumo-data">—</span></div>
+          <div class="contato-row"><span class="contato-row-label">Convidados</span><span class="contato-row-val" id="resumo-pessoas">—</span></div>
+          <div class="contato-row"><span class="contato-row-label">Evento</span><span class="contato-row-val" id="resumo-tipo">—</span></div>
+          <div class="contato-row"><span class="contato-row-label">Solicitante</span><span class="contato-row-val" id="resumo-nome">—</span></div>
+        </div>
+
+        <div style="font-size:12px; color:var(--cinza); text-align:center; line-height:1.6; margin-bottom:14px;">
+          Enquanto aguarda, que tal já pesquisar <a href="#fornecedores" style="color:var(--verde); font-weight:600;">fornecedores para seu evento</a>?
+        </div>
+
+        <!-- SIMULAÇÃO: botão para demo -->
+        <button onclick="simularConfirmacao()" style="background:var(--verde-claro);color:var(--verde-escuro);border:1.5px dashed var(--verde);border-radius:8px;padding:10px;width:100%;font-size:12px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif;">
+          🎭 [DEMO] Simular confirmação do proprietário
+        </button>
+      </div>
+
+      <!-- ETAPA 3: PAGAMENTO -->
+      <div class="reserva-etapa" id="etapa-3">
+        <div class="confirmado-box">
+          <div style="font-size:28px; margin-bottom:6px;">🎉</div>
+          <div style="font-weight:700; font-size:14px; color:var(--verde-escuro);">Reserva confirmada pelo proprietário!</div>
+          <div style="font-size:12px; color:var(--verde); margin-top:4px;">Finalize o pagamento para garantir sua data.</div>
+        </div>
+
+        <div class="pagamento-resumo">
+          <div style="font-size:12px; font-weight:700; color:var(--cinza); text-transform:uppercase; letter-spacing:0.5px; margin-bottom:10px;">Resumo do pagamento</div>
+          <div class="pagamento-linha" id="linha-diarias">
+            <span id="label-diarias">Diária — Chácara das Palmeiras</span>
+            <span id="valor-diarias">R$ 1.200,00</span>
+          </div>
+          <div class="pagamento-linha total">
+            <span>Total a pagar</span>
+            <span id="valor-total">R$ 1.200,00</span>
+          </div>
+          <div style="margin-top:10px; padding-top:10px; border-top:1px dashed var(--cinza-borda); font-size:11px; color:var(--cinza); line-height:1.6;">
+            💡 Sem taxas para você. Nossa comissão de 8% é descontada diretamente do repasse ao proprietário.
+          </div>
+        </div>
+
+        <div style="font-size:12px; color:var(--cinza); background:#f9fafb; border-radius:8px; padding:10px; margin-bottom:14px; line-height:1.6;">
+          ⏰ <strong>Atenção:</strong> você tem até <strong>2 horas</strong> para concluir o pagamento. Após esse prazo, a reserva será cancelada automaticamente.
+        </div>
+
+        <button class="btn-pagar" onclick="simularPagamento()">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M20 4H4c-1.11 0-2 .89-2 2v12c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V6c0-1.11-.89-2-2-2zm0 14H4v-6h16v6zm0-10H4V6h16v2z"/></svg>
+          Pagar com Mercado Pago
+        </button>
+
+        <div style="display:flex; gap:8px; justify-content:center; margin-top:10px; flex-wrap:wrap;">
+          <span style="font-size:11px; color:var(--cinza); display:flex; align-items:center; gap:3px;">💳 Crédito</span>
+          <span style="font-size:11px; color:var(--cinza);">•</span>
+          <span style="font-size:11px; color:var(--cinza); display:flex; align-items:center; gap:3px;">📱 Pix</span>
+          <span style="font-size:11px; color:var(--cinza);">•</span>
+          <span style="font-size:11px; color:var(--cinza); display:flex; align-items:center; gap:3px;">🏦 Boleto</span>
+        </div>
+
+        <div class="aviso-plat" style="margin-top:14px;">
+          Pagamento 100% seguro via Mercado Pago. Seus dados estão protegidos.
+        </div>
+      </div>
+
+      <!-- ETAPA 4: RESERVA CONFIRMADA -->
+      <div class="reserva-etapa" id="etapa-4">
+        <div style="text-align:center; padding: 10px 0 16px;">
+          <div style="font-size:48px; margin-bottom:10px;">✅</div>
+          <div style="font-family:'Fraunces',serif; font-size:22px; color:var(--verde-escuro); margin-bottom:6px;">Reserva confirmada!</div>
+          <div style="font-size:13px; color:var(--cinza);">Sua data está garantida. Confira os dados abaixo.</div>
+        </div>
+
+        <div class="dados-liberados">
+          <div style="font-size:12px; font-weight:700; color:var(--verde); text-transform:uppercase; letter-spacing:0.5px; margin-bottom:10px;">📍 Dados liberados após pagamento</div>
+          <div class="dado-item">
+            <span class="dado-icon">📍</span>
+            <div>
+              <div class="dado-label">Endereço completo</div>
+              <div class="dado-valor">Estrada Rural PR-317, Km 8, Sítio das Palmeiras — Maringá/PR</div>
+            </div>
+          </div>
+          <div class="dado-item">
+            <span class="dado-icon">📞</span>
+            <div>
+              <div class="dado-label">WhatsApp do proprietário</div>
+              <div class="dado-valor">(44) 9 9999-9999 — João</div>
+            </div>
+          </div>
+          <div class="dado-item">
+            <span class="dado-icon">📅</span>
+            <div>
+              <div class="dado-label">Data reservada</div>
+              <div class="dado-valor" id="confirmado-data">—</div>
+            </div>
+          </div>
+          <div class="dado-item">
+            <span class="dado-icon">🕙</span>
+            <div>
+              <div class="dado-label">Horários</div>
+              <div class="dado-valor">Check-in às 10h • Devolução até 23h</div>
+            </div>
+          </div>
+        </div>
+
+        <div style="background:#fef3c7; border-radius:10px; padding:12px; font-size:12px; color:#92400e; line-height:1.6; margin-bottom:14px;">
+          💬 <strong>Próximo passo:</strong> entre em contato com o proprietário pelo WhatsApp acima para combinar a entrada, chaves e demais detalhes do evento.
+        </div>
+
+        <button onclick="irParaInicio()" style="background:var(--verde-claro);color:var(--verde-escuro);border:none;border-radius:8px;padding:10px;width:100%;font-size:13px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif;">
+          🏠 Voltar para a página inicial
+        </button>
       </div>
 
     </div>
@@ -739,6 +1020,109 @@
   }
 
   // Teclado galeria
+  // FLUXO DE RESERVA
+  let etapaAtual = 1;
+
+  function irEtapa(n) {
+    // Esconde etapa atual
+    document.getElementById('etapa-' + etapaAtual).classList.remove('ativa');
+    document.getElementById('dot-' + etapaAtual).classList.remove('ativa');
+    if (n > etapaAtual) document.getElementById('dot-' + etapaAtual).classList.add('concluida');
+
+    etapaAtual = n;
+    document.getElementById('etapa-' + n).classList.add('ativa');
+    document.getElementById('dot-' + n).classList.add('ativa');
+
+    // Marca anteriores como concluídas
+    for (let i = 1; i < n; i++) {
+      document.getElementById('dot-' + i).classList.add('concluida');
+      document.getElementById('dot-' + i).classList.remove('ativa');
+    }
+  }
+
+  function validarDatas() {
+    const checkin = document.getElementById('r-checkin').value;
+    if (checkin) {
+      const minCheckout = new Date(checkin);
+      minCheckout.setDate(minCheckout.getDate() + 1);
+      document.getElementById('r-checkout').min = minCheckout.toISOString().split('T')[0];
+      // Se checkout já selecionado e menor que checkin, limpa
+      const checkout = document.getElementById('r-checkout').value;
+      if (checkout && checkout <= checkin) {
+        document.getElementById('r-checkout').value = '';
+        document.getElementById('resumo-periodo').style.display = 'none';
+      }
+    }
+    calcularTotal();
+  }
+
+  function calcularTotal() {
+    const checkin = document.getElementById('r-checkin').value;
+    const checkout = document.getElementById('r-checkout').value;
+    const resumo = document.getElementById('resumo-periodo');
+
+    if (checkin && checkout && checkout > checkin) {
+      const d1 = new Date(checkin + 'T12:00:00');
+      const d2 = new Date(checkout + 'T12:00:00');
+      const dias = Math.round((d2 - d1) / (1000 * 60 * 60 * 24)) + 1; // inclusivo: dia 14 a 16 = 3 dias
+      const valorDiaria = 1200;
+      const total = dias * valorDiaria;
+
+      const fmt = d => new Date(d + 'T12:00:00').toLocaleDateString('pt-BR', { day:'2-digit', month:'2-digit', year:'numeric' });
+
+      resumo.style.display = 'block';
+      resumo.textContent = `${dias} diária${dias > 1 ? 's' : ''} (${fmt(checkin)} → ${fmt(checkout)}) — R$ ${total.toLocaleString('pt-BR')},00`;
+
+      document.getElementById('label-diarias').textContent = `${dias} diária${dias > 1 ? 's' : ''} × R$ 1.200,00`;
+      document.getElementById('valor-diarias').textContent = `R$ ${total.toLocaleString('pt-BR')},00`;
+      document.getElementById('valor-total').textContent = `R$ ${total.toLocaleString('pt-BR')},00`;
+    } else {
+      resumo.style.display = 'none';
+    }
+  }
+
+  function enviarSolicitacao() {
+    const checkin = document.getElementById('r-checkin').value;
+    const checkout = document.getElementById('r-checkout').value;
+    const nome = document.getElementById('r-nome').value.trim();
+    const wpp = document.getElementById('r-wpp').value.trim();
+    const email = document.getElementById('r-email').value.trim();
+
+    if (!checkin) { mostrarToast('⚠️ Selecione a data de check-in'); return; }
+    if (!checkout) { mostrarToast('⚠️ Selecione a data de check-out'); return; }
+    if (checkout <= checkin) { mostrarToast('⚠️ Check-out deve ser após o check-in'); return; }
+    if (!nome) { mostrarToast('⚠️ Informe seu nome'); return; }
+    if (!wpp && !email) { mostrarToast('⚠️ Informe WhatsApp ou e-mail'); return; }
+
+    const fmt = d => new Date(d + 'T12:00:00').toLocaleDateString('pt-BR', { day:'2-digit', month:'long', year:'numeric' });
+    const dias = Math.round((new Date(checkout+'T12:00:00') - new Date(checkin+'T12:00:00')) / 86400000) + 1; // inclusivo
+    const periodoTexto = `${fmt(checkin)} → ${fmt(checkout)} (${dias} diária${dias>1?'s':''})`;
+
+    document.getElementById('resumo-data').textContent = periodoTexto;
+    document.getElementById('resumo-pessoas').textContent = document.getElementById('r-pessoas').value;
+    document.getElementById('resumo-tipo').textContent = document.getElementById('r-tipo').value;
+    document.getElementById('resumo-nome').textContent = nome;
+    document.getElementById('confirmado-data').textContent = periodoTexto;
+
+    irEtapa(2);
+    mostrarToast('✅ Solicitação enviada! Aguarde a confirmação.');
+  }
+
+  function simularConfirmacao() {
+    irEtapa(3);
+    mostrarToast('🎉 Proprietário confirmou sua reserva!');
+  }
+
+  function simularPagamento() {
+    irEtapa(4);
+    mostrarToast('✅ Pagamento confirmado! Reserva garantida.');
+  }
+
+  function irParaInicio() {
+    window.location.href = 'index.html';
+  }
+
+
   document.addEventListener('keydown', e => {
     if (!document.getElementById('modal-galeria').classList.contains('open')) return;
     if (e.key === 'ArrowRight') navGaleria(1);

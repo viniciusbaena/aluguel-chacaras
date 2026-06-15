@@ -386,13 +386,13 @@
     .cal-day:active:not(.cal-vazio):not(.cal-passado) { transform: scale(0.93); }
     .cal-day.cal-vazio { cursor: default; }
     .cal-day.cal-passado { color: #d1d5db; cursor: not-allowed; }
-    .cal-day.disponivel { background: #dcfce7; color: #14532d; font-weight: 700; border: 2px solid #16a34a; }
+    .cal-day.disponivel { background: #dcfce7; color: #14532d; font-weight: 700; border: 2px solid #16a34a; border-radius: 8px; }
     .modo-btn { display:inline-flex; align-items:center; gap:6px; padding:8px 16px; border-radius:8px; font-size:13px; font-weight:700; cursor:pointer; font-family:"Inter",sans-serif; transition:all 0.15s; border:2px solid transparent; }
     .modo-ativo-verde { background: var(--verde); color: #fff; border-color: var(--verde); }
     .modo-ativo-vermelho { background: #dc2626; color: #fff; border-color: #dc2626; }
     .modo-ativo-cinza { background: #6b7280; color: #fff; border-color: #6b7280; }
     .modo-inativo { background: #fff; color: var(--cinza); border-color: var(--cinza-borda); }
-    .cal-day.indisponivel { background: #fee2e2; color: #991b1b; font-weight: 700; }
+    .cal-day.indisponivel { background: #fee2e2; color: #991b1b; font-weight: 700; border: 2px solid #dc2626; border-radius: 8px; }
     .cal-day.hoje { border: 2px solid var(--verde); font-weight: 700; }
 
     .cal-legenda {
@@ -465,6 +465,102 @@
     .preview-preco { font-size: 14px; color: var(--cinza); }
     .preview-preco strong { font-size: 18px; color: var(--verde-escuro); }
 
+
+    @keyframes piscar-borda {
+      0%, 100% { border-color: #f59e0b; box-shadow: 0 0 0 0 rgba(245,158,11,0); }
+      50% { border-color: #d97706; box-shadow: 0 0 0 4px rgba(245,158,11,0.2); }
+    }
+
+    /* RESERVAS */
+    .reserva-card {
+      background: #fff; border-radius: 14px; border: 1px solid var(--cinza-borda);
+      padding: 20px; margin-bottom: 14px; transition: box-shadow 0.15s;
+    }
+    .reserva-card:hover { box-shadow: 0 4px 20px rgba(0,0,0,0.07); }
+    .reserva-card.pendente { border-left: 4px solid var(--amarelo); }
+    .reserva-card.confirmada { border-left: 4px solid var(--verde); }
+    .reserva-card.recusada { border-left: 4px solid var(--vermelho); opacity: 0.7; }
+    .reserva-card.concluida { border-left: 4px solid #9ca3af; }
+
+    .reserva-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 14px; gap: 12px; }
+    .reserva-badge {
+      display: inline-flex; align-items: center; gap: 5px;
+      padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: 700;
+    }
+    .badge-pendente { background: #fef3c7; color: #92400e; }
+    .badge-confirmada { background: var(--verde-claro); color: var(--verde-escuro); }
+    .badge-recusada { background: #fee2e2; color: #991b1b; }
+    .badge-concluida { background: #f3f4f6; color: #6b7280; }
+    .badge-pago { background: #ede9fe; color: #5b21b6; }
+
+    .reserva-cliente { display: flex; align-items: center; gap: 10px; }
+    .cliente-avatar {
+      width: 40px; height: 40px; border-radius: 50%;
+      background: var(--verde-claro); color: var(--verde-escuro);
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 700; font-size: 15px; flex-shrink: 0;
+    }
+    .cliente-nome { font-weight: 700; font-size: 15px; }
+    .cliente-contato { font-size: 12px; color: var(--cinza); margin-top: 2px; }
+
+    .reserva-infos {
+      display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px;
+      background: var(--cinza-bg); border-radius: 10px; padding: 12px 14px;
+      margin-bottom: 14px;
+    }
+    .reserva-info-item { display: flex; flex-direction: column; gap: 2px; }
+    .reserva-info-label { font-size: 10px; font-weight: 700; color: var(--cinza); text-transform: uppercase; letter-spacing: 0.3px; }
+    .reserva-info-val { font-size: 13px; font-weight: 600; color: var(--preto); }
+
+    .reserva-msg {
+      background: #fffbeb; border: 1px solid #fde68a; border-radius: 8px;
+      padding: 10px 14px; font-size: 13px; color: #374151;
+      line-height: 1.5; margin-bottom: 14px; font-style: italic;
+    }
+
+    .reserva-acoes { display: flex; gap: 10px; flex-wrap: wrap; }
+    .btn-confirmar {
+      background: var(--verde); color: #fff; border: none; border-radius: 8px;
+      padding: 10px 20px; font-size: 13px; font-weight: 700; cursor: pointer;
+      font-family: 'Inter', sans-serif; transition: background 0.15s;
+      display: flex; align-items: center; gap: 6px;
+    }
+    .btn-confirmar:hover { background: var(--verde-escuro); }
+    .btn-recusar {
+      background: #fff; color: var(--vermelho); border: 1.5px solid #fecaca;
+      border-radius: 8px; padding: 10px 20px; font-size: 13px; font-weight: 700;
+      cursor: pointer; font-family: 'Inter', sans-serif; transition: all 0.15s;
+      display: flex; align-items: center; gap: 6px;
+    }
+    .btn-recusar:hover { background: #fff5f5; }
+    .btn-msg-cliente {
+      background: #f0fdf4; color: var(--verde-escuro); border: 1.5px solid var(--verde-claro);
+      border-radius: 8px; padding: 10px 16px; font-size: 13px; font-weight: 600;
+      cursor: pointer; font-family: 'Inter', sans-serif; transition: all 0.15s;
+      display: flex; align-items: center; gap: 6px; margin-left: auto;
+    }
+    .btn-msg-cliente:hover { background: var(--verde-claro); }
+
+    .financeiro-resumo {
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-bottom: 24px;
+    }
+    .fin-card {
+      background: #fff; border-radius: 12px; padding: 18px;
+      border: 1px solid var(--cinza-borda); text-align: center;
+    }
+    .fin-valor { font-family: 'Fraunces', serif; font-size: 26px; color: var(--verde-escuro); font-weight: 700; }
+    .fin-label { font-size: 12px; color: var(--cinza); margin-top: 4px; }
+    .fin-tag { font-size: 11px; font-weight: 600; margin-top: 6px; }
+
+    /* MODAL RECUSAR */
+    .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.45); z-index: 200; align-items: center; justify-content: center; }
+    .modal-overlay.open { display: flex; }
+    .modal { background: #fff; border-radius: 16px; padding: 28px; width: 100%; max-width: 440px; animation: slideUp 0.2s ease; }
+    @keyframes slideUp { from { transform: translateY(16px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+    .modal-titulo { font-size: 17px; font-weight: 700; margin-bottom: 6px; }
+    .modal-sub { font-size: 13px; color: var(--cinza); margin-bottom: 18px; }
+
+
     @media (max-width: 768px) {
       .sidebar { display: none; }
       .main { margin-left: 0; padding: 20px; }
@@ -515,6 +611,13 @@
     <button class="nav-item ativo" onclick="mostrarTab('visao-geral', this)">
       <span class="nav-icon">📊</span> Visão Geral
     </button>
+    <button class="nav-item" onclick="mostrarTab('reservas', this)" style="position:relative;">
+      <span class="nav-icon">🔔</span> Reservas
+      <span style="background:#ef4444;color:#fff;border-radius:20px;padding:1px 7px;font-size:10px;font-weight:700;margin-left:auto;">2</span>
+    </button>
+    <button class="nav-item" onclick="mostrarTab('financeiro', this)">
+      <span class="nav-icon">💰</span> Financeiro
+    </button>
     <button class="nav-item" onclick="mostrarTab('minha-chacara', this)">
       <span class="nav-icon">🏡</span> Minha Chácara
     </button>
@@ -529,8 +632,8 @@
     <button class="nav-item" onclick="mostrarTab('configuracoes', this)">
       <span class="nav-icon">⚙️</span> Configurações
     </button>
-    <button class="nav-item" onclick="mostrarTab('plano', this)">
-      <span class="nav-icon">💳</span> Meu Plano
+    <button class="nav-item" onclick="mostrarTab('comissao', this)">
+      <span class="nav-icon">💰</span> Minha Comissão
     </button>
 
     <div class="sidebar-bottom">
@@ -538,7 +641,7 @@
         <div class="user-avatar">JP</div>
         <div>
           <div class="user-nome">João Proprietário</div>
-          <div class="user-plano">Plano Gratuito</div>
+          <div class="user-plano">Comissão 8% por reserva</div>
         </div>
       </div>
       <button class="nav-item" onclick="fazerLogout()" style="margin-top:8px; color:rgba(255,255,255,0.4);">
@@ -566,21 +669,33 @@
           <div class="stat-value">247</div>
           <span class="stat-tag tag-verde">este mês</span>
         </div>
+        <div class="stat-card" style="border:1.5px solid #f59e0b; cursor:pointer;" onclick="mostrarTab('reservas', document.querySelectorAll('.nav-item')[2])">
+          <div class="stat-label">⏳ Aguardando resposta</div>
+          <div class="stat-value" style="color:#92400e;">2</div>
+          <span class="stat-tag tag-amarelo">responda já!</span>
+        </div>
         <div class="stat-card">
-          <div class="stat-label">Contatos recebidos</div>
-          <div class="stat-value">18</div>
+          <div class="stat-label">Reservas confirmadas</div>
+          <div class="stat-value">4</div>
           <span class="stat-tag tag-verde">este mês</span>
         </div>
         <div class="stat-card">
-          <div class="stat-label">Dias reservados</div>
-          <div class="stat-value">6</div>
-          <span class="stat-tag tag-amarelo">em junho</span>
+          <div class="stat-label">Receita líquida</div>
+          <div class="stat-value">R$ 4,4k</div>
+          <span class="stat-tag tag-verde">este mês</span>
         </div>
-        <div class="stat-card">
-          <div class="stat-label">Avaliação média</div>
-          <div class="stat-value">4.8</div>
-          <span class="stat-tag tag-verde">⭐ de 5</span>
+      </div>
+
+      <!-- ALERTA RESERVAS PENDENTES -->
+      <div style="background:#fffbeb; border:1.5px solid #f59e0b; border-radius:12px; padding:16px 20px; margin-bottom:20px; display:flex; align-items:center; justify-content:space-between; gap:16px; animation:piscar-borda 1.5s ease-in-out infinite;">
+        <div style="display:flex; align-items:center; gap:12px;">
+          <span style="font-size:28px;">🔔</span>
+          <div>
+            <div style="font-weight:700; font-size:14px; color:#92400e;">Você tem 2 solicitações de reserva aguardando resposta</div>
+            <div style="font-size:12px; color:#b45309; margin-top:2px;">Responda em até 24h para não perder a reserva.</div>
+          </div>
         </div>
+        <button onclick="mostrarTab('reservas', document.querySelectorAll('.nav-item')[2])" class="btn btn-sm" style="background:#f59e0b;color:#fff;border:none;white-space:nowrap;">Ver reservas →</button>
       </div>
 
       <div style="display:grid; grid-template-columns: 2fr 1fr; gap:20px;">
@@ -633,6 +748,266 @@
             </div>
             <div style="font-size:12px; color:var(--cinza); text-align:right;">72% completo</div>
           </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- RESERVAS -->
+    <div class="tabs" id="tab-reservas">
+      <div class="topbar">
+        <div>
+          <div class="page-title">Reservas</div>
+          <div class="page-sub">Gerencie as solicitações e reservas da sua chácara</div>
+        </div>
+        <div style="display:flex; gap:8px;">
+          <select onchange="filtrarReservas(this.value)" style="border:1.5px solid var(--cinza-borda);border-radius:8px;padding:7px 12px;font-size:13px;font-family:'Inter',sans-serif;outline:none;">
+            <option value="todas">Todas</option>
+            <option value="pendente">Pendentes</option>
+            <option value="confirmada">Confirmadas</option>
+            <option value="concluida">Concluídas</option>
+            <option value="recusada">Recusadas</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- PENDENTES -->
+      <div style="font-size:12px; font-weight:700; color:var(--cinza); text-transform:uppercase; letter-spacing:0.5px; margin-bottom:12px;">⏳ Aguardando sua resposta (2)</div>
+
+      <div class="reserva-card pendente" id="reserva-1">
+        <div class="reserva-header">
+          <div class="reserva-cliente">
+            <div class="cliente-avatar">MF</div>
+            <div>
+              <div class="cliente-nome">Maria Fernanda</div>
+              <div class="cliente-contato">📱 (44) 9 8888-1111 • mfernanda@email.com</div>
+            </div>
+          </div>
+          <span class="reserva-badge badge-pendente">⏳ Pendente</span>
+        </div>
+
+        <div class="reserva-infos">
+          <div class="reserva-info-item">
+            <span class="reserva-info-label">Check-in</span>
+            <span class="reserva-info-val">20/07/2026</span>
+          </div>
+          <div class="reserva-info-item">
+            <span class="reserva-info-label">Check-out</span>
+            <span class="reserva-info-val">22/07/2026</span>
+          </div>
+          <div class="reserva-info-item">
+            <span class="reserva-info-label">Dias / Valor</span>
+            <span class="reserva-info-val">3 dias • R$ 3.600</span>
+          </div>
+          <div class="reserva-info-item">
+            <span class="reserva-info-label">Evento / Pessoas</span>
+            <span class="reserva-info-val">Aniversário • ~80 pessoas</span>
+          </div>
+        </div>
+
+        <div class="reserva-msg">
+          "Olá! Será uma festa de aniversário surpresa de 15 anos para minha filha. Precisamos entrar às 9h para montar a decoração. Podemos combinar isso?"
+        </div>
+
+        <div style="font-size:11px; color:var(--cinza); margin-bottom:12px;">
+          ⏰ Solicitado há 2 horas • Expira em 22 horas
+        </div>
+
+        <div class="reserva-acoes">
+          <button class="btn-confirmar" onclick="confirmarReserva(1)">✅ Confirmar reserva</button>
+          <button class="btn-recusar" onclick="abrirModalRecusar(1)">✕ Recusar</button>
+          <button class="btn-msg-cliente" onclick="msgCliente('44988881111')">💬 Perguntar ao cliente</button>
+        </div>
+      </div>
+
+      <div class="reserva-card pendente" id="reserva-2">
+        <div class="reserva-header">
+          <div class="reserva-cliente">
+            <div class="cliente-avatar">RS</div>
+            <div>
+              <div class="cliente-nome">Ricardo Santos</div>
+              <div class="cliente-contato">📱 (44) 9 7777-2222 • rsantos@empresa.com</div>
+            </div>
+          </div>
+          <span class="reserva-badge badge-pendente">⏳ Pendente</span>
+        </div>
+
+        <div class="reserva-infos">
+          <div class="reserva-info-item">
+            <span class="reserva-info-label">Check-in</span>
+            <span class="reserva-info-val">05/08/2026</span>
+          </div>
+          <div class="reserva-info-item">
+            <span class="reserva-info-label">Check-out</span>
+            <span class="reserva-info-val">05/08/2026</span>
+          </div>
+          <div class="reserva-info-item">
+            <span class="reserva-info-label">Dias / Valor</span>
+            <span class="reserva-info-val">1 dia • R$ 1.200</span>
+          </div>
+          <div class="reserva-info-item">
+            <span class="reserva-info-label">Evento / Pessoas</span>
+            <span class="reserva-info-val">Confraternização • ~120 pessoas</span>
+          </div>
+        </div>
+
+        <div class="reserva-msg">
+          "Confraternização da empresa. Equipe de 120 pessoas, precisamos de som e churrasqueira funcionando. Tem gerador caso falte luz?"
+        </div>
+
+        <div style="font-size:11px; color:var(--cinza); margin-bottom:12px;">
+          ⏰ Solicitado há 5 horas • Expira em 19 horas
+        </div>
+
+        <div class="reserva-acoes">
+          <button class="btn-confirmar" onclick="confirmarReserva(2)">✅ Confirmar reserva</button>
+          <button class="btn-recusar" onclick="abrirModalRecusar(2)">✕ Recusar</button>
+          <button class="btn-msg-cliente" onclick="msgCliente('44977772222')">💬 Perguntar ao cliente</button>
+        </div>
+      </div>
+
+      <!-- CONFIRMADAS -->
+      <div style="font-size:12px; font-weight:700; color:var(--cinza); text-transform:uppercase; letter-spacing:0.5px; margin:20px 0 12px;">✅ Confirmadas — aguardando pagamento / concluídas</div>
+
+      <div class="reserva-card confirmada">
+        <div class="reserva-header">
+          <div class="reserva-cliente">
+            <div class="cliente-avatar">AC</div>
+            <div>
+              <div class="cliente-nome">Ana Carvalho</div>
+              <div class="cliente-contato">📱 (44) 9 6666-3333</div>
+            </div>
+          </div>
+          <div style="display:flex; gap:6px;">
+            <span class="reserva-badge badge-confirmada">✅ Confirmada</span>
+            <span class="reserva-badge badge-pago">💳 Pago</span>
+          </div>
+        </div>
+
+        <div class="reserva-infos">
+          <div class="reserva-info-item">
+            <span class="reserva-info-label">Check-in</span>
+            <span class="reserva-info-val">28/06/2026</span>
+          </div>
+          <div class="reserva-info-item">
+            <span class="reserva-info-label">Check-out</span>
+            <span class="reserva-info-val">29/06/2026</span>
+          </div>
+          <div class="reserva-info-item">
+            <span class="reserva-info-label">Dias / Valor</span>
+            <span class="reserva-info-val">2 dias • R$ 2.400</span>
+          </div>
+          <div class="reserva-info-item">
+            <span class="reserva-info-label">Você recebe</span>
+            <span class="reserva-info-val" style="color:var(--verde);">R$ 2.208</span>
+          </div>
+        </div>
+
+        <div class="reserva-acoes">
+          <button class="btn-msg-cliente" style="margin-left:0;" onclick="msgCliente('44966663333')">💬 Falar com Ana</button>
+          <div style="margin-left:auto; font-size:12px; color:var(--cinza); display:flex; align-items:center;">
+            Pagamento confirmado • Endereço liberado ao cliente
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- FINANCEIRO -->
+    <div class="tabs" id="tab-financeiro">
+      <div class="topbar">
+        <div>
+          <div class="page-title">Financeiro</div>
+          <div class="page-sub">Acompanhe seus recebimentos e comissões</div>
+        </div>
+      </div>
+
+      <div class="financeiro-resumo">
+        <div class="fin-card">
+          <div class="fin-valor">R$ 4.416</div>
+          <div class="fin-label">Recebido este mês</div>
+          <div class="fin-tag" style="color:var(--verde);">✓ já na sua conta</div>
+        </div>
+        <div class="fin-card">
+          <div class="fin-valor">R$ 2.208</div>
+          <div class="fin-label">A receber (reservas pagas)</div>
+          <div class="fin-tag" style="color:var(--amarelo);">⏳ após check-out</div>
+        </div>
+        <div class="fin-card">
+          <div class="fin-valor">R$ 384</div>
+          <div class="fin-label">Comissão plataforma (8%)</div>
+          <div class="fin-tag" style="color:var(--cinza);">descontado automaticamente</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">📋 Histórico de reservas</div>
+        <table style="width:100%; border-collapse:collapse; font-size:13px;">
+          <thead>
+            <tr style="background:#f9fafb;">
+              <th style="text-align:left; padding:10px 14px; font-size:11px; font-weight:700; color:var(--cinza); text-transform:uppercase; border-bottom:1px solid var(--cinza-borda);">Cliente</th>
+              <th style="text-align:left; padding:10px 14px; font-size:11px; font-weight:700; color:var(--cinza); text-transform:uppercase; border-bottom:1px solid var(--cinza-borda);">Período</th>
+              <th style="text-align:left; padding:10px 14px; font-size:11px; font-weight:700; color:var(--cinza); text-transform:uppercase; border-bottom:1px solid var(--cinza-borda);">Valor bruto</th>
+              <th style="text-align:left; padding:10px 14px; font-size:11px; font-weight:700; color:var(--cinza); text-transform:uppercase; border-bottom:1px solid var(--cinza-borda);">Comissão (8%)</th>
+              <th style="text-align:left; padding:10px 14px; font-size:11px; font-weight:700; color:var(--cinza); text-transform:uppercase; border-bottom:1px solid var(--cinza-borda);">Você recebe</th>
+              <th style="text-align:left; padding:10px 14px; font-size:11px; font-weight:700; color:var(--cinza); text-transform:uppercase; border-bottom:1px solid var(--cinza-borda);">Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr style="border-bottom:1px solid #f3f4f6;">
+              <td style="padding:12px 14px; font-weight:600;">Ana Carvalho</td>
+              <td style="padding:12px 14px; color:var(--cinza);">28–29/06/2026</td>
+              <td style="padding:12px 14px;">R$ 2.400</td>
+              <td style="padding:12px 14px; color:var(--vermelho);">− R$ 192</td>
+              <td style="padding:12px 14px; font-weight:700; color:var(--verde);">R$ 2.208</td>
+              <td style="padding:12px 14px;"><span style="background:var(--verde-claro);color:var(--verde-escuro);font-size:11px;font-weight:700;padding:3px 8px;border-radius:20px;">✓ Pago</span></td>
+            </tr>
+            <tr style="border-bottom:1px solid #f3f4f6;">
+              <td style="padding:12px 14px; font-weight:600;">Carlos Ferreira</td>
+              <td style="padding:12px 14px; color:var(--cinza);">10–12/06/2026</td>
+              <td style="padding:12px 14px;">R$ 3.600</td>
+              <td style="padding:12px 14px; color:var(--vermelho);">− R$ 288</td>
+              <td style="padding:12px 14px; font-weight:700; color:var(--verde);">R$ 3.312</td>
+              <td style="padding:12px 14px;"><span style="background:var(--verde-claro);color:var(--verde-escuro);font-size:11px;font-weight:700;padding:3px 8px;border-radius:20px;">✓ Pago</span></td>
+            </tr>
+            <tr>
+              <td style="padding:12px 14px; font-weight:600;">Maria Fernanda</td>
+              <td style="padding:12px 14px; color:var(--cinza);">20–22/07/2026</td>
+              <td style="padding:12px 14px;">R$ 3.600</td>
+              <td style="padding:12px 14px; color:var(--vermelho);">− R$ 288</td>
+              <td style="padding:12px 14px; font-weight:700; color:var(--cinza);">R$ 3.312</td>
+              <td style="padding:12px 14px;"><span style="background:#fef3c7;color:#92400e;font-size:11px;font-weight:700;padding:3px 8px;border-radius:20px;">⏳ Pendente</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div style="background:var(--verde-claro); border-radius:12px; padding:14px 18px; font-size:13px; color:var(--verde-escuro); line-height:1.6;">
+        💳 <strong>Como funciona o repasse:</strong> após o check-out do cliente, o valor líquido (já descontada a comissão de 8%) é transferido automaticamente para sua conta cadastrada no Mercado Pago em até 2 dias úteis.
+      </div>
+    </div>
+
+    <!-- MODAL RECUSAR -->
+    <div class="modal-overlay" id="modal-recusar" onclick="fecharModal(event)">
+      <div class="modal">
+        <div class="modal-titulo">Recusar solicitação</div>
+        <div class="modal-sub">O cliente será notificado. Informe o motivo para ajudá-lo a entender.</div>
+        <div style="display:flex; flex-direction:column; gap:8px; margin-bottom:16px;">
+          <label style="display:flex;align-items:center;gap:8px;font-size:14px;cursor:pointer;padding:10px;border:1.5px solid var(--cinza-borda);border-radius:8px;" onclick="selecionarMotivo(this)">
+            <input type="radio" name="motivo" style="accent-color:var(--verde-escuro);"/> Data já reservada
+          </label>
+          <label style="display:flex;align-items:center;gap:8px;font-size:14px;cursor:pointer;padding:10px;border:1.5px solid var(--cinza-borda);border-radius:8px;" onclick="selecionarMotivo(this)">
+            <input type="radio" name="motivo"/> Número de pessoas acima da capacidade
+          </label>
+          <label style="display:flex;align-items:center;gap:8px;font-size:14px;cursor:pointer;padding:10px;border:1.5px solid var(--cinza-borda);border-radius:8px;" onclick="selecionarMotivo(this)">
+            <input type="radio" name="motivo"/> Manutenção no período
+          </label>
+          <label style="display:flex;align-items:center;gap:8px;font-size:14px;cursor:pointer;padding:10px;border:1.5px solid var(--cinza-borda);border-radius:8px;" onclick="selecionarMotivo(this)">
+            <input type="radio" name="motivo"/> Outro motivo
+          </label>
+        </div>
+        <textarea id="motivo-texto" placeholder="Mensagem adicional para o cliente (opcional)..." style="width:100%;border:1.5px solid var(--cinza-borda);border-radius:8px;padding:10px;font-family:'Inter',sans-serif;font-size:13px;resize:none;height:70px;outline:none;margin-bottom:16px;"></textarea>
+        <div style="display:flex; gap:10px; justify-content:flex-end;">
+          <button onclick="document.getElementById('modal-recusar').classList.remove('open')" style="background:#f3f4f6;border:none;border-radius:8px;padding:10px 18px;font-size:13px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif;">Cancelar</button>
+          <button onclick="recusarConfirmado()" style="background:var(--vermelho);color:#fff;border:none;border-radius:8px;padding:10px 18px;font-size:13px;font-weight:700;cursor:pointer;font-family:'Inter',sans-serif;">Confirmar recusa</button>
         </div>
       </div>
     </div>
@@ -761,22 +1136,14 @@
           </div>
         </div>
         <div class="form-grid" style="margin-top:16px;">
-          <div class="field">
-            <label>Aceita pagamento</label>
-            <select>
-              <option>Pix, transferência e dinheiro</option>
-              <option>Apenas Pix</option>
-              <option>Cartão de crédito</option>
-              <option>Qualquer forma</option>
-            </select>
-          </div>
-          <div class="field">
-            <label>Exige sinal/reserva?</label>
-            <select>
-              <option>Sim — 50% antecipado</option>
-              <option>Sim — 30% antecipado</option>
-              <option>Não</option>
-            </select>
+          <div class="field form-full">
+            <div style="background:var(--verde-claro); border:1.5px solid var(--verde); border-radius:10px; padding:14px 16px; display:flex; gap:12px; align-items:flex-start;">
+              <span style="font-size:22px; flex-shrink:0;">💳</span>
+              <div>
+                <div style="font-size:13px; font-weight:700; color:var(--verde-escuro); margin-bottom:4px;">Pagamento gerenciado pela plataforma</div>
+                <div style="font-size:12px; color:#374151; line-height:1.6;">O cliente paga o valor total diretamente pelo AluguelDeChácaras.com.br via Mercado Pago (cartão, Pix ou boleto). Após o check-out, o valor líquido — já descontada a comissão de 8% — é transferido automaticamente para sua conta no Mercado Pago em até 2 dias úteis. Você não precisa cobrar nem negociar pagamento com o cliente.</div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -1019,38 +1386,91 @@
     </div>
 
     <!-- PLANO -->
-    <div class="tabs" id="tab-plano">
+    <div class="tabs" id="tab-comissao">
       <div class="topbar">
         <div>
-          <div class="page-title">Meu Plano</div>
-          <div class="page-sub">Gerencie sua assinatura</div>
+          <div class="page-title">Minha Comissão</div>
+          <div class="page-sub">Entenda como funciona o repasse da plataforma</div>
         </div>
       </div>
 
+      <!-- COMO FUNCIONA -->
       <div class="card" style="border:2px solid var(--verde);">
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
-          <div class="card-title" style="margin-bottom:0;">🌿 Plano Gratuito — Período de Lançamento</div>
-          <span class="status-badge badge-ativo">Ativo</span>
-        </div>
-        <div style="font-size:14px; color:var(--cinza); margin-bottom:20px; line-height:1.7;">
-          Durante o período de lançamento, seu anúncio é <strong>completamente gratuito</strong>. Aproveite para cadastrar todas as informações e fotos da sua chácara.
-        </div>
-        <div style="background:var(--verde-claro); border-radius:10px; padding:16px; font-size:13px; color:var(--verde-escuro);">
-          📢 Em breve lançaremos o <strong>Plano Pro por R$ 50/mês</strong>, com destaque nas buscas e estatísticas avançadas. Você será avisado com antecedência.
+        <div class="card-title">🌿 Como funciona a comissão</div>
+        <div style="display:flex; flex-direction:column; gap:14px;">
+
+          <div style="display:flex; gap:14px; align-items:flex-start; padding:14px; background:var(--cinza-bg); border-radius:10px;">
+            <span style="font-size:28px; flex-shrink:0;">1️⃣</span>
+            <div>
+              <div style="font-weight:700; font-size:14px; margin-bottom:4px;">Cliente solicita e paga pela plataforma</div>
+              <div style="font-size:13px; color:var(--cinza); line-height:1.6;">Após você confirmar a reserva, o cliente efetua o pagamento integral pelo AluguelDeChácaras.com.br via Mercado Pago. O valor fica retido na plataforma até o check-out.</div>
+            </div>
+          </div>
+
+          <div style="display:flex; gap:14px; align-items:flex-start; padding:14px; background:var(--cinza-bg); border-radius:10px;">
+            <span style="font-size:28px; flex-shrink:0;">2️⃣</span>
+            <div>
+              <div style="font-weight:700; font-size:14px; margin-bottom:4px;">Comissão de 8% descontada automaticamente</div>
+              <div style="font-size:13px; color:var(--cinza); line-height:1.6;">A plataforma desconta 8% do valor total como comissão pelo serviço de intermediação, marketing e segurança da transação. Esse desconto é feito automaticamente — você não precisa fazer nada.</div>
+            </div>
+          </div>
+
+          <div style="display:flex; gap:14px; align-items:flex-start; padding:14px; background:var(--cinza-bg); border-radius:10px;">
+            <span style="font-size:28px; flex-shrink:0;">3️⃣</span>
+            <div>
+              <div style="font-weight:700; font-size:14px; margin-bottom:4px;">Você recebe o valor líquido após o check-out</div>
+              <div style="font-size:13px; color:var(--cinza); line-height:1.6;">Após o check-out do cliente, o valor líquido é transferido automaticamente para sua conta no Mercado Pago em até 2 dias úteis. Simples, seguro e sem burocracia.</div>
+            </div>
+          </div>
+
         </div>
       </div>
 
-      <div class="card" style="opacity:0.6;">
-        <div class="card-title">🚀 Plano Pro — Em breve</div>
-        <div style="font-size:14px; color:var(--cinza); margin-bottom:16px;">R$ 50/mês • Cancele quando quiser</div>
-        <div style="display:flex; flex-direction:column; gap:10px; font-size:14px;">
-          <div>✅ Anúncio em destaque nas buscas</div>
-          <div>✅ Estatísticas detalhadas de visualizações</div>
-          <div>✅ Selo "Verificado" no anúncio</div>
-          <div>✅ Suporte prioritário</div>
-          <div>✅ Até 20 fotos (vs 10 no gratuito)</div>
+      <!-- SIMULADOR -->
+      <div class="card">
+        <div class="card-title">🧮 Simulador de ganhos</div>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:16px;">
+          <div class="field">
+            <label>Valor da diária (R$)</label>
+            <input type="number" id="sim-diaria" value="1200" oninput="simularComissao()" style="border:1.5px solid var(--cinza-borda);border-radius:8px;padding:10px;font-size:14px;font-family:'Inter',sans-serif;outline:none;"/>
+          </div>
+          <div class="field">
+            <label>Número de dias</label>
+            <input type="number" id="sim-dias" value="2" min="1" oninput="simularComissao()" style="border:1.5px solid var(--cinza-borda);border-radius:8px;padding:10px;font-size:14px;font-family:'Inter',sans-serif;outline:none;"/>
+          </div>
         </div>
-        <button class="btn btn-verde" style="margin-top:20px; opacity:0.5; cursor:not-allowed;">Em breve</button>
+        <div style="background:var(--verde-claro); border-radius:12px; padding:20px;">
+          <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:16px; text-align:center;">
+            <div>
+              <div style="font-size:11px; font-weight:700; color:var(--cinza); text-transform:uppercase; margin-bottom:6px;">Valor total</div>
+              <div style="font-family:'Fraunces',serif; font-size:24px; color:var(--preto); font-weight:700;" id="sim-total">R$ 2.400</div>
+            </div>
+            <div>
+              <div style="font-size:11px; font-weight:700; color:var(--cinza); text-transform:uppercase; margin-bottom:6px;">Comissão (8%)</div>
+              <div style="font-family:'Fraunces',serif; font-size:24px; color:var(--vermelho); font-weight:700;" id="sim-comissao">− R$ 192</div>
+            </div>
+            <div>
+              <div style="font-size:11px; font-weight:700; color:var(--cinza); text-transform:uppercase; margin-bottom:6px;">Você recebe</div>
+              <div style="font-family:'Fraunces',serif; font-size:24px; color:var(--verde-escuro); font-weight:700;" id="sim-liquido">R$ 2.208</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- VANTAGENS -->
+      <div class="card">
+        <div class="card-title">✅ O que você ganha com a plataforma</div>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:16px;">
+          <div style="display:flex;gap:10px;align-items:flex-start;font-size:13px;padding:10px;background:var(--cinza-bg);border-radius:8px;"><span>🎯</span><span>Seu anúncio aparece para clientes da região buscando exatamente o que você oferece</span></div>
+          <div style="display:flex;gap:10px;align-items:flex-start;font-size:13px;padding:10px;background:var(--cinza-bg);border-radius:8px;"><span>💳</span><span>Pagamento seguro e garantido — você recebe mesmo se o cliente não aparecer</span></div>
+          <div style="display:flex;gap:10px;align-items:flex-start;font-size:13px;padding:10px;background:var(--cinza-bg);border-radius:8px;"><span>🤖</span><span>IA responde solicitações no seu WhatsApp automaticamente, mesmo fora do horário</span></div>
+          <div style="display:flex;gap:10px;align-items:flex-start;font-size:13px;padding:10px;background:var(--cinza-bg);border-radius:8px;"><span>📅</span><span>Calendário integrado evita conflitos de reserva automaticamente</span></div>
+          <div style="display:flex;gap:10px;align-items:flex-start;font-size:13px;padding:10px;background:var(--cinza-bg);border-radius:8px;"><span>📊</span><span>Painel com estatísticas de visualizações, contatos e receita</span></div>
+          <div style="display:flex;gap:10px;align-items:flex-start;font-size:13px;padding:10px;background:var(--cinza-bg);border-radius:8px;"><span>⭐</span><span>Sistema de avaliações que aumenta sua credibilidade com novos clientes</span></div>
+        </div>
+        <div style="padding:14px 16px; background:#f0fdf4; border:1.5px solid var(--verde); border-radius:10px; font-size:13px; color:var(--verde-escuro); line-height:1.6;">
+          💡 <strong>Você só paga quando recebe.</strong> Sem mensalidade, sem taxa fixa. A comissão de 8% só é cobrada quando uma reserva é confirmada e paga pelo cliente.
+        </div>
       </div>
     </div>
 
@@ -1239,6 +1659,18 @@
     t.textContent = msg;
     t.classList.add('show');
     setTimeout(() => t.classList.remove('show'), 3000);
+  }
+
+  function simularComissao() {
+    const diaria = parseFloat(document.getElementById('sim-diaria').value) || 0;
+    const dias = parseInt(document.getElementById('sim-dias').value) || 1;
+    const total = diaria * dias;
+    const comissao = total * 0.08;
+    const liquido = total - comissao;
+    const fmt = v => 'R$ ' + v.toLocaleString('pt-BR', { minimumFractionDigits: 0 });
+    document.getElementById('sim-total').textContent = fmt(total);
+    document.getElementById('sim-comissao').textContent = '− ' + fmt(comissao);
+    document.getElementById('sim-liquido').textContent = fmt(liquido);
   }
 
   function salvar(tipo) {
