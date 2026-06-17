@@ -210,6 +210,23 @@
     .cat-check { margin-left: auto; width: 20px; height: 20px; border-radius: 50%; border: 2px solid var(--cinza-borda); display: flex; align-items: center; justify-content: center; font-size: 11px; }
     .cat-item.selecionado .cat-check { background: var(--terra); border-color: var(--terra); color: #fff; }
 
+    /* MODAL OVERLAY */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.5);
+      z-index: 200;
+      align-items: center;
+      justify-content: center;
+    }
+    .modal-overlay.open { display: flex; }
+
+    @keyframes slideUp {
+      from { transform: translateY(20px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+
     @media (max-width: 768px) {
       .sidebar { display: none; }
       .main { margin-left: 0; padding: 20px; }
@@ -238,7 +255,7 @@
     </div>
     <button class="btn btn-terra" onclick="fazerLogin()" style="margin-top:8px;">Entrar no painel</button>
     <div style="text-align:center; font-size:13px; color:var(--cinza); margin-top:20px;">
-      Ainda não tem conta? <a href="#" style="color:var(--terra); font-weight:600;">Cadastre-se grátis</a>
+      Ainda não tem conta? <a href="index.html#anuncie" style="color:var(--terra); font-weight:600;">Cadastre-se</a>
     </div>
     <div style="margin-top:20px; padding:12px; background:var(--terra-claro); border-radius:8px; font-size:12px; color:var(--terra-escuro); text-align:center;">
       💡 <strong>Demonstração:</strong> clique em "Entrar no painel" para explorar
@@ -259,16 +276,13 @@
     <button class="nav-item" onclick="mostrarTab('meu-servico', this)">
       <span class="nav-icon">🎯</span> Meu Serviço
     </button>
-    <button class="nav-item" onclick="mostrarTab('fotos', this)">
-      <span class="nav-icon">📷</span> Fotos e Vídeos
-    </button>
 
     <div class="sidebar-section">Conta</div>
     <button class="nav-item" onclick="mostrarTab('configuracoes', this)">
       <span class="nav-icon">⚙️</span> Configurações
     </button>
     <button class="nav-item" onclick="mostrarTab('plano', this)">
-      <span class="nav-icon">💳</span> Meu Plano
+      <span class="nav-icon">⭐</span> Minha Conta
     </button>
 
     <div class="sidebar-bottom">
@@ -276,7 +290,7 @@
         <div class="user-avatar">DM</div>
         <div>
           <div class="user-nome">DJ Marquinhos</div>
-          <div class="user-plano">Plano Gratuito</div>
+          <div class="user-plano">Cadastro gratuito</div>
         </div>
       </div>
       <button class="nav-item" onclick="fazerLogout()" style="margin-top:8px; color:rgba(255,255,255,0.4);">
@@ -294,7 +308,7 @@
           <div class="page-title">Visão Geral</div>
           <div class="page-sub">Acompanhe o desempenho do seu anúncio</div>
         </div>
-        <span class="status-badge badge-ativo">Anúncio ativo</span>
+        <span class="status-badge badge-ativo" id="badge-status-forn">Anúncio ativo</span>
       </div>
 
       <div class="stats-grid">
@@ -320,64 +334,25 @@
         </div>
       </div>
 
-      <div style="display:grid; grid-template-columns: 2fr 1fr; gap:20px;">
+      <div style="display:grid; grid-template-columns: 1fr; gap:20px;">
         <div class="card">
           <div class="card-title">🎯 Status do seu anúncio</div>
-          <div class="preview-card">
-            <div class="preview-foto">🎵</div>
-            <div class="preview-info">
-              <div class="preview-cat">DJ e Música</div>
-              <div class="preview-nome">DJ Marquinhos Events</div>
-              <div class="preview-local">📍 Maringá — PR</div>
-              <div style="margin-top:10px; font-size:13px; color:var(--cinza); line-height:1.5;">
-                Som profissional para festas e eventos. Iluminação LED inclusa. Atende Maringá e região.
-              </div>
-              <div style="margin-top:10px; display:flex; flex-wrap:wrap; gap:6px;">
-                <span style="background:var(--terra-claro);color:var(--terra-escuro);font-size:11px;font-weight:600;padding:3px 10px;border-radius:20px;">🎵 DJ</span>
-                <span style="background:var(--terra-claro);color:var(--terra-escuro);font-size:11px;font-weight:600;padding:3px 10px;border-radius:20px;">💡 Iluminação LED</span>
-                <span style="background:var(--terra-claro);color:var(--terra-escuro);font-size:11px;font-weight:600;padding:3px 10px;border-radius:20px;">🎤 Microfone</span>
-              </div>
+          <div style="background:var(--cinza-bg); border-radius:10px; padding:16px; display:flex; align-items:center; gap:14px;">
+            <div style="width:48px;height:48px;border-radius:12px;background:var(--terra-claro);display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0;">🎵</div>
+            <div>
+              <div style="font-size:11px;font-weight:700;color:var(--terra);text-transform:uppercase;letter-spacing:0.5px;">DJ e Música</div>
+              <div style="font-size:16px;font-weight:700;color:var(--terra-escuro);margin-top:2px;">DJ Marquinhos Events</div>
+              <div style="font-size:12px;color:var(--cinza);margin-top:2px;">📍 Maringá — PR</div>
             </div>
           </div>
           <div style="display:flex; gap:10px; margin-top:16px;">
             <button class="btn btn-outline btn-sm" onclick="mostrarTab('meu-servico', document.querySelectorAll('.nav-item')[1])">✏️ Editar anúncio</button>
-            <button class="btn btn-outline btn-sm" onclick="mostrarTab('fotos', document.querySelectorAll('.nav-item')[2])">📷 Gerenciar fotos</button>
+            <button class="btn btn-outline btn-sm" onclick="mostrarTab('meu-servico', document.querySelectorAll('.nav-item')[1])">📷 Fotos e serviço</button>
+            <button class="btn btn-sm" id="btn-toggle-forn-vg" onclick="toggleAnuncioForn()" style="background:var(--vermelho);color:#fff;margin-left:auto;">⏸ Pausar anúncio</button>
           </div>
         </div>
 
-        <div class="card">
-          <div class="card-title">✅ Completude do perfil</div>
-          <div style="display:flex; flex-direction:column; gap:12px;">
-            <div style="display:flex; align-items:center; justify-content:space-between; font-size:13px;">
-              <span>Categoria selecionada</span>
-              <span style="color:var(--verde); font-weight:700;">✓</span>
-            </div>
-            <div style="display:flex; align-items:center; justify-content:space-between; font-size:13px;">
-              <span>Descrição do serviço</span>
-              <span style="color:var(--verde); font-weight:700;">✓</span>
-            </div>
-            <div style="display:flex; align-items:center; justify-content:space-between; font-size:13px;">
-              <span>Fotos cadastradas</span>
-              <span style="color:var(--verde); font-weight:700;">✓</span>
-            </div>
-            <div style="display:flex; align-items:center; justify-content:space-between; font-size:13px;">
-              <span>Valores informados</span>
-              <span style="color:var(--verde); font-weight:700;">✓</span>
-            </div>
-            <div style="display:flex; align-items:center; justify-content:space-between; font-size:13px;">
-              <span>Vídeo cadastrado</span>
-              <span style="color:#d1d5db; font-weight:700;">✗</span>
-            </div>
-            <div style="display:flex; align-items:center; justify-content:space-between; font-size:13px;">
-              <span>Área de atuação</span>
-              <span style="color:#f59e0b; font-weight:700;">⚠</span>
-            </div>
-            <div style="height:6px; background:#f3f4f6; border-radius:10px; margin-top:8px;">
-              <div style="height:100%; width:68%; background:var(--terra); border-radius:10px;"></div>
-            </div>
-            <div style="font-size:12px; color:var(--cinza); text-align:right;">68% completo</div>
-          </div>
-        </div>
+
       </div>
     </div>
 
@@ -549,7 +524,7 @@
         <div class="form-grid">
           <div class="field form-full">
             <label>Nome do negócio / serviço</label>
-            <input type="text" value="DJ Marquinhos Events"/>
+            <input type="text" id="ff-nome" value="DJ Marquinhos Events"/>
           </div>
           <div class="field">
             <label>WhatsApp para contato</label>
@@ -565,7 +540,7 @@
           </div>
           <div class="field form-full">
             <label>Área de atuação</label>
-            <input type="text" value="Maringá, Sarandi, Paiçandu, Marialva e região"/>
+            <input type="text" id="ff-area" value="Maringá, Sarandi, Paiçandu, Marialva e região"/>
           </div>
         </div>
       </div>
@@ -576,7 +551,7 @@
         <div class="form-grid">
           <div class="field">
             <label>Valor mínimo (R$)</label>
-            <input type="text" placeholder="Ex: 800" value="800"/>
+            <input type="text" id="ff-valor" placeholder="Ex: 800" value="800"/>
           </div>
           <div class="field">
             <label>Como informar o valor</label>
@@ -623,59 +598,49 @@
         </div>
       </div>
 
-      <div style="display:flex; justify-content:flex-end; gap:10px;">
-        <button class="btn btn-danger btn-sm">Desativar anúncio</button>
-        <button class="btn btn-terra-sm" onclick="salvar('servico')">💾 Salvar alterações</button>
-      </div>
-    </div>
-
-    <!-- FOTOS -->
-    <div class="tabs" id="tab-fotos">
-      <div class="topbar">
-        <div>
-          <div class="page-title">Fotos e Vídeos</div>
-          <div class="page-sub">Mostre seu trabalho com qualidade</div>
-        </div>
-      </div>
-
+      <!-- FOTOS INCORPORADAS -->
       <div class="card">
         <div class="card-title">📷 Fotos do serviço / portfólio</div>
+        <div style="font-size:12px; color:var(--cinza); margin-bottom:14px;">💡 A primeira foto é a capa do anúncio. Use fotos de eventos reais que você atendeu.</div>
         <div class="upload-area" onclick="document.getElementById('input-fotos').click()">
           <div class="upload-icon">📸</div>
           <div class="upload-title">Clique para adicionar fotos</div>
           <div class="upload-sub">JPG, PNG ou WEBP • Até 10MB cada • Máximo 15 fotos</div>
           <input type="file" id="input-fotos" multiple accept="image/*" style="display:none" onchange="adicionarFotos(this)"/>
         </div>
-        <div class="fotos-grid" id="fotos-grid">
-          <div class="foto-item" style="background:linear-gradient(135deg,#fbd38d,#ed8936);">
-            🎵
-            <span class="foto-principal-badge">Capa</span>
-            <button class="foto-remove">✕</button>
-          </div>
-          <div class="foto-item" style="background:linear-gradient(135deg,#b3e5fc,#4fc3f7);">
-            💡
-            <button class="foto-remove">✕</button>
-          </div>
-          <div class="foto-item" style="background:linear-gradient(135deg,#f8bbd0,#f48fb1);">
-            🎤
-            <button class="foto-remove">✕</button>
+        <div class="fotos-grid" id="fotos-grid" style="margin-top:14px;">
+          <div class="foto-item" id="foto-vazia" style="background:var(--cinza-bg); border:2px dashed var(--cinza-borda); cursor:pointer;" onclick="document.getElementById('input-fotos').click()">
+            <div style="display:flex;flex-direction:column;align-items:center;gap:6px;color:var(--cinza);">
+              <span style="font-size:28px;">📸</span>
+              <span style="font-size:11px;font-weight:600;text-align:center;">Adicionar fotos</span>
+            </div>
           </div>
         </div>
-        <div style="font-size:12px; color:var(--cinza); margin-top:12px;">
-          💡 A primeira foto é a capa do anúncio. Use fotos de eventos reais que você atendeu.
-        </div>
+        <button id="btn-salvar-fotos" class="btn" style="display:none; margin-top:14px; width:100%; justify-content:center; background:var(--terra); color:#fff;" onclick="salvar('fotos')">
+          💾 Salvar fotos
+        </button>
       </div>
 
       <div class="card">
         <div class="card-title">🎬 Vídeo do serviço</div>
         <div class="field">
           <label>Link do vídeo (YouTube ou Instagram)</label>
-          <input type="text" placeholder="https://youtube.com/watch?v=..."/>
+          <input type="text" id="ff-video" placeholder="https://youtube.com/watch?v=..."/>
         </div>
         <div style="font-size:12px; color:var(--cinza); margin-top:4px;">
           Mostre seu trabalho em ação! Um vídeo curto aumenta muito a confiança do cliente.
         </div>
-        <button class="btn btn-terra-sm btn-sm" style="margin-top:16px;" onclick="salvar('video')">Salvar vídeo</button>
+        <button class="btn btn-terra-sm btn-sm" style="margin-top:14px;" onclick="salvar('video')">💾 Salvar vídeo</button>
+      </div>
+
+      <!-- BOTÕES FINAIS -->
+      <div style="display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap;">
+        <button class="btn btn-sm" id="btn-toggle-forn" onclick="toggleAnuncioForn()" style="background:var(--vermelho);color:#fff;">⏸ Pausar anúncio</button>
+        <div style="display:flex; gap:10px;">
+          <button class="btn btn-outline btn-sm" onclick="abrirPreviewForn('pre')">👁️ Pré-visualizar</button>
+          <button class="btn btn-terra-sm" onclick="salvar('servico')">💾 Salvar alterações</button>
+          <button class="btn btn-sm" style="background:var(--terra-escuro);color:#fff;" onclick="abrirPreviewForn('publicado')">🔗 Ver como cliente vê</button>
+        </div>
       </div>
     </div>
 
@@ -711,42 +676,185 @@
     <div class="tabs" id="tab-plano">
       <div class="topbar">
         <div>
-          <div class="page-title">Meu Plano</div>
-          <div class="page-sub">Gerencie sua assinatura</div>
+          <div class="page-title">Minha Conta</div>
+          <div class="page-sub">Informações sobre seu cadastro na plataforma</div>
         </div>
       </div>
+
       <div class="card" style="border:2px solid var(--terra);">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
-          <div class="card-title" style="margin-bottom:0;">🎉 Plano Gratuito — Período de Lançamento</div>
+          <div class="card-title" style="margin-bottom:0;">🎉 Cadastro de Fornecedor</div>
           <span class="status-badge badge-ativo">Ativo</span>
         </div>
         <div style="font-size:14px; color:var(--cinza); margin-bottom:20px; line-height:1.7;">
-          Durante o período de lançamento, seu anúncio é <strong>completamente gratuito</strong>. Cadastre todas as informações e fotos do seu serviço agora!
+          Seu cadastro como fornecedor na plataforma é <strong>completamente gratuito</strong>. Mantenha suas informações atualizadas para aparecer nas buscas dos clientes que estão planejando eventos.
         </div>
-        <div style="background:var(--terra-claro); border-radius:10px; padding:16px; font-size:13px; color:var(--terra-escuro);">
-          📢 Em breve lançaremos o <strong>Plano Pro por R$ 25/mês</strong>, com destaque nas buscas e mais visibilidade. Você será avisado com antecedência.
+        <div style="background:var(--terra-claro); border-radius:10px; padding:16px; font-size:13px; color:var(--terra-escuro); line-height:1.6;">
+          💡 <strong>Como funciona:</strong> seu serviço aparece para clientes que estão alugando chácaras na região. O contato é feito diretamente entre você e o cliente — sem taxas ou comissões para fornecedores.
         </div>
       </div>
-      <div class="card" style="opacity:0.6;">
-        <div class="card-title">🚀 Plano Pro — Em breve</div>
-        <div style="font-size:14px; color:var(--cinza); margin-bottom:16px;">R$ 25/mês • Cancele quando quiser</div>
-        <div style="display:flex; flex-direction:column; gap:10px; font-size:14px;">
-          <div>✅ Destaque na categoria</div>
-          <div>✅ Aparece antes dos anúncios gratuitos</div>
-          <div>✅ Selo "Verificado" no perfil</div>
-          <div>✅ Estatísticas detalhadas</div>
-          <div>✅ Até 15 fotos no portfólio</div>
+
+      <div class="card">
+        <div class="card-title">✅ O que você ganha estando cadastrado</div>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+          <div style="display:flex;gap:10px;align-items:flex-start;font-size:13px;padding:10px;background:var(--cinza-bg);border-radius:8px;"><span>🎯</span><span>Aparece para clientes que já estão planejando eventos em chácaras da região</span></div>
+          <div style="display:flex;gap:10px;align-items:flex-start;font-size:13px;padding:10px;background:var(--cinza-bg);border-radius:8px;"><span>📍</span><span>Listado por categoria e cidade — fácil de encontrar</span></div>
+          <div style="display:flex;gap:10px;align-items:flex-start;font-size:13px;padding:10px;background:var(--cinza-bg);border-radius:8px;"><span>📷</span><span>Portfólio com fotos e vídeos do seu trabalho</span></div>
+          <div style="display:flex;gap:10px;align-items:flex-start;font-size:13px;padding:10px;background:var(--cinza-bg);border-radius:8px;"><span>💬</span><span>Contato direto com o cliente — sem intermediários</span></div>
+          <div style="display:flex;gap:10px;align-items:flex-start;font-size:13px;padding:10px;background:var(--cinza-bg);border-radius:8px;"><span>⭐</span><span>Avaliações de clientes que aumentam sua credibilidade</span></div>
+          <div style="display:flex;gap:10px;align-items:flex-start;font-size:13px;padding:10px;background:var(--cinza-bg);border-radius:8px;"><span>🆓</span><span>Sem mensalidade, sem taxa, sem comissão sobre seus serviços</span></div>
         </div>
-        <button class="btn" style="margin-top:20px; opacity:0.5; cursor:not-allowed; background:#e5e7eb; color:#9ca3af;">Em breve</button>
       </div>
     </div>
 
   </main>
 </div>
 
+<!-- MODAL PREVIEW FORNECEDOR -->
+<div class="modal-overlay" id="modal-preview-forn" onclick="if(event.target===this)fecharPreviewForn()" style="z-index:300;">
+  <div style="background:#fff; border-radius:20px; width:100%; max-width:640px; max-height:90vh; overflow-y:auto; animation:slideUp 0.2s ease; position:relative;">
+    <div style="display:flex; align-items:center; justify-content:space-between; padding:18px 24px; border-bottom:1px solid var(--cinza-borda); position:sticky; top:0; background:#fff; z-index:1; border-radius:20px 20px 0 0;">
+      <div>
+        <div style="font-size:15px; font-weight:700; color:var(--terra-escuro);" class="prev-forn-titulo">👁️ Pré-visualização</div>
+        <div style="font-size:12px; color:var(--cinza); margin-top:2px;" class="prev-forn-sub">Rascunho com alterações ainda não salvas</div>
+      </div>
+      <button onclick="fecharPreviewForn()" style="background:#f3f4f6;border:none;border-radius:8px;width:32px;height:32px;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;">✕</button>
+    </div>
+    <div style="padding:24px;">
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px;">
+        <div id="prev-forn-avatar" style="width:56px;height:56px;border-radius:12px;background:var(--terra-claro);border:2px solid var(--terra);display:flex;align-items:center;justify-content:center;font-size:28px;flex-shrink:0;">🎵</div>
+        <div>
+          <div style="font-size:11px;font-weight:700;color:var(--terra);text-transform:uppercase;letter-spacing:1px;margin-bottom:3px;" id="prev-forn-cat">—</div>
+          <div style="font-family:'Fraunces',serif;font-size:20px;color:var(--terra-escuro);line-height:1.2;" id="prev-forn-nome">—</div>
+          <div style="color:var(--cinza);font-size:12px;margin-top:2px;" id="prev-forn-local">📍 —</div>
+        </div>
+      </div>
+      <div style="margin-bottom:18px;">
+        <div style="font-size:15px;font-weight:700;color:var(--terra-escuro);margin-bottom:8px;">Sobre o serviço</div>
+        <div style="font-size:13px;color:#374151;line-height:1.7;" id="prev-forn-desc">—</div>
+      </div>
+      <hr style="border:none;border-top:1px solid var(--cinza-borda);margin-bottom:18px;"/>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:18px;">
+        <div style="background:var(--cinza-bg);border-radius:10px;padding:12px;">
+          <div style="font-size:11px;color:var(--cinza);font-weight:600;text-transform:uppercase;margin-bottom:4px;">Valor</div>
+          <div style="font-family:'Fraunces',serif;font-size:20px;color:var(--terra-escuro);font-weight:700;" id="prev-forn-valor">R$ —</div>
+        </div>
+        <div style="background:var(--cinza-bg);border-radius:10px;padding:12px;">
+          <div style="font-size:11px;color:var(--cinza);font-weight:600;text-transform:uppercase;margin-bottom:4px;">Pagamento</div>
+          <div style="font-size:13px;font-weight:600;" id="prev-forn-pagamento">—</div>
+        </div>
+        <div style="background:var(--cinza-bg);border-radius:10px;padding:12px;">
+          <div style="font-size:11px;color:var(--cinza);font-weight:600;text-transform:uppercase;margin-bottom:4px;">Antecedência</div>
+          <div style="font-size:13px;font-weight:600;" id="prev-forn-antec">—</div>
+        </div>
+        <div style="background:var(--cinza-bg);border-radius:10px;padding:12px;">
+          <div style="font-size:11px;color:var(--cinza);font-weight:600;text-transform:uppercase;margin-bottom:4px;">Área de atuação</div>
+          <div style="font-size:13px;font-weight:600;" id="prev-forn-area">—</div>
+        </div>
+      </div>
+      <hr style="border:none;border-top:1px solid var(--cinza-borda);margin-bottom:18px;"/>
+      <div style="margin-bottom:18px;">
+        <div style="font-size:15px;font-weight:700;color:var(--terra-escuro);margin-bottom:10px;">Diferenciais</div>
+        <div id="prev-forn-diferenciais" style="display:flex;flex-wrap:wrap;gap:8px;"></div>
+      </div>
+
+      <div style="background:var(--terra-claro);border:1.5px solid var(--terra);border-radius:12px;padding:16px;text-align:center;">
+        <div style="background:var(--terra);color:#fff;border-radius:8px;padding:11px;font-size:14px;font-weight:700;">💬 Entrar em contato</div>
+        <div style="font-size:11px;color:var(--cinza);margin-top:8px;">Contato direto — sem taxas para o cliente</div>
+      </div>
+    </div>
+    <div style="padding:14px 24px;border-top:1px solid var(--cinza-borda);display:flex;justify-content:flex-end;position:sticky;bottom:0;background:#fff;border-radius:0 0 20px 20px;">
+      <button onclick="fecharPreviewForn()" class="btn btn-sm" style="background:var(--terra);color:#fff;">✕ Fechar</button>
+    </div>
+  </div>
+</div>
+
 <div class="toast" id="toast"></div>
 
 <script>
+  // PREVIEW FORNECEDOR
+  function abrirPreviewForn(modo) {
+    // Coletar dados pelos IDs
+    const nome  = document.getElementById('ff-nome')?.value || 'Nome do serviço';
+    const area  = document.getElementById('ff-area')?.value || 'Não informada';
+    const valor = document.getElementById('ff-valor')?.value || '';
+    const desc  = document.querySelector('#tab-meu-servico textarea')?.value || 'Descrição não preenchida.';
+
+    // Categoria
+    const catEl = document.getElementById('select-categoria');
+    const cat   = catEl ? catEl.options[catEl.selectedIndex]?.text : '—';
+
+    // Pagamento e antecedência
+    const selects = document.querySelectorAll('#tab-meu-servico select');
+    const pagamento  = selects[1] ? selects[1].options[selects[1].selectedIndex]?.text : '—';
+    const antec = document.querySelectorAll('#tab-meu-servico input[type="text"]')[4]?.value || '—';
+
+    // Preencher preview
+    document.getElementById('prev-forn-nome').textContent  = nome;
+    document.getElementById('prev-forn-cat').textContent   = cat;
+    document.getElementById('prev-forn-local').textContent = '📍 ' + area;
+    document.getElementById('prev-forn-desc').textContent  = desc;
+    document.getElementById('prev-forn-valor').textContent = valor ? 'R$ ' + Number(valor).toLocaleString('pt-BR') : 'Sob consulta';
+    document.getElementById('prev-forn-pagamento').textContent = pagamento;
+    document.getElementById('prev-forn-antec').textContent = antec || '—';
+    document.getElementById('prev-forn-area').textContent  = area;
+
+    // Diferenciais selecionados
+    const difs = [];
+    document.querySelectorAll('.tag-check.selecionado').forEach(t => difs.push(t.textContent.trim()));
+    const divDif = document.getElementById('prev-forn-diferenciais');
+    divDif.innerHTML = difs.length
+      ? difs.map(d => `<span style="background:var(--terra-claro);color:var(--terra-escuro);padding:5px 12px;border-radius:20px;font-size:12px;font-weight:600;">${d}</span>`).join('')
+      : '<span style="font-size:13px;color:var(--cinza);">Nenhum diferencial selecionado.</span>';
+
+    // Foto no avatar
+    const primeiraFoto = document.querySelector('#fotos-grid .foto-item:not(#foto-vazia) img');
+    const avatar = document.getElementById('prev-forn-avatar');
+    if (primeiraFoto) {
+      avatar.innerHTML = `<img src="${primeiraFoto.src}" style="width:100%;height:100%;object-fit:cover;border-radius:10px;"/>`;
+      avatar.style.fontSize = '0';
+    } else {
+      avatar.textContent = '🎵';
+      avatar.style.fontSize = '28px';
+    }
+
+    // Título do modal
+    const titulo = document.querySelector('.prev-forn-titulo');
+    const sub    = document.querySelector('.prev-forn-sub');
+    if (modo === 'publicado') {
+      if (titulo) titulo.textContent = '🔗 Ver como o cliente vê';
+      if (sub)    sub.textContent    = 'Visualização do anúncio com as alterações salvas';
+    } else {
+      if (titulo) titulo.textContent = '👁️ Pré-visualização';
+      if (sub)    sub.textContent    = 'Rascunho com alterações ainda não salvas';
+    }
+
+    document.getElementById('modal-preview-forn').classList.add('open');
+  }
+
+  function fecharPreviewForn() {
+    document.getElementById('modal-preview-forn').classList.remove('open');
+  }
+
+  // TOGGLE ANÚNCIO FORNECEDOR
+  let anuncioFornAtivo = true;
+
+  function toggleAnuncioForn() {
+    anuncioFornAtivo = !anuncioFornAtivo;
+    const btns = [document.getElementById('btn-toggle-forn'), document.getElementById('btn-toggle-forn-vg')].filter(Boolean);
+    const badge = document.getElementById('badge-status-forn');
+
+    if (anuncioFornAtivo) {
+      btns.forEach(b => { b.textContent = '⏸ Pausar anúncio'; b.style.background = 'var(--vermelho)'; });
+      if (badge) { badge.className = 'status-badge badge-ativo'; badge.textContent = 'Anúncio ativo'; }
+      mostrarToast('✅ Anúncio reativado! Já aparece nas buscas.');
+    } else {
+      btns.forEach(b => { b.textContent = '▶ Publicar anúncio'; b.style.background = 'var(--verde)'; });
+      if (badge) { badge.className = 'status-badge badge-inativo'; badge.textContent = 'Anúncio pausado'; }
+      mostrarToast('⏸ Anúncio pausado. Clique em "Publicar anúncio" para reativar.');
+    }
+  }
+
   function fazerLogin() {
     document.getElementById('login-page').style.display = 'none';
     document.getElementById('painel').classList.add('ativo');
@@ -762,6 +870,7 @@
     document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('ativo'));
     document.getElementById('tab-' + id).classList.add('ativo');
     if (btn) btn.classList.add('ativo');
+    if (id === 'meu-servico') inicializarTags();
   }
 
   function selecionarCat(el) {
@@ -773,30 +882,79 @@
     el.querySelector('.cat-check').textContent = '✓';
   }
 
-  document.addEventListener('click', function(e) {
-    const tag = e.target.closest('.tag-check');
-    if (tag) tag.classList.toggle('selecionado');
-  });
+  function inicializarTags() {
+    document.querySelectorAll('.tag-check').forEach(function(label) {
+      const checkbox = label.querySelector('input[type="checkbox"]');
+      if (!checkbox) return;
+      if (checkbox.checked) label.classList.add('selecionado');
+      else label.classList.remove('selecionado');
+      checkbox.addEventListener('change', function() {
+        if (this.checked) label.classList.add('selecionado');
+        else label.classList.remove('selecionado');
+      });
+    });
+  }
+  document.addEventListener('DOMContentLoaded', inicializarTags);
 
   function adicionarFotos(input) {
     const grid = document.getElementById('fotos-grid');
     Array.from(input.files).forEach(file => {
       const reader = new FileReader();
       reader.onload = function(ev) {
+        if (document.getElementById('foto-vazia')) document.getElementById('foto-vazia').remove();
         const div = document.createElement('div');
         div.className = 'foto-item';
-        div.style.background = '#eee';
-        div.innerHTML = `<img src="${ev.target.result}" style="width:100%;height:100%;object-fit:cover;"/><button class="foto-remove" onclick="this.parentElement.remove()">✕</button>`;
-        grid.appendChild(div);
+        div.innerHTML = `<img src="${ev.target.result}" style="width:100%;height:100%;object-fit:cover;border-radius:10px;"/><button class="foto-remove" onclick="removerFotoForn(this)">✕</button>`;
+        const vazioAtual = document.getElementById('foto-vazia');
+        if (vazioAtual) grid.insertBefore(div, vazioAtual);
+        else grid.appendChild(div);
+        if (!document.getElementById('foto-vazia')) {
+          const novoVazio = document.createElement('div');
+          novoVazio.className = 'foto-item';
+          novoVazio.id = 'foto-vazia';
+          novoVazio.style.cssText = 'background:var(--cinza-bg);border:2px dashed var(--cinza-borda);cursor:pointer;';
+          novoVazio.onclick = () => document.getElementById('input-fotos').click();
+          novoVazio.innerHTML = '<div style="display:flex;flex-direction:column;align-items:center;gap:6px;color:var(--cinza);"><span style="font-size:28px;">📸</span><span style="font-size:11px;font-weight:600;text-align:center;">Mais fotos</span></div>';
+          grid.appendChild(novoVazio);
+        }
+        atualizarBadgeCapa();
+        const btnSalvar = document.getElementById('btn-salvar-fotos');
+        if (btnSalvar) btnSalvar.style.display = 'flex';
       };
       reader.readAsDataURL(file);
     });
     input.value = '';
   }
 
+  function removerFotoForn(btn) {
+    btn.parentElement.remove();
+    atualizarBadgeCapa();
+    const total = document.querySelectorAll('#fotos-grid .foto-item:not(#foto-vazia)').length;
+    if (total === 0) {
+      const grid = document.getElementById('fotos-grid');
+      if (!document.getElementById('foto-vazia')) {
+        grid.innerHTML = `<div class="foto-item" id="foto-vazia" style="background:var(--cinza-bg);border:2px dashed var(--cinza-borda);cursor:pointer;" onclick="document.getElementById('input-fotos').click()"><div style="display:flex;flex-direction:column;align-items:center;gap:6px;color:var(--cinza);"><span style="font-size:28px;">📸</span><span style="font-size:11px;font-weight:600;text-align:center;">Adicionar fotos</span></div></div>`;
+      }
+      const btnSalvar = document.getElementById('btn-salvar-fotos');
+      if (btnSalvar) btnSalvar.style.display = 'none';
+    }
+  }
+
+  function atualizarBadgeCapa() {
+    document.querySelectorAll('.foto-principal-badge').forEach(b => b.remove());
+    const primeira = document.querySelector('#fotos-grid .foto-item:not(#foto-vazia)');
+    if (primeira) {
+      const badge = document.createElement('span');
+      badge.className = 'foto-principal-badge';
+      badge.textContent = 'Capa';
+      primeira.appendChild(badge);
+    }
+  }
+
   function salvar(tipo) {
     const msgs = {
       servico: '✅ Serviço salvo com sucesso!',
+      fotos: '✅ Fotos salvas!',
       video: '✅ Vídeo salvo!',
       config: '✅ Configurações salvas!',
       senha: '✅ Senha alterada!'

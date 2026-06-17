@@ -591,7 +591,7 @@
     <button class="btn btn-verde" onclick="fazerLogin()" style="margin-top:8px;">Entrar no painel</button>
 
     <div class="login-hint">
-      Ainda não tem conta? <a onclick="mostrarCadastro()">Cadastre-se grátis</a>
+      Ainda não tem conta? <a href="index.html#anuncie" style="color:var(--verde);font-weight:600;">Cadastre-se</a>
     </div>
 
     <div style="margin-top:20px; padding:12px; background:var(--verde-claro); border-radius:8px; font-size:12px; color:var(--verde-escuro); text-align:center;">
@@ -613,16 +613,13 @@
     </button>
     <button class="nav-item" onclick="mostrarTab('reservas', this)" style="position:relative;">
       <span class="nav-icon">🔔</span> Reservas
-      <span style="background:#ef4444;color:#fff;border-radius:20px;padding:1px 7px;font-size:10px;font-weight:700;margin-left:auto;">2</span>
+      <span id="badge-reservas" style="background:#ef4444;color:#fff;border-radius:20px;padding:1px 7px;font-size:10px;font-weight:700;margin-left:auto;">2</span>
     </button>
     <button class="nav-item" onclick="mostrarTab('financeiro', this)">
       <span class="nav-icon">💰</span> Financeiro
     </button>
     <button class="nav-item" onclick="mostrarTab('minha-chacara', this)">
       <span class="nav-icon">🏡</span> Minha Chácara
-    </button>
-    <button class="nav-item" onclick="mostrarTab('fotos', this)">
-      <span class="nav-icon">📷</span> Fotos e Vídeos
     </button>
     <button class="nav-item" onclick="mostrarTab('calendario', this)">
       <span class="nav-icon">📅</span> Disponibilidade
@@ -660,7 +657,7 @@
           <div class="page-title">Visão Geral</div>
           <div class="page-sub">Acompanhe o desempenho do seu anúncio</div>
         </div>
-        <span class="status-badge badge-ativo">Anúncio ativo</span>
+        <span class="status-badge badge-ativo" id="badge-status-anuncio">Anúncio ativo</span>
       </div>
 
       <div class="stats-grid">
@@ -671,8 +668,8 @@
         </div>
         <div class="stat-card" style="border:1.5px solid #f59e0b; cursor:pointer;" onclick="mostrarTab('reservas', document.querySelectorAll('.nav-item')[2])">
           <div class="stat-label">⏳ Aguardando resposta</div>
-          <div class="stat-value" style="color:#92400e;">2</div>
-          <span class="stat-tag tag-amarelo">responda já!</span>
+          <div class="stat-value" style="color:#92400e;" id="stat-pendentes">2</div>
+          <span class="stat-tag tag-amarelo" id="stat-pendentes-tag">responda já!</span>
         </div>
         <div class="stat-card">
           <div class="stat-label">Reservas confirmadas</div>
@@ -687,11 +684,11 @@
       </div>
 
       <!-- ALERTA RESERVAS PENDENTES -->
-      <div style="background:#fffbeb; border:1.5px solid #f59e0b; border-radius:12px; padding:16px 20px; margin-bottom:20px; display:flex; align-items:center; justify-content:space-between; gap:16px; animation:piscar-borda 1.5s ease-in-out infinite;">
+      <div id="alerta-pendentes" style="background:#fffbeb; border:1.5px solid #f59e0b; border-radius:12px; padding:16px 20px; margin-bottom:20px; display:flex; align-items:center; justify-content:space-between; gap:16px; animation:piscar-borda 1.5s ease-in-out infinite;">
         <div style="display:flex; align-items:center; gap:12px;">
           <span style="font-size:28px;">🔔</span>
           <div>
-            <div style="font-weight:700; font-size:14px; color:#92400e;">Você tem 2 solicitações de reserva aguardando resposta</div>
+            <div style="font-weight:700; font-size:14px; color:#92400e;" id="alerta-texto">Você tem 2 solicitações de reserva aguardando resposta</div>
             <div style="font-size:12px; color:#b45309; margin-top:2px;">Responda em até 24h para não perder a reserva.</div>
           </div>
         </div>
@@ -714,9 +711,10 @@
               <div class="preview-preco">a partir de <strong>R$ 1.200</strong>/dia</div>
             </div>
           </div>
-          <div style="display:flex; gap:10px; margin-top:16px;">
-            <button class="btn btn-outline btn-sm" onclick="mostrarTab('minha-chacara', document.querySelector('.nav-item:nth-child(4))'))">✏️ Editar anúncio</button>
+          <div style="display:flex; gap:10px; margin-top:16px; flex-wrap:wrap;">
+            <button class="btn btn-outline btn-sm" onclick="mostrarTab('minha-chacara', document.querySelectorAll('.nav-item')[4])">✏️ Editar anúncio</button>
             <button class="btn btn-outline btn-sm" onclick="mostrarTab('calendario', null)">📅 Ver calendário</button>
+            <button class="btn btn-sm" id="btn-toggle-anuncio-visao" onclick="toggleAnuncio()" style="background:var(--vermelho);color:#fff;margin-left:auto;">⏸ Pausar anúncio</button>
           </div>
         </div>
 
@@ -771,7 +769,7 @@
       </div>
 
       <!-- PENDENTES -->
-      <div style="font-size:12px; font-weight:700; color:var(--cinza); text-transform:uppercase; letter-spacing:0.5px; margin-bottom:12px;">⏳ Aguardando sua resposta (2)</div>
+      <div style="font-size:12px; font-weight:700; color:var(--cinza); text-transform:uppercase; letter-spacing:0.5px; margin-bottom:12px;" id="titulo-pendentes">⏳ Aguardando sua resposta (2)</div>
 
       <div class="reserva-card pendente" id="reserva-1">
         <div class="reserva-header">
@@ -985,8 +983,102 @@
       </div>
     </div>
 
+    <!-- MODAL PRÉ-VISUALIZAÇÃO -->
+    <div class="modal-overlay" id="modal-preview" onclick="if(event.target===this)fecharPreview()" style="z-index:300;">
+      <div style="background:#fff; border-radius:20px; width:100%; max-width:720px; max-height:90vh; overflow-y:auto; animation:slideUp 0.2s ease; position:relative;">
+
+        <!-- Header do modal -->
+        <div style="display:flex; align-items:center; justify-content:space-between; padding:20px 28px; border-bottom:1px solid var(--cinza-borda); position:sticky; top:0; background:#fff; z-index:1; border-radius:20px 20px 0 0;">
+          <div>
+            <div style="font-size:16px; font-weight:700; color:var(--verde-escuro);" class="modal-titulo-texto">👁️ Pré-visualização do anúncio</div>
+            <div style="font-size:12px; color:var(--cinza); margin-top:2px;" class="modal-sub-texto">Assim seu anúncio aparece para os clientes</div>
+          </div>
+          <button onclick="fecharPreview()" style="background:#f3f4f6;border:none;border-radius:8px;width:32px;height:32px;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;">✕</button>
+        </div>
+
+        <!-- Conteúdo do preview -->
+        <div style="padding:28px;">
+
+          <!-- Foto placeholder -->
+          <div id="prev-foto" style="width:100%; height:200px; background:linear-gradient(135deg,#c8e6c9,#81c784); border-radius:14px; display:flex; align-items:center; justify-content:center; font-size:80px; margin-bottom:20px; position:relative;">
+            🏡
+            <div style="position:absolute; bottom:12px; right:12px; background:rgba(0,0,0,0.55); color:#fff; font-size:12px; padding:4px 12px; border-radius:20px; font-weight:600;">📷 Suas fotos aparecerão aqui</div>
+          </div>
+
+          <!-- Header info -->
+          <div style="margin-bottom:16px;">
+            <div style="font-size:13px; color:var(--cinza); margin-bottom:6px;">📍 <span id="prev-cidade">—</span></div>
+            <div style="font-family:'Fraunces',serif; font-size:28px; color:var(--verde-escuro); margin-bottom:8px; line-height:1.2;" id="prev-nome">Nome da chácara</div>
+            <div style="display:flex; align-items:center; gap:6px;">
+              <span style="color:#f59e0b; font-size:14px;">★★★★★</span>
+              <span style="font-size:13px; color:var(--cinza);">Novo anúncio</span>
+            </div>
+          </div>
+
+          <!-- Tags rápidas -->
+          <div id="prev-tags" style="display:flex; flex-wrap:wrap; gap:8px; margin-bottom:20px;"></div>
+
+          <hr style="border:none; border-top:1px solid var(--cinza-borda); margin-bottom:20px;"/>
+
+          <!-- Descrição -->
+          <div style="margin-bottom:20px;">
+            <div style="font-size:16px; font-weight:700; color:var(--verde-escuro); margin-bottom:10px;">Sobre a chácara</div>
+            <div id="prev-desc" style="font-size:14px; color:#374151; line-height:1.8;">—</div>
+          </div>
+
+          <hr style="border:none; border-top:1px solid var(--cinza-borda); margin-bottom:20px;"/>
+
+          <!-- Estrutura -->
+          <div style="margin-bottom:20px;">
+            <div style="font-size:16px; font-weight:700; color:var(--verde-escuro); margin-bottom:12px;">Estrutura e comodidades</div>
+            <div id="prev-estrutura" style="display:grid; grid-template-columns: repeat(3,1fr); gap:10px;"></div>
+          </div>
+
+          <hr style="border:none; border-top:1px solid var(--cinza-borda); margin-bottom:20px;"/>
+
+          <!-- Tipos de evento -->
+          <div style="margin-bottom:20px;">
+            <div style="font-size:16px; font-weight:700; color:var(--verde-escuro); margin-bottom:12px;">Tipos de evento aceitos</div>
+            <div id="prev-eventos" style="display:flex; flex-wrap:wrap; gap:8px;"></div>
+          </div>
+
+          <hr style="border:none; border-top:1px solid var(--cinza-borda); margin-bottom:20px;"/>
+
+          <!-- Card de reserva simulado -->
+          <div style="background:var(--verde-claro); border:1.5px solid var(--verde); border-radius:14px; padding:20px;">
+            <div style="font-size:13px; color:var(--cinza); margin-bottom:6px;">A partir de</div>
+            <div style="display:flex; align-items:baseline; gap:4px; margin-bottom:14px;">
+              <span style="font-family:'Fraunces',serif; font-size:32px; color:var(--verde-escuro); font-weight:700;" id="prev-valor">R$ —</span>
+              <span style="font-size:14px; color:var(--cinza);">/dia</span>
+            </div>
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:14px;">
+              <div style="background:#fff; border-radius:8px; padding:10px; font-size:12px;">
+                <div style="color:var(--cinza); margin-bottom:2px;">Capacidade</div>
+                <div style="font-weight:700;" id="prev-cap">— pessoas</div>
+              </div>
+              <div style="background:#fff; border-radius:8px; padding:10px; font-size:12px;">
+                <div style="color:var(--cinza); margin-bottom:2px;">Check-in</div>
+                <div style="font-weight:700;">A combinar</div>
+              </div>
+            </div>
+            <div style="background:var(--verde-escuro); color:#fff; border:none; border-radius:10px; padding:13px; font-size:14px; font-weight:700; text-align:center;">
+              📅 Solicitar reserva
+            </div>
+            <div style="font-size:11px; color:var(--verde); text-align:center; margin-top:10px;">🔒 Endereço liberado somente após pagamento</div>
+          </div>
+
+        </div>
+
+        <!-- Footer -->
+        <div style="padding:16px 28px; border-top:1px solid var(--cinza-borda); display:flex; justify-content:flex-end; gap:10px; position:sticky; bottom:0; background:#fff; border-radius:0 0 20px 20px;">
+          <button onclick="fecharPreview()" class="btn btn-verde btn-sm">✕ Fechar</button>
+        </div>
+
+      </div>
+    </div>
+
     <!-- MODAL RECUSAR -->
-    <div class="modal-overlay" id="modal-recusar" onclick="fecharModal(event)">
+    <div class="modal-overlay" id="modal-recusar" onclick="if(event.target===this)fecharModalRecusar()">
       <div class="modal">
         <div class="modal-titulo">Recusar solicitação</div>
         <div class="modal-sub">O cliente será notificado. Informe o motivo para ajudá-lo a entender.</div>
@@ -1006,7 +1098,7 @@
         </div>
         <textarea id="motivo-texto" placeholder="Mensagem adicional para o cliente (opcional)..." style="width:100%;border:1.5px solid var(--cinza-borda);border-radius:8px;padding:10px;font-family:'Inter',sans-serif;font-size:13px;resize:none;height:70px;outline:none;margin-bottom:16px;"></textarea>
         <div style="display:flex; gap:10px; justify-content:flex-end;">
-          <button onclick="document.getElementById('modal-recusar').classList.remove('open')" style="background:#f3f4f6;border:none;border-radius:8px;padding:10px 18px;font-size:13px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif;">Cancelar</button>
+          <button onclick="fecharModalRecusar()" style="background:#f3f4f6;border:none;border-radius:8px;padding:10px 18px;font-size:13px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif;">Cancelar</button>
           <button onclick="recusarConfirmado()" style="background:var(--vermelho);color:#fff;border:none;border-radius:8px;padding:10px 18px;font-size:13px;font-weight:700;cursor:pointer;font-family:'Inter',sans-serif;">Confirmar recusa</button>
         </div>
       </div>
@@ -1078,7 +1170,6 @@
               <div>✅ <strong>Descreva a experiência:</strong> ex. "Ideal para reunir família e amigos num ambiente tranquilo e arborizado"</div>
               <div>✅ Mencione <strong>o que está incluso</strong> no valor (mesas, cadeiras, etc.)</div>
               <div>✅ Informe <strong>o que não está incluso</strong> para evitar surpresas</div>
-              <div>✅ Adicione o <strong>link do Google Maps</strong> ou endereço completo</div>
             </div>
           </div>
 
@@ -1094,15 +1185,15 @@
         <div class="form-grid">
           <div class="field form-full">
             <label>Nome da chácara</label>
-            <input type="text" value="Chácara das Palmeiras"/>
+            <input type="text" id="f-nome" value="Chácara das Palmeiras"/>
           </div>
           <div class="field">
             <label>Cidade</label>
-            <input type="text" value="Maringá"/>
+            <input type="text" id="f-cidade" value="Maringá"/>
           </div>
           <div class="field">
             <label>Bairro / Localidade</label>
-            <input type="text" value="Zona Rural"/>
+            <input type="text" id="f-bairro" value="Zona Rural"/>
           </div>
           <div class="field">
             <label>WhatsApp para contato</label>
@@ -1124,15 +1215,15 @@
         <div class="form-3">
           <div class="field">
             <label>Capacidade máxima (pessoas)</label>
-            <input type="number" value="150"/>
+            <input type="number" id="f-capacidade" value="150"/>
           </div>
           <div class="field">
             <label>Valor diária (R$)</label>
-            <input type="number" value="1200"/>
+            <input type="number" id="f-diaria" value="1200"/>
           </div>
           <div class="field">
             <label>Valor fim de semana (R$)</label>
-            <input type="number" value="1800"/>
+            <input type="number" id="f-fds" value="1800"/>
           </div>
         </div>
         <div class="form-grid" style="margin-top:16px;">
@@ -1150,6 +1241,7 @@
 
       <div class="card">
         <div class="card-title">🏗️ Estrutura e comodidades</div>
+        <div style="font-size:12px;color:var(--cinza);margin-bottom:12px;">Clique para marcar ou desmarcar as comodidades da sua chácara.</div>
         <div class="tags-grid" id="tags-estrutura">
           <label class="tag-check selecionado"><input type="checkbox" checked/> 🏊 Piscina</label>
           <label class="tag-check selecionado"><input type="checkbox" checked/> 🍖 Churrasqueira</label>
@@ -1172,7 +1264,8 @@
 
       <div class="card">
         <div class="card-title">🎉 Tipos de evento aceitos</div>
-        <div class="tags-grid">
+        <div style="font-size:12px;color:var(--cinza);margin-bottom:12px;">Clique para marcar os tipos de evento que sua chácara aceita.</div>
+        <div class="tags-grid" id="tags-eventos">
           <label class="tag-check selecionado"><input type="checkbox" checked/> 🎂 Aniversários</label>
           <label class="tag-check selecionado"><input type="checkbox" checked/> 💒 Casamentos</label>
           <label class="tag-check selecionado"><input type="checkbox" checked/> 🤝 Confraternizações</label>
@@ -1184,23 +1277,10 @@
         </div>
       </div>
 
-      <div style="display:flex; justify-content:flex-end; gap:10px;">
-        <button class="btn btn-danger btn-sm">Desativar anúncio</button>
-        <button class="btn btn-verde" onclick="salvar('anuncio')">💾 Salvar alterações</button>
-      </div>
-    </div>
-
-    <!-- FOTOS -->
-    <div class="tabs" id="tab-fotos">
-      <div class="topbar">
-        <div>
-          <div class="page-title">Fotos e Vídeos</div>
-          <div class="page-sub">Boas fotos aumentam muito as chances de contato</div>
-        </div>
-      </div>
-
+      <!-- FOTOS E VÍDEOS INCORPORADOS -->
       <div class="card">
         <div class="card-title">📷 Fotos da chácara</div>
+        <div style="font-size:12px; color:var(--cinza); margin-bottom:14px;">💡 A primeira foto é a principal e aparece como capa do anúncio. Mínimo recomendado: 8 fotos.</div>
 
         <div class="upload-area" onclick="document.getElementById('input-fotos').click()">
           <div class="upload-icon">📸</div>
@@ -1209,41 +1289,45 @@
           <input type="file" id="input-fotos" multiple accept="image/*" style="display:none" onchange="adicionarFotos(this)"/>
         </div>
 
-        <div class="fotos-grid" id="fotos-grid">
-          <div class="foto-item" style="background:linear-gradient(135deg,#c8e6c9,#81c784);">
-            🏡
-            <span class="foto-principal-badge">Principal</span>
-            <button class="foto-remove">✕</button>
-          </div>
-          <div class="foto-item" style="background:linear-gradient(135deg,#b3e5fc,#4fc3f7);">
-            🏊
-            <button class="foto-remove">✕</button>
-          </div>
-          <div class="foto-item" style="background:linear-gradient(135deg,#ffe0b2,#ffb74d);">
-            🍖
-            <button class="foto-remove">✕</button>
-          </div>
-          <div class="foto-item" style="background:linear-gradient(135deg,#f8bbd0,#f48fb1);">
-            ⚽
-            <button class="foto-remove">✕</button>
+        <div class="fotos-grid" id="fotos-grid" style="margin-top:14px;">
+          <div class="foto-item" id="foto-vazia" style="background:var(--cinza-bg); border:2px dashed var(--cinza-borda); cursor:pointer;" onclick="document.getElementById('input-fotos').click()">
+            <div style="display:flex;flex-direction:column;align-items:center;gap:6px;color:var(--cinza);">
+              <span style="font-size:28px;">📸</span>
+              <span style="font-size:11px;font-weight:600;text-align:center;">Adicionar fotos</span>
+            </div>
           </div>
         </div>
 
-        <div style="font-size:12px; color:var(--cinza); margin-top:12px;">
-          💡 A primeira foto é a principal e aparece como capa do anúncio. Arraste para reordenar.
-        </div>
+        <button id="btn-salvar-fotos" class="btn btn-verde" style="display:none; margin-top:14px; width:100%; justify-content:center;" onclick="salvar('fotos')">
+          💾 Salvar fotos
+        </button>
       </div>
 
       <div class="card">
         <div class="card-title">🎬 Vídeo da chácara</div>
         <div class="field">
           <label>Link do vídeo (YouTube ou Instagram)</label>
-          <input type="text" placeholder="https://youtube.com/watch?v=..."/>
+          <input type="text" id="input-video" placeholder="https://youtube.com/watch?v=..."/>
         </div>
         <div style="font-size:12px; color:var(--cinza); margin-top:4px;">
           Anúncios com vídeo recebem 3x mais contatos. Cole o link do YouTube ou Instagram.
         </div>
-        <button class="btn btn-verde btn-sm" style="margin-top:16px;" onclick="salvar('video')">Salvar vídeo</button>
+        <button class="btn btn-verde btn-sm" style="margin-top:14px;" onclick="salvar('video')">💾 Salvar vídeo</button>
+      </div>
+
+      <!-- BOTÕES FINAIS -->
+      <div id="aviso-pausado" style="display:none; background:#fee2e2; border:1.5px solid #dc2626; border-radius:10px; padding:12px 16px; margin-bottom:14px; font-size:13px; color:#991b1b; display:none; align-items:center; gap:10px;">
+        <span style="font-size:20px;">⏸</span>
+        <div><strong>Anúncio pausado.</strong> Seu anúncio está fora do ar e não aparece nas buscas. Clique em "Publicar anúncio" para reativar.</div>
+      </div>
+
+      <div style="display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap;">
+        <button class="btn btn-danger btn-sm" id="btn-toggle-anuncio" onclick="toggleAnuncio()">⏸ Pausar anúncio</button>
+        <div style="display:flex; gap:10px;">
+          <button class="btn btn-outline" onclick="abrirPreview('pre')">👁️ Pré-visualizar</button>
+          <button class="btn btn-verde" onclick="salvar('anuncio')">💾 Salvar alterações</button>
+          <button class="btn" style="background:var(--terra);color:#fff;" onclick="abrirPreview('publicado')">🔗 Ver como cliente vê</button>
+        </div>
       </div>
     </div>
 
@@ -1499,7 +1583,7 @@
   }
 
   function mostrarCadastro() {
-    mostrarToast('Cadastro será implementado em breve!');
+    mostrarToast('Para se cadastrar, acesse AluguelDeChácaras.com.br e clique em Anunciar.');
   }
 
   // TABS
@@ -1509,29 +1593,111 @@
     document.getElementById('tab-' + id).classList.add('ativo');
     if (btn) btn.classList.add('ativo');
     if (id === 'calendario') renderCalendario();
+    if (id === 'minha-chacara') inicializarTags();
   }
 
-  // TAGS CLICÁVEIS
-  document.addEventListener('click', function(e) {
-    const tag = e.target.closest('.tag-check');
-    if (tag) tag.classList.toggle('selecionado');
-  });
+  // TAGS CLICÁVEIS — inicializar e vincular diretamente cada checkbox
+  function inicializarTags() {
+    document.querySelectorAll('.tag-check').forEach(function(label) {
+      const checkbox = label.querySelector('input[type="checkbox"]');
+      if (!checkbox) return;
+
+      // Sincronizar estado visual com o checkbox
+      if (checkbox.checked) {
+        label.classList.add('selecionado');
+      } else {
+        label.classList.remove('selecionado');
+      }
+
+      // Ao mudar o checkbox, atualizar visual
+      checkbox.addEventListener('change', function() {
+        if (this.checked) {
+          label.classList.add('selecionado');
+        } else {
+          label.classList.remove('selecionado');
+        }
+      });
+    });
+  }
+
+  // Chamar ao carregar e ao trocar de aba
+  document.addEventListener('DOMContentLoaded', inicializarTags);
 
   // FOTOS
   function adicionarFotos(input) {
     const grid = document.getElementById('fotos-grid');
-    Array.from(input.files).forEach((file, i) => {
+    const vazio = document.getElementById('foto-vazia');
+
+    Array.from(input.files).forEach((file) => {
       const reader = new FileReader();
       reader.onload = function(ev) {
+        // Remover card vazio se existir
+        if (document.getElementById('foto-vazia')) {
+          document.getElementById('foto-vazia').remove();
+        }
+
         const div = document.createElement('div');
         div.className = 'foto-item';
-        div.style.background = '#eee';
-        div.innerHTML = `<img src="${ev.target.result}" style="width:100%;height:100%;object-fit:cover;"/><button class="foto-remove" onclick="this.parentElement.remove()">✕</button>`;
-        grid.appendChild(div);
+        div.innerHTML = `<img src="${ev.target.result}" style="width:100%;height:100%;object-fit:cover;border-radius:10px;"/><button class="foto-remove" onclick="removerFoto(this)">✕</button>`;
+
+        // Inserir antes do card vazio se ainda existir, senão append
+        const vazioAtual = document.getElementById('foto-vazia');
+        if (vazioAtual) {
+          grid.insertBefore(div, vazioAtual);
+        } else {
+          grid.appendChild(div);
+        }
+
+        // Adicionar card vazio de volta no final se não existir
+        if (!document.getElementById('foto-vazia')) {
+          const novoVazio = document.createElement('div');
+          novoVazio.className = 'foto-item';
+          novoVazio.id = 'foto-vazia';
+          novoVazio.style.cssText = 'background:var(--cinza-bg);border:2px dashed var(--cinza-borda);cursor:pointer;';
+          novoVazio.onclick = () => document.getElementById('input-fotos').click();
+          novoVazio.innerHTML = '<div style="display:flex;flex-direction:column;align-items:center;gap:6px;color:var(--cinza);"><span style="font-size:28px;">📸</span><span style="font-size:11px;font-weight:600;text-align:center;">Mais fotos</span></div>';
+          grid.appendChild(novoVazio);
+        }
+
+        atualizarBadgePrincipal();
+        mostrarBtnSalvarFotos();
       };
       reader.readAsDataURL(file);
     });
     input.value = '';
+  }
+
+  function removerFoto(btn) {
+    btn.parentElement.remove();
+    atualizarBadgePrincipal();
+    const totalFotos = document.querySelectorAll('#fotos-grid .foto-item:not(#foto-vazia)').length;
+    if (totalFotos === 0) {
+      // Restaurar estado inicial
+      const grid = document.getElementById('fotos-grid');
+      if (!document.getElementById('foto-vazia')) {
+        grid.innerHTML = `<div class="foto-item" id="foto-vazia" style="background:var(--cinza-bg);border:2px dashed var(--cinza-borda);cursor:pointer;" onclick="document.getElementById('input-fotos').click()"><div style="display:flex;flex-direction:column;align-items:center;gap:6px;color:var(--cinza);"><span style="font-size:28px;">📸</span><span style="font-size:11px;font-weight:600;text-align:center;">Adicionar fotos</span></div></div>`;
+      }
+      const btn = document.getElementById('btn-salvar-fotos');
+      if (btn) btn.style.display = 'none';
+    }
+  }
+
+  function atualizarBadgePrincipal() {
+    // Remove todos os badges
+    document.querySelectorAll('.foto-principal-badge').forEach(b => b.remove());
+    // Adiciona na primeira foto real
+    const primeira = document.querySelector('#fotos-grid .foto-item:not(#foto-vazia)');
+    if (primeira) {
+      const badge = document.createElement('span');
+      badge.className = 'foto-principal-badge';
+      badge.textContent = 'Principal';
+      primeira.appendChild(badge);
+    }
+  }
+
+  function mostrarBtnSalvarFotos() {
+    const btn = document.getElementById('btn-salvar-fotos');
+    if (btn) btn.style.display = 'flex';
   }
 
   // CALENDÁRIO
@@ -1661,6 +1827,241 @@
     setTimeout(() => t.classList.remove('show'), 3000);
   }
 
+  // RESERVAS
+  let reservaParaRecusar = null;
+
+  function confirmarReserva(id) {
+    const card = document.getElementById('reserva-' + id);
+    if (!card) return;
+    const badge = card.querySelector('.reserva-badge');
+    const acoes = card.querySelector('.reserva-acoes');
+    const timer = card.querySelector('[style*="Expira"]') || card.querySelector('.reserva-timer');
+
+    card.classList.remove('pendente');
+    card.classList.add('confirmada');
+    if (badge) { badge.className = 'reserva-badge badge-confirmada'; badge.textContent = '✅ Confirmada'; }
+    if (timer) timer.style.display = 'none';
+    if (acoes) acoes.innerHTML = `<button class="btn-msg-cliente" style="margin-left:0;" onclick="msgCliente('44999999999')">💬 Falar com cliente</button><div style="margin-left:auto;font-size:12px;color:var(--cinza);display:flex;align-items:center;">Aguardando pagamento do cliente</div>`;
+
+    atualizarBadgeReservas();
+    mostrarToast('✅ Reserva confirmada! O cliente foi notificado para efetuar o pagamento.');
+  }
+
+  function abrirModalRecusar(id) {
+    reservaParaRecusar = id;
+    const overlay = document.getElementById('modal-recusar');
+    if (overlay) overlay.classList.add('open');
+  }
+
+  function fecharModalRecusar() {
+    const overlay = document.getElementById('modal-recusar');
+    if (overlay) overlay.classList.remove('open');
+  }
+
+  function recusarConfirmado() {
+    if (!reservaParaRecusar) return;
+    const card = document.getElementById('reserva-' + reservaParaRecusar);
+    if (!card) return;
+    const badge = card.querySelector('.reserva-badge');
+    const acoes = card.querySelector('.reserva-acoes');
+
+    card.classList.remove('pendente');
+    card.classList.add('recusada');
+    if (badge) { badge.className = 'reserva-badge badge-recusada'; badge.textContent = '✕ Recusada'; }
+    if (acoes) acoes.innerHTML = `<span style="font-size:12px;color:var(--cinza);">Solicitação recusada. Cliente foi notificado.</span>`;
+
+    fecharModalRecusar();
+    atualizarBadgeReservas();
+    mostrarToast('Reserva recusada. O cliente foi notificado.');
+    reservaParaRecusar = null;
+  }
+
+  function atualizarBadgeReservas() {
+    const pendentes = document.querySelectorAll('.reserva-card.pendente').length;
+
+    // 1. Badge na sidebar
+    const badge = document.getElementById('badge-reservas');
+    if (badge) {
+      badge.textContent = pendentes;
+      badge.style.display = pendentes > 0 ? 'inline' : 'none';
+    }
+
+    // 2. Stat card visão geral
+    const statNum = document.getElementById('stat-pendentes');
+    if (statNum) statNum.textContent = pendentes;
+
+    // 3. Título na aba reservas
+    const titulo = document.getElementById('titulo-pendentes');
+    if (titulo) titulo.textContent = '⏳ Aguardando sua resposta (' + pendentes + ')';
+
+    // 4. Alerta na visão geral
+    const alerta = document.getElementById('alerta-pendentes');
+    const alertaTexto = document.getElementById('alerta-texto');
+    if (alerta) {
+      if (pendentes === 0) {
+        alerta.style.display = 'none';
+      } else {
+        alerta.style.display = 'flex';
+        if (alertaTexto) {
+          alertaTexto.textContent = 'Você tem ' + pendentes + ' solicitação' + (pendentes > 1 ? 'ões' : '') + ' de reserva aguardando resposta';
+        }
+      }
+    }
+
+    // 5. Stat card borda amarela — remover destaque se zero pendentes
+    const statCard = statNum ? statNum.closest('.stat-card') : null;
+    if (statCard) {
+      statCard.style.border = pendentes > 0 ? '1.5px solid #f59e0b' : '1px solid var(--cinza-borda)';
+    }
+    const statTag = document.getElementById('stat-pendentes-tag');
+    if (statTag) statTag.textContent = pendentes > 0 ? 'responda já!' : 'nenhuma pendente';
+  }
+
+  function msgCliente(numero) {
+    const msg = encodeURIComponent('Olá! Sou o proprietário da chácara cadastrada no AluguelDeChácaras.com.br. Entro em contato sobre sua solicitação de reserva.');
+    window.open('https://wa.me/55' + numero + '?text=' + msg, '_blank');
+  }
+
+  // TOGGLE ANÚNCIO ATIVO/PAUSADO
+  let anuncioAtivo = true;
+
+  function toggleAnuncio() {
+    anuncioAtivo = !anuncioAtivo;
+
+    // Botões — um na Minha Chácara, um na Visão Geral
+    const btn1 = document.getElementById('btn-toggle-anuncio');
+    const btn2 = document.getElementById('btn-toggle-anuncio-visao');
+    const badge = document.getElementById('badge-status-anuncio');
+    const aviso = document.getElementById('aviso-pausado');
+
+    const btns = [btn1, btn2].filter(Boolean);
+
+    if (anuncioAtivo) {
+      // Reativar
+      btns.forEach(b => {
+        b.textContent = '⏸ Pausar anúncio';
+        b.style.background = 'var(--vermelho)';
+        b.style.color = '#fff';
+        b.className = 'btn btn-sm';
+      });
+      if (badge) { badge.className = 'status-badge badge-ativo'; badge.textContent = 'Anúncio ativo'; }
+      if (aviso) aviso.style.display = 'none';
+      mostrarToast('✅ Anúncio reativado! Já aparece nas buscas.');
+    } else {
+      // Pausar
+      btns.forEach(b => {
+        b.textContent = '▶ Publicar anúncio';
+        b.style.background = 'var(--verde)';
+        b.style.color = '#fff';
+        b.className = 'btn btn-sm';
+      });
+      if (badge) { badge.className = 'status-badge badge-inativo'; badge.textContent = 'Anúncio pausado'; }
+      if (aviso) aviso.style.display = 'flex';
+      mostrarToast('⏸ Anúncio pausado. Clique em "Publicar anúncio" para reativar.');
+    }
+  }
+
+  function abrirPreview(modo) {
+    const dados = coletarDadosAnuncio();
+
+    // Atualizar título e subtítulo do modal conforme modo
+    const modalTitulo = document.querySelector('#modal-preview .modal-titulo-texto');
+    const modalSub = document.querySelector('#modal-preview .modal-sub-texto');
+    if (modalTitulo) {
+      if (modo === 'publicado') {
+        modalTitulo.textContent = '🔗 Ver como o cliente vê';
+        if (modalSub) modalSub.textContent = 'Visualização do anúncio publicado com as alterações salvas';
+      } else {
+        modalTitulo.textContent = '👁️ Pré-visualização';
+        if (modalSub) modalSub.textContent = 'Rascunho com as alterações ainda não salvas';
+      }
+    }
+
+
+    // Nome e localização
+    document.getElementById('prev-nome').textContent = dados.nome || 'Minha Chácara';
+    document.getElementById('prev-cidade').textContent = [dados.cidade, dados.bairro].filter(Boolean).join(' — ') || 'Cidade não informada';
+
+    // Descrição
+    document.getElementById('prev-desc').textContent = dados.desc || 'Descrição não preenchida.';
+
+    // Capacidade e valor
+    document.getElementById('prev-cap').textContent = dados.capacidade ? dados.capacidade + ' pessoas' : '— pessoas';
+    document.getElementById('prev-valor').textContent = dados.diaria ? 'R$ ' + Number(dados.diaria).toLocaleString('pt-BR') : 'R$ —';
+
+    // Foto principal
+    const prevFoto = document.getElementById('prev-foto');
+    const aviso = document.getElementById('prev-foto-aviso');
+    if (dados.fotos && dados.fotos.length > 0) {
+      prevFoto.innerHTML = `<img src="${dados.fotos[0]}" style="width:100%;height:100%;object-fit:cover;"/>`;
+      if (aviso) aviso.style.display = 'none';
+    } else {
+      prevFoto.innerHTML = '🏡';
+      prevFoto.style.fontSize = '80px';
+      if (aviso) aviso.style.display = 'block';
+    }
+
+    // Tags de estrutura selecionadas
+    const tagsEstrutura = document.querySelectorAll('#tags-estrutura .tag-check.selecionado');
+    const prevTags = document.getElementById('prev-tags');
+    prevTags.innerHTML = '';
+    tagsEstrutura.forEach(t => {
+      const span = document.createElement('span');
+      span.style.cssText = 'background:var(--verde-claro);color:var(--verde-escuro);padding:5px 12px;border-radius:20px;font-size:12px;font-weight:600;';
+      span.textContent = t.textContent.trim();
+      prevTags.appendChild(span);
+    });
+
+    // Grid de estrutura
+    const prevEstrutura = document.getElementById('prev-estrutura');
+    prevEstrutura.innerHTML = '';
+    tagsEstrutura.forEach(t => {
+      const div = document.createElement('div');
+      div.style.cssText = 'display:flex;align-items:center;gap:8px;padding:10px 12px;background:#fff;border-radius:8px;border:1px solid var(--cinza-borda);font-size:13px;font-weight:500;';
+      div.textContent = t.textContent.trim();
+      prevEstrutura.appendChild(div);
+    });
+    if (tagsEstrutura.length === 0) prevEstrutura.innerHTML = '<div style="font-size:13px;color:var(--cinza);">Nenhuma comodidade selecionada.</div>';
+
+    // Tipos de evento
+    const tagsEventos = document.querySelectorAll('#tags-eventos .tag-check.selecionado');
+    const prevEventos = document.getElementById('prev-eventos');
+    prevEventos.innerHTML = '';
+    tagsEventos.forEach(t => {
+      const span = document.createElement('span');
+      span.style.cssText = 'background:var(--terra-claro);color:var(--terra);padding:5px 14px;border-radius:20px;font-size:13px;font-weight:600;';
+      span.textContent = t.textContent.trim();
+      prevEventos.appendChild(span);
+    });
+    if (tagsEventos.length === 0) prevEventos.innerHTML = '<div style="font-size:13px;color:var(--cinza);">Nenhum tipo de evento selecionado.</div>';
+
+    // Galeria de fotos em miniatura
+    if (dados.fotos && dados.fotos.length > 1) {
+      const existingGal = document.getElementById('prev-galeria-mini');
+      if (!existingGal) {
+        const galDiv = document.createElement('div');
+        galDiv.id = 'prev-galeria-mini';
+        galDiv.style.cssText = 'display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:16px;';
+        dados.fotos.slice(1, 5).forEach(src => {
+          galDiv.innerHTML += `<img src="${src}" style="width:100%;aspect-ratio:1;object-fit:cover;border-radius:8px;"/>`;
+        });
+        prevFoto.insertAdjacentElement('afterend', galDiv);
+      } else {
+        existingGal.innerHTML = '';
+        dados.fotos.slice(1, 5).forEach(src => {
+          existingGal.innerHTML += `<img src="${src}" style="width:100%;aspect-ratio:1;object-fit:cover;border-radius:8px;"/>`;
+        });
+      }
+    }
+
+    // Abrir modal
+    document.getElementById('modal-preview').classList.add('open');
+  }
+
+  function fecharPreview() {
+    document.getElementById('modal-preview').classList.remove('open');
+  }
+
   function simularComissao() {
     const diaria = parseFloat(document.getElementById('sim-diaria').value) || 0;
     const dias = parseInt(document.getElementById('sim-dias').value) || 1;
@@ -1673,13 +2074,52 @@
     document.getElementById('sim-liquido').textContent = fmt(liquido);
   }
 
+  function coletarDadosAnuncio() {
+    // Textos básicos — usando IDs para garantir os campos corretos
+    const nome       = document.getElementById('f-nome')?.value || '';
+    const cidade     = document.getElementById('f-cidade')?.value || '';
+    const bairro     = document.getElementById('f-bairro')?.value || '';
+    const capacidade = document.getElementById('f-capacidade')?.value || '';
+    const diaria     = document.getElementById('f-diaria')?.value || '';
+    const fds        = document.getElementById('f-fds')?.value || '';
+    const descEl     = document.querySelector('#tab-minha-chacara textarea');
+    const desc       = descEl?.value || '';
+    const video      = document.getElementById('input-video')?.value || '';
+    const wpp        = '';
+
+    // Comodidades selecionadas
+    const comodidades = [];
+    document.querySelectorAll('#tags-estrutura .tag-check.selecionado').forEach(t => {
+      comodidades.push(t.textContent.trim());
+    });
+
+    // Tipos de evento selecionados
+    const eventos = [];
+    document.querySelectorAll('#tags-eventos .tag-check.selecionado').forEach(t => {
+      eventos.push(t.textContent.trim());
+    });
+
+    // Fotos em base64
+    const fotos = [];
+    document.querySelectorAll('#fotos-grid .foto-item:not(#foto-vazia) img').forEach(img => {
+      fotos.push(img.src);
+    });
+
+    return { nome, cidade, bairro, wpp, capacidade, diaria, fds, desc, video, comodidades, eventos, fotos };
+  }
+
   function salvar(tipo) {
+    if (tipo === 'anuncio' || tipo === 'fotos') {
+      const dados = coletarDadosAnuncio();
+      try { localStorage.setItem('chacara_dados', JSON.stringify(dados)); } catch(e) {}
+    }
     const msgs = {
       anuncio: '✅ Anúncio salvo com sucesso!',
-      video: '✅ Vídeo salvo!',
+      fotos:   '✅ Fotos salvas!',
+      video:   '✅ Vídeo salvo!',
       calendario: '✅ Calendário atualizado!',
-      config: '✅ Configurações salvas!',
-      senha: '✅ Senha alterada!'
+      config:  '✅ Configurações salvas!',
+      senha:   '✅ Senha alterada!'
     };
     mostrarToast(msgs[tipo] || '✅ Salvo!');
   }

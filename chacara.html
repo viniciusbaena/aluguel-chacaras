@@ -404,8 +404,8 @@
 
 <!-- NAV -->
 <nav>
-  <a href="aluguel-chacaras.html" class="nav-logo">🌿 Aluguel de <span>Chácaras</span></a>
-  <a href="aluguel-chacaras.html" class="nav-back">← Voltar para resultados</a>
+  <a href="index.html" class="nav-logo">🌿 Aluguel de <span>Chácaras</span></a>
+  <a href="index.html" class="nav-back">← Voltar para resultados</a>
 </nav>
 
 <!-- GALERIA -->
@@ -534,7 +534,7 @@
           <div class="cal-leg-item"><div class="cal-leg-cor" style="background:#f9fafb; border:1px solid #e5e7eb;"></div> Não informado</div>
         </div>
         <div style="margin-top:14px; font-size:13px; color:var(--cinza);">
-          💬 Para confirmar disponibilidade de uma data específica, entre em contato com o proprietário.
+          💬 Para confirmar disponibilidade de uma data específica, solicite uma reserva — o proprietário responderá em até 24h.
         </div>
       </div>
     </div>
@@ -599,10 +599,18 @@
       <div style="font-size:14px; color:var(--cinza); margin-bottom:16px;">Parceiros disponíveis para atender nesta chácara e região</div>
       <div class="fornecedores-mini">
         <div class="fornecedor-mini">
-          <div class="fornecedor-mini-icon">🎵</div>
+          <div class="fornecedor-mini-icon">🎠</div>
           <div>
-            <div class="fornecedor-mini-cat">DJ e Música</div>
-            <div class="fornecedor-mini-nome">DJ Marquinhos Events</div>
+            <div class="fornecedor-mini-cat">Brinquedos Infantis</div>
+            <div class="fornecedor-mini-nome">Alegria Kids Locações</div>
+            <div style="font-size:11px; color:var(--cinza); margin-top:2px;">📍 Sarandi</div>
+          </div>
+        </div>
+        <div class="fornecedor-mini">
+          <div class="fornecedor-mini-icon">🥩</div>
+          <div>
+            <div class="fornecedor-mini-cat">Churrasqueiro</div>
+            <div class="fornecedor-mini-nome">Churrasco do Toninho</div>
             <div style="font-size:11px; color:var(--cinza); margin-top:2px;">📍 Maringá</div>
           </div>
         </div>
@@ -615,23 +623,15 @@
           </div>
         </div>
         <div class="fornecedor-mini">
-          <div class="fornecedor-mini-icon">🎠</div>
+          <div class="fornecedor-mini-icon">🎊</div>
           <div>
-            <div class="fornecedor-mini-cat">Brinquedos Infantis</div>
-            <div class="fornecedor-mini-nome">Alegria Kids Locações</div>
-            <div style="font-size:11px; color:var(--cinza); margin-top:2px;">📍 Sarandi</div>
-          </div>
-        </div>
-        <div class="fornecedor-mini">
-          <div class="fornecedor-mini-icon">🍺</div>
-          <div>
-            <div class="fornecedor-mini-cat">Chopeiras</div>
-            <div class="fornecedor-mini-nome">Chopp Gelado Maringá</div>
+            <div class="fornecedor-mini-cat">Decoração e Balões</div>
+            <div class="fornecedor-mini-nome">Decora Festa Maringá</div>
             <div style="font-size:11px; color:var(--cinza); margin-top:2px;">📍 Maringá</div>
           </div>
         </div>
       </div>
-      <a href="aluguel-chacaras.html#fornecedores" style="display:block; text-align:center; margin-top:14px; font-size:14px; font-weight:600; color:var(--terra); text-decoration:none;">Ver todos os fornecedores →</a>
+      <a href="index.html#fornecedores" style="display:block; text-align:center; margin-top:14px; font-size:14px; font-weight:600; color:var(--terra); text-decoration:none;">Ver todos os fornecedores →</a>
     </div>
 
   </div>
@@ -760,7 +760,7 @@
         </div>
 
         <div style="font-size:12px; color:var(--cinza); text-align:center; line-height:1.6; margin-bottom:14px;">
-          Enquanto aguarda, que tal já pesquisar <a href="#fornecedores" style="color:var(--verde); font-weight:600;">fornecedores para seu evento</a>?
+          Enquanto aguarda, que tal já pesquisar <a href="index.html#fornecedores" style="color:var(--verde); font-weight:600;">fornecedores para seu evento</a>?
         </div>
 
         <!-- SIMULAÇÃO: botão para demo -->
@@ -859,7 +859,7 @@
         </div>
 
         <button onclick="irParaInicio()" style="background:var(--verde-claro);color:var(--verde-escuro);border:none;border-radius:8px;padding:10px;width:100%;font-size:13px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif;">
-          🏠 Voltar para a página inicial
+          🏠 Buscar mais chácaras
         </button>
       </div>
 
@@ -1122,6 +1122,126 @@
     window.location.href = 'index.html';
   }
 
+
+  // CARREGAR DADOS DO PAINEL (localStorage)
+  function carregarDadosPainel() {
+    let dados = null;
+    try { dados = JSON.parse(localStorage.getItem('chacara_dados')); } catch(e) {}
+    if (!dados) return;
+
+    // Nome e localização
+    if (dados.nome) {
+      const titulo = document.querySelector('.detalhe-titulo');
+      if (titulo) titulo.textContent = dados.nome;
+      document.title = dados.nome + ' — AluguelDeChácaras.com.br';
+    }
+    if (dados.cidade || dados.bairro) {
+      const local = document.querySelector('.detalhe-local');
+      if (local) local.textContent = '📍 ' + [dados.cidade, dados.bairro].filter(Boolean).join(' — ');
+    }
+
+    // Descrição
+    if (dados.desc) {
+      const descTexto = document.getElementById('desc-texto');
+      if (descTexto) {
+        // Preserva o botão "ver mais"
+        const btn = descTexto.querySelector('#desc-btn');
+        const mais = descTexto.querySelector('#desc-mais');
+        descTexto.childNodes.forEach(n => { if (n.nodeType === 3) n.textContent = ''; });
+        descTexto.insertBefore(document.createTextNode(dados.desc), descTexto.firstChild);
+      }
+    }
+
+    // Preço
+    if (dados.diaria) {
+      const preco = document.querySelector('.preco-valor');
+      if (preco) preco.textContent = 'R$ ' + Number(dados.diaria).toLocaleString('pt-BR');
+    }
+    if (dados.fds) {
+      const pFds = document.querySelector('.preco-fds strong');
+      if (pFds) pFds.textContent = 'R$ ' + Number(dados.fds).toLocaleString('pt-BR');
+    }
+
+    // Capacidade nas tags rápidas
+    if (dados.capacidade) {
+      const tagsRow = document.querySelector('.tags-row');
+      if (tagsRow) {
+        const tagCap = tagsRow.querySelector('.tag');
+        if (tagCap) tagCap.textContent = '👥 Até ' + dados.capacidade + ' pessoas';
+      }
+      // Card de reserva
+      const contaRow = document.querySelectorAll('.contato-row-val');
+      if (contaRow[0]) contaRow[0].textContent = 'Até ' + dados.capacidade + ' pessoas';
+    }
+
+    // Comodidades
+    if (dados.comodidades && dados.comodidades.length > 0) {
+      const grid = document.querySelector('.estrutura-grid');
+      if (grid) {
+        grid.innerHTML = dados.comodidades.map(c =>
+          `<div class="estrutura-item"><span class="estrutura-icon">${c.split(' ')[0]}</span> ${c.split(' ').slice(1).join(' ')}</div>`
+        ).join('');
+      }
+    }
+
+    // Tipos de evento
+    if (dados.eventos && dados.eventos.length > 0) {
+      const eventoGrid = document.querySelector('.eventos-grid');
+      if (eventoGrid) {
+        eventoGrid.innerHTML = dados.eventos.map(e =>
+          `<span class="evento-tag">${e}</span>`
+        ).join('');
+      }
+    }
+
+    // Fotos
+    if (dados.fotos && dados.fotos.length > 0) {
+      // Galeria principal
+      const galMain = document.querySelector('.galeria-main');
+      if (galMain) {
+        galMain.style.fontSize = '0';
+        galMain.style.background = '#000';
+        galMain.innerHTML = `<img src="${dados.fotos[0]}" style="width:100%;height:100%;object-fit:cover;" onclick="abrirGaleria(0)"/><button class="galeria-ver-mais" onclick="abrirGaleria(0)">📷 Ver todas as ${dados.fotos.length} fotos</button>`;
+      }
+      // Thumbs
+      const thumbs = document.querySelectorAll('.galeria-thumb');
+      thumbs.forEach((t, i) => {
+        if (dados.fotos[i + 1]) {
+          t.style.fontSize = '0';
+          t.style.background = '#000';
+          t.innerHTML = `<img src="${dados.fotos[i+1]}" style="width:100%;height:100%;object-fit:cover;" onclick="abrirGaleria(${i+1})"/>`;
+        }
+      });
+      // Atualizar array de fotos para o lightbox
+      fotos.length = 0;
+      cores.length = 0;
+      dados.fotos.forEach(src => {
+        fotos.push('');
+        cores.push('');
+        // Guardar src
+      });
+      window._fotosBase64 = dados.fotos;
+    }
+  }
+
+  // Sobrescrever renderGaleria para usar fotos reais se disponíveis
+  const _renderGaleriaOriginal = renderGaleria;
+  function renderGaleriaComFotos() {
+    if (window._fotosBase64 && window._fotosBase64[fotoAtual]) {
+      const img = document.getElementById('modal-img');
+      img.style.background = '#111';
+      img.innerHTML = `<img src="${window._fotosBase64[fotoAtual]}" style="width:100%;height:100%;object-fit:contain;border-radius:16px;"/>`;
+      document.getElementById('modal-contador').textContent = `${fotoAtual+1} / ${window._fotosBase64.length}`;
+      document.querySelectorAll('.modal-thumb').forEach((t,i) => t.classList.toggle('ativo', i===fotoAtual));
+    } else {
+      _renderGaleriaOriginal();
+    }
+  }
+
+  window.addEventListener('load', function() {
+    carregarDadosPainel();
+    renderGaleria = renderGaleriaComFotos;
+  });
 
   document.addEventListener('keydown', e => {
     if (!document.getElementById('modal-galeria').classList.contains('open')) return;

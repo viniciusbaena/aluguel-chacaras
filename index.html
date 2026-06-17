@@ -491,7 +491,7 @@
     .fornecedores-grid {
       display: grid;
       grid-template-columns: repeat(4, 1fr);
-      gap: 20px;
+      gap: 16px;
     }
 
     .fornecedor-card {
@@ -794,7 +794,7 @@
   </ul>
   <div class="nav-cta">
     <a href="#" class="btn btn-outline" onclick="abrirModal('login')">Entrar</a>
-    <a href="#anuncie" class="btn btn-primary">Anuncie grátis</a>
+    <a href="#anuncie" class="btn btn-primary">Anunciar</a>
   </div>
 </nav>
 
@@ -806,7 +806,7 @@
       A chácara <em>perfeita</em> para seu evento
     </h1>
     <p class="hero-sub">
-      Encontre chácaras para festas, eventos e lazer em Maringá e região. Veja fotos, disponibilidade e fale direto com o proprietário.
+      Encontre chácaras para festas, eventos e lazer em Maringá e região. Solicite sua reserva online com segurança e praticidade.
     </p>
     <div class="hero-actions">
       <a href="#chacaras" class="btn btn-verde btn-lg">Ver chácaras disponíveis</a>
@@ -847,20 +847,7 @@
       <label>Cidade ou região</label>
       <input type="text" id="f-cidade" placeholder="Ex: Maringá, Sarandi, Paiçandu..."/>
     </div>
-    <div class="busca-field">
-      <label>Tipo de evento</label>
-      <select id="f-evento">
-        <option value="">Qualquer tipo</option>
-        <option>🎂 Festa de aniversário</option>
-        <option>💒 Casamento</option>
-        <option>🤝 Confraternização</option>
-        <option>🏖️ Lazer / final de semana</option>
-        <option>👔 Evento corporativo</option>
-        <option>🍖 Churrasco</option>
-        <option>🎓 Formatura</option>
-        <option>👧 Festa infantil</option>
-      </select>
-    </div>
+
     <div class="busca-field">
       <label>Número de convidados</label>
       <select id="f-pessoas">
@@ -897,12 +884,12 @@
       </div>
 
       <div class="busca-field">
-        <label>Acesso</label>
-        <select id="f-acesso">
-          <option value="">Qualquer acesso</option>
-          <option>Asfalto até o portão</option>
-          <option>Estrada de terra</option>
-        </select>
+        <label>📅 Data de início</label>
+        <input type="date" id="f-data-inicio" style="background:#fff;border:none;border-radius:8px;padding:11px 14px;font-size:14px;font-family:'Inter',sans-serif;outline:none;color:#111827;width:100%;"/>
+      </div>
+      <div class="busca-field">
+        <label>📅 Data de fim</label>
+        <input type="date" id="f-data-fim" style="background:#fff;border:none;border-radius:8px;padding:11px 14px;font-size:14px;font-family:'Inter',sans-serif;outline:none;color:#111827;width:100%;"/>
       </div>
 
       <div class="busca-field">
@@ -989,11 +976,10 @@
 
   function buscar() {
     const cidade = document.getElementById('f-cidade').value;
-    const evento = document.getElementById('f-evento').value;
     const pessoas = document.getElementById('f-pessoas').value;
     // Simula resultado
     const base = 38;
-    const filtros = [cidade,evento,pessoas].filter(Boolean).length;
+    const filtros = [cidade,pessoas].filter(Boolean).length;
     const resultado = Math.max(3, base - filtros * 8 - Math.floor(Math.random()*5));
     document.getElementById('resultado-count').textContent = resultado + ' chácaras encontradas';
     document.querySelector('#chacaras').scrollIntoView({ behavior: 'smooth' });
@@ -1001,7 +987,6 @@
 
   function limparFiltros() {
     document.getElementById('f-cidade').value = '';
-    document.getElementById('f-evento').value = '';
     document.getElementById('f-pessoas').value = '';
     if(document.getElementById('f-preco')) document.getElementById('f-preco').value = '';
     if(document.getElementById('f-data')) document.getElementById('f-data').value = '';
@@ -1040,7 +1025,7 @@
         </div>
         <div class="chacara-footer">
           <div class="chacara-preco">a partir de <strong>R$ 1.200</strong>/dia</div>
-          <button class="btn-contato" onclick="abrirModal('contato')">Ver contato</button>
+          <button class="btn-contato" onclick="abrirModal('reserva')">Solicitar reserva</button>
         </div>
       </div>
     </div>
@@ -1061,7 +1046,7 @@
         </div>
         <div class="chacara-footer">
           <div class="chacara-preco">a partir de <strong>R$ 900</strong>/dia</div>
-          <button class="btn-contato" onclick="abrirModal('contato')">Ver contato</button>
+          <button class="btn-contato" onclick="abrirModal('reserva')">Solicitar reserva</button>
         </div>
       </div>
     </div>
@@ -1082,7 +1067,7 @@
         </div>
         <div class="chacara-footer">
           <div class="chacara-preco">a partir de <strong>R$ 2.500</strong>/dia</div>
-          <button class="btn-contato" onclick="abrirModal('contato')">Ver contato</button>
+          <button class="btn-contato" onclick="abrirModal('reserva')">Solicitar reserva</button>
         </div>
       </div>
     </div>
@@ -1101,39 +1086,19 @@
 
   <div class="categorias-grid">
     <div class="categoria-card">
-      <div class="categoria-icon">🎂</div>
-      <div class="categoria-nome">Bolos e Doces</div>
-      <div class="categoria-qtd">14 fornecedores</div>
-    </div>
-    <div class="categoria-card">
-      <div class="categoria-icon">🎵</div>
-      <div class="categoria-nome">DJ e Música</div>
-      <div class="categoria-qtd">22 fornecedores</div>
-    </div>
-    <div class="categoria-card">
-      <div class="categoria-icon">🍺</div>
-      <div class="categoria-nome">Chopeiras</div>
-      <div class="categoria-qtd">8 fornecedores</div>
-    </div>
-    <div class="categoria-card">
-      <div class="categoria-icon">🎈</div>
-      <div class="categoria-nome">Decoração</div>
-      <div class="categoria-qtd">18 fornecedores</div>
-    </div>
-    <div class="categoria-card">
       <div class="categoria-icon">🎠</div>
       <div class="categoria-nome">Brinquedos Infantis</div>
       <div class="categoria-qtd">11 fornecedores</div>
     </div>
     <div class="categoria-card">
-      <div class="categoria-icon">🍽️</div>
-      <div class="categoria-nome">Buffets</div>
-      <div class="categoria-qtd">16 fornecedores</div>
+      <div class="categoria-icon">🤹</div>
+      <div class="categoria-nome">Recreadores Infantis</div>
+      <div class="categoria-qtd">9 fornecedores</div>
     </div>
     <div class="categoria-card">
-      <div class="categoria-icon">🤹</div>
-      <div class="categoria-nome">Animadores</div>
-      <div class="categoria-qtd">9 fornecedores</div>
+      <div class="categoria-icon">🎈</div>
+      <div class="categoria-nome">Brinquedos Infláveis</div>
+      <div class="categoria-qtd">7 fornecedores</div>
     </div>
     <div class="categoria-card">
       <div class="categoria-icon">🥩</div>
@@ -1141,59 +1106,63 @@
       <div class="categoria-qtd">7 fornecedores</div>
     </div>
     <div class="categoria-card">
-      <div class="categoria-icon">🎊</div>
-      <div class="categoria-nome">Balões</div>
+      <div class="categoria-icon">🎸</div>
+      <div class="categoria-nome">Músicos / Shows</div>
+      <div class="categoria-qtd">14 fornecedores</div>
+    </div>
+    <div class="categoria-card">
+      <div class="categoria-icon">🍹</div>
+      <div class="categoria-nome">Bartenders</div>
       <div class="categoria-qtd">6 fornecedores</div>
+    </div>
+    <div class="categoria-card">
+      <div class="categoria-icon">🍷</div>
+      <div class="categoria-nome">Garçons</div>
+      <div class="categoria-qtd">8 fornecedores</div>
+    </div>
+    <div class="categoria-card">
+      <div class="categoria-icon">🎊</div>
+      <div class="categoria-nome">Decoração e Balões</div>
+      <div class="categoria-qtd">18 fornecedores</div>
+    </div>
+    <div class="categoria-card">
+      <div class="categoria-icon">👨‍🍳</div>
+      <div class="categoria-nome">Cozinheiros(as)</div>
+      <div class="categoria-qtd">9 fornecedores</div>
+    </div>
+    <div class="categoria-card">
+      <div class="categoria-icon">🛒</div>
+      <div class="categoria-nome">Disk Bebidas</div>
+      <div class="categoria-qtd">5 fornecedores</div>
+    </div>
+    <div class="categoria-card">
+      <div class="categoria-icon">🍽️</div>
+      <div class="categoria-nome">Buffets</div>
+      <div class="categoria-qtd">16 fornecedores</div>
+    </div>
+    <div class="categoria-card">
+      <div class="categoria-icon">🎂</div>
+      <div class="categoria-nome">Bolos e Doces</div>
+      <div class="categoria-qtd">14 fornecedores</div>
     </div>
     <div class="categoria-card">
       <div class="categoria-icon">🍡</div>
       <div class="categoria-nome">Salgados</div>
       <div class="categoria-qtd">12 fornecedores</div>
     </div>
+    <div class="categoria-card">
+      <div class="categoria-icon">🍺</div>
+      <div class="categoria-nome">Chopeiras</div>
+      <div class="categoria-qtd">8 fornecedores</div>
+    </div>
+    <div class="categoria-card">
+      <div class="categoria-icon">🎵</div>
+      <div class="categoria-nome">DJ e Música</div>
+      <div class="categoria-qtd">22 fornecedores</div>
+    </div>
   </div>
 
-  <div class="fornecedores-grid">
-    <div class="fornecedor-card">
-      <div class="fornecedor-avatar">🎵</div>
-      <div class="fornecedor-cat">DJ e Música</div>
-      <div class="fornecedor-nome">DJ Marquinhos Events</div>
-      <div class="fornecedor-desc">Som profissional para festas e eventos. Iluminação LED inclusa. Atende Maringá e região.</div>
-      <div class="fornecedor-footer">
-        <span class="fornecedor-local">📍 Maringá</span>
-        <button class="btn-contato" onclick="abrirModal('contato')">Contato</button>
-      </div>
-    </div>
-    <div class="fornecedor-card">
-      <div class="fornecedor-avatar">🎂</div>
-      <div class="fornecedor-cat">Bolos e Doces</div>
-      <div class="fornecedor-nome">Doce Arte Confeitaria</div>
-      <div class="fornecedor-desc">Bolos artísticos personalizados, docinhos e mesa de doces para qualquer evento.</div>
-      <div class="fornecedor-footer">
-        <span class="fornecedor-local">📍 Maringá</span>
-        <button class="btn-contato" onclick="abrirModal('contato')">Contato</button>
-      </div>
-    </div>
-    <div class="fornecedor-card">
-      <div class="fornecedor-avatar">🎠</div>
-      <div class="fornecedor-cat">Brinquedos Infantis</div>
-      <div class="fornecedor-nome">Alegria Kids Locações</div>
-      <div class="fornecedor-desc">Pula-pula, escorregador, piscina de bolinhas e muito mais. Entrega e montagem inclusa.</div>
-      <div class="fornecedor-footer">
-        <span class="fornecedor-local">📍 Sarandi</span>
-        <button class="btn-contato" onclick="abrirModal('contato')">Contato</button>
-      </div>
-    </div>
-    <div class="fornecedor-card">
-      <div class="fornecedor-avatar">🍺</div>
-      <div class="fornecedor-cat">Chopeiras</div>
-      <div class="fornecedor-nome">Chopp Gelado Maringá</div>
-      <div class="fornecedor-desc">Aluguel de chopeiras com ou sem chope. Diversas marcas disponíveis. Frete grátis na região.</div>
-      <div class="fornecedor-footer">
-        <span class="fornecedor-local">📍 Maringá</span>
-        <button class="btn-contato" onclick="abrirModal('contato')">Contato</button>
-      </div>
-    </div>
-  </div>
+  <a href="#" style="display:block; text-align:center; margin-top:8px; font-size:14px; font-weight:600; color:var(--terra); text-decoration:none;">Ver todos os fornecedores →</a>
 </section>
 
 <!-- COMO FUNCIONA -->
@@ -1205,17 +1174,17 @@
     <div class="como-item">
       <div class="como-icon">🔍</div>
       <div class="como-title">Busque e filtre</div>
-      <div class="como-desc">Pesquise chácaras por cidade, tipo de evento e número de convidados. Veja fotos, estrutura e disponibilidade em tempo real.</div>
+      <div class="como-desc">Pesquise chácaras por cidade e número de convidados. Use os filtros avançados para refinar por data, preço e comodidades.</div>
     </div>
     <div class="como-item">
-      <div class="como-icon">📞</div>
-      <div class="como-title">Fale direto com o dono</div>
-      <div class="como-desc">Sem intermediários. Você vê o contato do proprietário e fecha o negócio diretamente com ele, pelo WhatsApp ou telefone.</div>
+      <div class="como-icon">📋</div>
+      <div class="como-title">Solicite sua reserva</div>
+      <div class="como-desc">Preencha o formulário com suas datas e evento. O proprietário confirma em até 24h e você paga com segurança pela plataforma.</div>
     </div>
     <div class="como-item">
       <div class="como-icon">🎉</div>
       <div class="como-title">Aproveite seu evento</div>
-      <div class="como-desc">Com a chácara escolhida, complete o pacote com nossos fornecedores parceiros: buffet, DJ, decoração, brinquedos e muito mais.</div>
+      <div class="como-desc">Após o pagamento, receba o endereço e contato do proprietário. Complete o pacote com nossos fornecedores parceiros.</div>
     </div>
   </div>
 </section>
@@ -1233,17 +1202,17 @@
     <div class="anuncie-card">
       <div class="anuncie-icon">🏡</div>
       <div class="anuncie-title">Tenho uma chácara</div>
-      <div class="anuncie-desc">Cadastre sua chácara e receba contatos de pessoas que estão planejando eventos na região. Você gerencia tudo pelo painel.</div>
+      <div class="anuncie-desc">Cadastre sua chácara, gerencie reservas pelo painel e receba pagamentos com segurança pela plataforma.</div>
       <ul class="anuncie-lista">
         <li>Fotos e vídeos do espaço</li>
         <li>Calendário de disponibilidade</li>
         <li>Descrição completa e valores</li>
-        <li>Contato direto com os clientes</li>
+        <li>Reservas gerenciadas com segurança pela plataforma</li>
         <li>Aparece nas buscas da região</li>
       </ul>
       <div class="anuncie-preco">
-        <span class="preco-free">Grátis</span>
-        <span class="preco-label">durante o período de lançamento</span>
+        <span class="preco-free" style="font-size:28px;">8%</span>
+        <span class="preco-label">de comissão apenas por reserva confirmada — sem mensalidade</span>
       </div>
       <button class="btn btn-verde btn-lg" onclick="abrirModal('cadastro-chacara')" style="width:100%; justify-content:center;">Cadastrar minha chácara</button>
     </div>
@@ -1255,13 +1224,13 @@
       <ul class="anuncie-lista">
         <li>Perfil com fotos e descrição</li>
         <li>Listado na categoria do seu serviço</li>
-        <li>Contato direto com os clientes</li>
+        <li>Clientes que já estão planejando eventos</li>
         <li>Alcance toda a região de Maringá</li>
         <li>Destaque entre os parceiros</li>
       </ul>
       <div class="anuncie-preco">
         <span class="preco-free">Grátis</span>
-        <span class="preco-label">durante o período de lançamento</span>
+        <span class="preco-label">para fornecedores — sem mensalidade</span>
       </div>
       <button class="btn btn-primary btn-lg" onclick="abrirModal('cadastro-fornecedor')" style="width:100%; justify-content:center;">Cadastrar meu serviço</button>
     </div>
@@ -1287,18 +1256,18 @@
   <div>
     <div class="footer-col-title">Fornecedores</div>
     <ul class="footer-links">
-      <li><a href="#">DJ e Música</a></li>
+      <li><a href="#">Brinquedos Infantis</a></li>
+      <li><a href="#">Churrasqueiros</a></li>
+      <li><a href="#">Decoração e Balões</a></li>
       <li><a href="#">Buffets</a></li>
-      <li><a href="#">Decoração</a></li>
-      <li><a href="#">Brinquedos</a></li>
-      <li><a href="#">Chopeiras</a></li>
+      <li><a href="#">DJ e Música</a></li>
     </ul>
   </div>
   <div>
     <div class="footer-col-title">Plataforma</div>
     <ul class="footer-links">
       <li><a href="#">Como funciona</a></li>
-      <li><a href="#">Anuncie grátis</a></li>
+      <li><a href="#anuncie">Anuncie sua chácara</a></li>
       <li><a href="#">Entrar</a></li>
       <li><a href="#">Contato</a></li>
     </ul>
@@ -1323,24 +1292,28 @@
         <div class="field"><label>E-mail</label><input type="email" placeholder="seu@email.com"/></div>
         <div class="field"><label>Senha</label><input type="password" placeholder="••••••••"/></div>
         <button class="btn btn-verde" style="width:100%;justify-content:center;margin-top:8px;" onclick="fecharModal()">Entrar</button>
-        <p style="text-align:center;margin-top:16px;font-size:13px;color:#6b7280;">Não tem conta? <a href="#anuncie" onclick="fecharModal()" style="color:#2d7a45;font-weight:600;">Cadastre-se grátis</a></p>
+        <p style="text-align:center;margin-top:16px;font-size:13px;color:#6b7280;">Não tem conta? <a href="#anuncie" onclick="fecharModal()" style="color:#2d7a45;font-weight:600;">Cadastre-se</a></p>
       `
     },
-    contato: {
-      titulo: 'Ver contato',
-      sub: 'Fale diretamente com o proprietário ou fornecedor.',
+    reserva: {
+      titulo: 'Solicitar reserva',
+      sub: 'Preencha seus dados e enviaremos sua solicitação ao proprietário.',
       campos: `
-        <div style="background:#e8f5ed;border-radius:12px;padding:20px;text-align:center;margin-bottom:20px;">
-          <div style="font-size:32px;margin-bottom:8px;">📞</div>
-          <div style="font-weight:700;font-size:18px;color:#1e4d2b;">(44) 9 9999-9999</div>
-          <div style="font-size:13px;color:#6b7280;margin-top:4px;">WhatsApp disponível</div>
+        <div class="field"><label>Seu nome</label><input type="text" placeholder="Nome completo"/></div>
+        <div class="field"><label>WhatsApp</label><input type="text" placeholder="(44) 9 0000-0000"/></div>
+        <div class="field"><label>E-mail</label><input type="email" placeholder="seu@email.com"/></div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+          <div class="field"><label>Check-in</label><input type="date"/></div>
+          <div class="field"><label>Check-out</label><input type="date"/></div>
         </div>
-        <button class="btn btn-verde" style="width:100%;justify-content:center;" onclick="fecharModal()">Fechar</button>
+        <div class="field"><label>Mensagem (opcional)</label><textarea placeholder="Descreva seu evento..." style="border:1.5px solid #e5e7eb;border-radius:8px;padding:10px;font-family:'Inter',sans-serif;font-size:13px;resize:none;height:70px;width:100%;outline:none;"></textarea></div>
+        <button class="btn btn-verde" style="width:100%;justify-content:center;margin-top:4px;" onclick="fecharModal()">Enviar solicitação</button>
+        <p style="text-align:center;margin-top:12px;font-size:12px;color:#6b7280;">🔒 Endereço e contato liberados somente após confirmação e pagamento.</p>
       `
     },
     'cadastro-chacara': {
       titulo: 'Cadastrar minha chácara',
-      sub: 'Preencha os dados básicos. É grátis durante o lançamento!',
+      sub: 'Preencha os dados básicos e comece a receber reservas pela plataforma.',
       campos: `
         <div class="field"><label>Seu nome</label><input type="text" placeholder="Nome completo"/></div>
         <div class="field"><label>WhatsApp</label><input type="text" placeholder="(44) 9 0000-0000"/></div>
@@ -1352,7 +1325,7 @@
     },
     'cadastro-fornecedor': {
       titulo: 'Cadastrar meu serviço',
-      sub: 'Apareça para quem está organizando eventos na região. Grátis!',
+      sub: 'Apareça para quem está organizando eventos na região. Cadastro gratuito!',
       campos: `
         <div class="field"><label>Seu nome</label><input type="text" placeholder="Nome completo"/></div>
         <div class="field"><label>WhatsApp</label><input type="text" placeholder="(44) 9 0000-0000"/></div>
@@ -1700,7 +1673,7 @@
 
   <div class="chat-suggestions" id="chat-suggestions">
     <button class="chat-suggestion" onclick="enviarSugestao('Quero uma chácara com piscina')">🏊 Com piscina</button>
-    <button class="chat-suggestion" onclick="enviarSugestao('Preciso de uma chácara para casamento')">💒 Casamento</button>
+    <button class="chat-suggestion" onclick="enviarSugestao('Preciso de uma chácara para festa')">💒 Casamento</button>
     <button class="chat-suggestion" onclick="enviarSugestao('Quero ver fornecedores de DJ')">🎵 DJ e música</button>
     <button class="chat-suggestion" onclick="enviarSugestao('Chácaras para até 50 pessoas')">👥 Até 50 pessoas</button>
   </div>
@@ -1745,10 +1718,11 @@ FORNECEDORES CADASTRADOS:
 CATEGORIAS DE FORNECEDORES DISPONÍVEIS: Bolos e Doces, DJ e Música, Chopeiras, Decoração e Balões, Brinquedos Infantis, Buffets, Animadores e Recreadores, Churrasqueiros, Salgados.
 
 INFORMAÇÕES GERAIS:
-- Plataforma gratuita durante período de lançamento
-- Contato é feito diretamente com o proprietário/fornecedor
+- Reservas feitas com segurança pela plataforma — endereço liberado apenas após pagamento confirmado
+- Comissão de 8% cobrada do proprietário por reserva confirmada — sem custo adicional para o cliente
+- Fornecedores cadastrados gratuitamente na plataforma
 - Cidades atendidas: Maringá, Sarandi, Paiçandu, Marialva e região
-- Para cadastrar chácara ou serviço: clicar em "Anuncie grátis" no menu
+- Para cadastrar chácara ou serviço: clicar em "Anunciar" no menu
 
 Responda sempre em português brasileiro. Se não souber algo, sugira que o visitante use o formulário de contato ou navegue pelo site.
   `;
