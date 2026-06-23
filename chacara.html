@@ -1081,7 +1081,79 @@
     }
   }
 
-  function enviarSolicitacao() {
+  // ── INTEGRAÇÃO N8N ────────────────────────────────────────────
+  const PROPERTY_ID  = '4f7e9eae-4da6-493f-bc99-2d85f08266e3';
+  const N8N_WEBHOOK  = 'https://n8n.alugueldechacaras.com/webhook/nova-reserva';
+
+  function formatarWhatsApp(numero) {
+    const d = numero.replace(/\D/g, '');
+    if (d.startsWith('55') && d.length >= 12) return d;
+    return '55' + d;
+  }
+
+  async function enviarSolicitacao() {
+    const checkin  = document.getElementById('r-checkin').value;
+    const checkout = document.getElementById('r-checkout').value;
+    const nome     = document.getElementById('r-nome').value.trim();
+    const wpp      = document.getElementById('r-wpp').value.trim();
+    const email    = document.getElementById('r-email').value.trim();
+    const pessoas  = document.getElementById('r-pessoas')?.value || '1';
+    const tipo     = document.getElementById('r-tipo')?.value || '';
+    const msgExtra = document.getElementById('r-mensagem')?.value?.trim() || '';
+
+    if (!checkin)            { mostrarToast('⚠️ Selecione a data de check-in'); return; }
+    if (!checkout)           { mostrarToast('⚠️ Selecione a data de check-out'); return; }
+    if (checkout <= checkin) { mostrarToast('⚠️ Check-out deve ser após o check-in'); return; }
+    if (!nome)               { mostrarToast('⚠️ Informe seu nome'); return; }
+    if (!wpp && !email)      { mostrarToast('⚠️ Informe WhatsApp ou e-mail'); return; }
+
+    const fmt = d => new Date(d + 'T12:00:00').toLocaleDateString('pt-BR', { day:'2-digit', month:'long', year:'numeric' });
+    const dias = Math.round((new Date(checkout+'T12:00:00') - new Date(checkin+'T12:00:00')) / 86400000);
+    const periodoTexto = `${fmt(checkin)} → ${fmt(checkout)} (${dias} diária${dias>1?'s':''})`;
+
+    const btn = document.querySelector('.btn-reservar');
+    if (btn) { btn.disabled = true; btn.textContent = '⏳ Enviando...'; }
+
+    try {
+      const payload = {
+        property_id:     PROPERTY_ID,
+        client_name:     nome,
+        client_whatsapp: wpp ? formatarWhatsApp(wpp) : '',
+        client_email:    email,
+        num_guests:      parseInt(pessoas) || 1,
+        check_in:        checkin,
+        check_out:       checkout,
+        message:         [tipo, msgExtra].filter(Boolean).join(' — ')
+      };
+
+      const resp = await fetch(N8N_WEBHOOK, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+
+      const data = await resp.json().catch(() => ({}));
+      if (!resp.ok) throw new Error(data.message || `Erro ${resp.status}`);
+
+      document.getElementById('resumo-data').textContent     = periodoTexto;
+      document.getElementById('resumo-pessoas').textContent  = pessoas;
+      document.getElementById('resumo-tipo').textContent     = tipo;
+      document.getElementById('resumo-nome').textContent     = nome;
+      document.getElementById('confirmado-data').textContent = periodoTexto;
+
+      irEtapa(2);
+      mostrarToast('✅ Solicitação enviada! O proprietário será notificado.');
+
+    } catch(err) {
+      console.error('Erro N8N:', err);
+      mostrarToast('❌ Erro ao enviar. Tente novamente em instantes.');
+    } finally {
+      if (btn) { btn.disabled = false; btn.textContent = '📅 Solicitar reserva'; }
+    }
+  }
+
+  // (mantido para compatibilidade com UI)
+  function _enviarSolicitacao_ORIGINAL() {
     const checkin = document.getElementById('r-checkin').value;
     const checkout = document.getElementById('r-checkout').value;
     const nome = document.getElementById('r-nome').value.trim();
@@ -1106,6 +1178,8 @@
 
     irEtapa(2);
     mostrarToast('✅ Solicitação enviada! Aguarde a confirmação.');
+  }
+
   }
 
   function simularConfirmacao() {
