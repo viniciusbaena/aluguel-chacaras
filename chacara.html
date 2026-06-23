@@ -763,10 +763,7 @@
           Enquanto aguarda, que tal já pesquisar <a href="index.html#fornecedores" style="color:var(--verde); font-weight:600;">fornecedores para seu evento</a>?
         </div>
 
-        <!-- SIMULAÇÃO: botão para demo -->
-        <button onclick="simularConfirmacao()" style="background:var(--verde-claro);color:var(--verde-escuro);border:1.5px dashed var(--verde);border-radius:8px;padding:10px;width:100%;font-size:12px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif;">
-          🎭 [DEMO] Simular confirmação do proprietário
-        </button>
+
       </div>
 
       <!-- ETAPA 3: PAGAMENTO -->
@@ -796,7 +793,7 @@
           ⏰ <strong>Atenção:</strong> você tem até <strong>2 horas</strong> para concluir o pagamento. Após esse prazo, a reserva será cancelada automaticamente.
         </div>
 
-        <button class="btn-pagar" onclick="simularPagamento()">
+        <button class="btn-pagar" onclick="abrirPagamento()">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M20 4H4c-1.11 0-2 .89-2 2v12c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V6c0-1.11-.89-2-2-2zm0 14H4v-6h16v6zm0-10H4V6h16v2z"/></svg>
           Pagar com Mercado Pago
         </button>
@@ -1185,6 +1182,15 @@
   function simularConfirmacao() {
     irEtapa(3);
     mostrarToast('🎉 Proprietário confirmou sua reserva!');
+  }
+
+  function abrirPagamento() {
+    const link = sessionStorage.getItem('mp_payment_link') || window._mpLink;
+    if (link) {
+      window.open(link, '_blank');
+    } else {
+      mostrarToast('⚠️ Link de pagamento não encontrado. Verifique o WhatsApp.');
+    }
   }
 
   function simularPagamento() {
