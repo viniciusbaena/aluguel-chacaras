@@ -689,9 +689,9 @@
           <div class="campo-reserva">
             <label>Nº de convidados</label>
             <select id="r-pessoas">
-              <option>Até 50</option>
-              <option>50 a 100</option>
-              <option selected>100 a 150</option>
+              <option value="50">Até 50 pessoas</option>
+              <option value="100">50 a 100 pessoas</option>
+              <option value="150" selected>100 a 150 pessoas</option>
             </select>
           </div>
           <div class="campo-reserva">
@@ -1099,7 +1099,7 @@
     const email    = document.getElementById('r-email').value.trim();
     const pessoas  = document.getElementById('r-pessoas')?.value || '1';
     const tipo     = document.getElementById('r-tipo')?.value || '';
-    const msgExtra = document.getElementById('r-mensagem')?.value?.trim() || '';
+    const msgExtra = document.getElementById('r-msg')?.value?.trim() || '';
 
     if (!checkin)            { mostrarToast('⚠️ Selecione a data de check-in'); return; }
     if (!checkout)           { mostrarToast('⚠️ Selecione a data de check-out'); return; }
