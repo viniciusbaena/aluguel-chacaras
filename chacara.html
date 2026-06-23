@@ -1126,14 +1126,16 @@
         message:         [tipo, msgExtra].filter(Boolean).join(' — ')
       };
 
+      // URLSearchParams evita CORS preflight (Content-Type: application/x-www-form-urlencoded é "simple request")
       const resp = await fetch(N8N_WEBHOOK, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: new URLSearchParams(payload).toString()
       });
 
-      const data = await resp.json().catch(() => ({}));
-      if (!resp.ok) throw new Error(data.message || `Erro ${resp.status}`);
+      // N8N pode não ter CORS header na resposta — não bloquear o fluxo por isso
+      const data = await resp.json().catch(() => ({ success: resp.ok }));
+      if (!resp.ok) throw new Error(data.message || 'Erro ' + resp.status);
 
       document.getElementById('resumo-data').textContent     = periodoTexto;
       document.getElementById('resumo-pessoas').textContent  = pessoas;
