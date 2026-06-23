@@ -1841,10 +1841,10 @@
     card.classList.add('confirmada');
     if (badge) { badge.className = 'reserva-badge badge-confirmada'; badge.textContent = '✅ Confirmada'; }
     if (timer) timer.style.display = 'none';
-    if (acoes) acoes.innerHTML = `<button class="btn-msg-cliente" style="margin-left:0;" onclick="msgCliente('44999999999')">💬 Falar com cliente</button><div style="margin-left:auto;font-size:12px;color:var(--cinza);display:flex;align-items:center;">Aguardando pagamento do cliente</div>`;
+    if (acoes) acoes.innerHTML = `<button class="btn-msg-cliente" style="margin-left:0;" onclick="msgCliente('44999999999')">💬 Falar com cliente via WhatsApp</button><div style="margin-left:auto;font-size:12px;color:var(--cinza);display:flex;align-items:center;">Aguardando pagamento do cliente</div>`;
 
     atualizarBadgeReservas();
-    mostrarToast('✅ Reserva confirmada! O cliente foi notificado para efetuar o pagamento.');
+    mostrarToast('✅ Reserva registrada! O cliente recebe o link de pagamento automaticamente via WhatsApp.');
   }
 
   function abrirModalRecusar(id) {
@@ -1872,7 +1872,7 @@
 
     fecharModalRecusar();
     atualizarBadgeReservas();
-    mostrarToast('Reserva recusada. O cliente foi notificado.');
+    mostrarToast('Reserva recusada. O cliente é notificado automaticamente via WhatsApp.');
     reservaParaRecusar = null;
   }
 
