@@ -482,10 +482,10 @@
 
   function abrirWhatsapp() {
     const msg = encodeURIComponent('Olá! Vi seu serviço no AluguelDeChácaras.com.br e gostaria de mais informações sobre disponibilidade e valores.');
-    window.open(`https://wa.me/5544999999999?text=${msg}`, '_blank');
+    const num = window._fornecedorWpp || '5544999999999'; window.open(`https://wa.me/${num}?text=${msg}`, '_blank');
   }
 
-  function ligar() { mostrarToast('📞 (44) 9 9999-9999'); }
+  function ligar() { const tel = window._fornecedorTel; if (tel) { window.location.href = 'tel:' + tel; } else { mostrarToast('📱 Entre em contato pelo WhatsApp'); } }
 
   function compartilhar() {
     if (navigator.share) {
