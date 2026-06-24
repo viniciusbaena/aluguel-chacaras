@@ -777,8 +777,8 @@
         <div class="pagamento-resumo">
           <div style="font-size:12px; font-weight:700; color:var(--cinza); text-transform:uppercase; letter-spacing:0.5px; margin-bottom:10px;">Resumo do pagamento</div>
           <div class="pagamento-linha" id="linha-diarias">
-            <span id="label-diarias">Diária — Chácara das Palmeiras</span>
-            <span id="valor-diarias">R$ 1.200,00</span>
+            <span id="label-diarias">Diária — <span data-prop="name">Espaço Verde Festas</span></span>
+            <span id="valor-diarias">R$ ---</span>
           </div>
           <div class="pagamento-linha total">
             <span>Total a pagar</span>
@@ -1004,7 +1004,7 @@
 
   function compartilhar() {
     if (navigator.share) {
-      navigator.share({ title: 'Chácara das Palmeiras', url: window.location.href });
+      navigator.share({ title: document.title, url: window.location.href });
     } else {
       navigator.clipboard.writeText(window.location.href);
       mostrarToast('🔗 Link copiado!');
@@ -1113,6 +1113,12 @@
     if (!prop) { document.title = 'Não encontrado'; return; }
 
     PROPERTY_ID = prop.id;
+    // Update price display in summary section
+    const valorDiarias = document.getElementById('valor-diarias');
+    if (valorDiarias) {
+      const [i,d] = parseFloat(prop.price_per_day).toFixed(2).split('.');
+      valorDiarias.textContent = 'R$ ' + i.replace(/\B(?=(\d{3})+(?!\d))/g, '.') + ',' + d;
+    }
     document.title = prop.name + ' — AluguelDeChácaras.com.br';
     document.querySelectorAll('[data-prop="name"]').forEach(el => el.textContent = prop.name);
     document.querySelectorAll('[data-prop="city"]').forEach(el => el.textContent = prop.city || '');
