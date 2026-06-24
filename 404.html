@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>AluguelDeChácaras.com.br</title>
+  <title>AluguelDeChÃ¡caras.com.br</title>
   <style>
     body { font-family: Inter, sans-serif; display: flex; align-items: center; 
             justify-content: center; min-height: 100vh; margin: 0; 
@@ -16,9 +16,9 @@
 </head>
 <body>
 <div class="box">
-  <div class="logo">🏡 AluguelDeChácaras</div>
+  <div class="logo">ð¡ AluguelDeChÃ¡caras</div>
   <p id="msg">Verificando...</p>
-  <p><a href="/">← Voltar ao início</a></p>
+  <p><a href="/">â Voltar ao inÃ­cio</a></p>
 </div>
 <script>
 (async function() {
@@ -29,11 +29,11 @@
   try {
     var r = await fetch(
       'https://tathqoyhcuxthsrghrzx.supabase.co/rest/v1/properties?slug=eq.' + slug + '&active=eq.true&select=id,name&limit=1',
-      { headers: { apikey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRhdGhxb3loY3V4dGhzcmdocnp4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDk3NTM2NzcsImV4cCI6MjA2NTMyOTY3N30.7J2J9rBzX4FGFidSC9b3Z_FT82aKQPNRHBbM1aMEHOk', Authorization: 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRhdGhxb3loY3V4dGhzcmdocnp4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDk3NTM2NzcsImV4cCI6MjA2NTMyOTY3N30.7J2J9rBzX4FGFidSC9b3Z_FT82aKQPNRHBbM1aMEHOk' } }
+      { headers: { apikey: 'sb_publishable_fLpPGAodcCvJxPkQ223ABQ_ApJKDLRU', Authorization: 'Bearer sb_publishable_fLpPGAodcCvJxPkQ223ABQ_ApJKDLRU' } }
     );
     var data = await r.json();
     if (data && data.length > 0) {
-      // Property found — dynamically create the page
+      // Property found â dynamically create the page
       sessionStorage.setItem('prop_slug', slug);
       sessionStorage.setItem('prop_id', data[0].id);
       sessionStorage.setItem('prop_name', data[0].name);
@@ -42,7 +42,7 @@
     }
   } catch(e) {}
 
-  document.getElementById('msg').textContent = 'Página não encontrada.';
+  document.getElementById('msg').textContent = 'PÃ¡gina nÃ£o encontrada.';
 })();
 </script>
 </body>
