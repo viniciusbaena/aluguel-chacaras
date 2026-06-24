@@ -1,17 +1,49 @@
 <!DOCTYPE html>
-<html>
+<html lang="pt-BR">
 <head>
   <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>AluguelDeChácaras.com.br</title>
-  <script>
-    // GitHub Pages SPA redirect trick
-    // Captures the slug from the URL and redirects to index with it
-    var seg = window.location.pathname.replace(/^\//, '').replace(/\/$/, '');
-    if (seg) {
-      sessionStorage.setItem('redirect_slug', seg);
-    }
-    window.location.replace(window.location.origin + '/');
-  </script>
+  <style>
+    body { font-family: Inter, sans-serif; display: flex; align-items: center; 
+            justify-content: center; min-height: 100vh; margin: 0; 
+            background: #faf8f3; color: #111827; }
+    .box { text-align: center; padding: 40px; }
+    .logo { font-size: 24px; font-weight: 900; color: #1e4d2b; margin-bottom: 24px; }
+    p { color: #6b7280; margin: 8px 0; }
+    a { color: #2d7a45; font-weight: 600; text-decoration: none; }
+  </style>
 </head>
-<body></body>
+<body>
+<div class="box">
+  <div class="logo">🏡 AluguelDeChácaras</div>
+  <p id="msg">Verificando...</p>
+  <p><a href="/">← Voltar ao início</a></p>
+</div>
+<script>
+(async function() {
+  var slug = window.location.pathname.replace(/^\//, '').replace(/\/$/, '');
+  if (!slug) { window.location.replace('/'); return; }
+
+  // Check if it's a known property slug in Supabase
+  try {
+    var r = await fetch(
+      'https://tathqoyhcuxthsrghrzx.supabase.co/rest/v1/properties?slug=eq.' + slug + '&active=eq.true&select=id,name&limit=1',
+      { headers: { apikey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRhdGhxb3loY3V4dGhzcmdocnp4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDk3NTM2NzcsImV4cCI6MjA2NTMyOTY3N30.7J2J9rBzX4FGFidSC9b3Z_FT82aKQPNRHBbM1aMEHOk', Authorization: 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRhdGhxb3loY3V4dGhzcmdocnp4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDk3NTM2NzcsImV4cCI6MjA2NTMyOTY3N30.7J2J9rBzX4FGFidSC9b3Z_FT82aKQPNRHBbM1aMEHOk' } }
+    );
+    var data = await r.json();
+    if (data && data.length > 0) {
+      // Property found — dynamically create the page
+      sessionStorage.setItem('prop_slug', slug);
+      sessionStorage.setItem('prop_id', data[0].id);
+      sessionStorage.setItem('prop_name', data[0].name);
+      window.location.replace('/?prop=' + slug);
+      return;
+    }
+  } catch(e) {}
+
+  document.getElementById('msg').textContent = 'Página não encontrada.';
+})();
+</script>
+</body>
 </html>
