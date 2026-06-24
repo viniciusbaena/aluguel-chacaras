@@ -677,14 +677,15 @@
         <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
           <div class="campo-reserva">
             <label>ð Check-in</label>
-            <input type="date" id="r-checkin" min="2026-06-15" onchange="validarDatas()"/>
+            <input type="date" id="r-checkin" onchange="validarDatas()"/>
           </div>
           <div class="campo-reserva">
             <label>ð Check-out</label>
-            <input type="date" id="r-checkout" min="2026-06-16" onchange="calcularTotal()"/>
+            <input type="date" id="r-checkout" onchange="calcularTotal()"/>
           </div>
         </div>
         <div id="resumo-periodo" style="display:none; background:var(--verde-claro); border-radius:8px; padding:8px 12px; font-size:12px; color:var(--verde-escuro); font-weight:600; margin-bottom:4px;"></div>
+        <div id="aviso-data-bloqueada" style="display:none; background:#ffebee; color:#b71c1c; border-radius:8px; padding:8px 12px; font-size:12px; font-weight:600; margin-bottom:4px;"></div>
         <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
           <div class="campo-reserva">
             <label>NÂº de convidados</label>
@@ -944,15 +945,8 @@
   let calMes = new Date().getMonth();
   let calAno = new Date().getFullYear();
 
-  // Disponibilidade simulada
-  const disponibilidade = {};
+  // Disponibilidade real (preenchida ao carregar datas bloqueadas)
   const hoje = new Date();
-  for (let d = 1; d <= 31; d++) {
-    const key = `${hoje.getFullYear()}-${String(hoje.getMonth()+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
-    const r = Math.random();
-    if (r < 0.5) disponibilidade[key] = 'disponivel';
-    else if (r < 0.75) disponibilidade[key] = 'indisponivel';
-  }
 
   function renderCal() {
     document.getElementById('cal-mes').textContent = `${meses[calMes]} ${calAno}`;
@@ -981,8 +975,8 @@
       el.textContent = d;
       if (passado) el.classList.add('passado');
       else if (isHoje) el.classList.add('hoje');
-      else if (disponibilidade[key] === 'disponivel') el.classList.add('disponivel');
-      else if (disponibilidade[key] === 'indisponivel') el.classList.add('indisponivel');
+      else if (datasBlockeadas.includes(key)) el.classList.add('indisponivel');
+      else el.classList.add('disponivel');
       grid.appendChild(el);
     }
   }
@@ -1053,6 +1047,7 @@
       }
     }
     calcularTotal();
+    verificarDatasBloqueadasNoPeriodo();
   }
 
   function calcularTotal() {
@@ -1064,7 +1059,7 @@
       const d1 = new Date(checkin + 'T12:00:00');
       const d2 = new Date(checkout + 'T12:00:00');
       const dias = Math.round((d2 - d1) / (1000 * 60 * 60 * 24)) + 1; // inclusivo: dia 14 a 16 = 3 dias
-      const valorDiaria = 1200;
+      const valorDiaria = PROPERTY_PRICE || 1200;
       const total = dias * valorDiaria;
 
       const fmt = d => new Date(d + 'T12:00:00').toLocaleDateString('pt-BR', { day:'2-digit', month:'2-digit', year:'numeric' });
@@ -1085,7 +1080,9 @@
   const SUPABASE_URL  = 'https://tathqoyhcuxthsrghrzx.supabase.co';
   const SUPABASE_ANON = 'sb_publishable_fLpPGAodcCvJxPkQ223ABQ_ApJKDLRU';
   const N8N_WEBHOOK   = 'https://n8n.alugueldechacaras.com/webhook/nova-reserva';
-  let   PROPERTY_ID   = '';
+  let   PROPERTY_ID    = '';
+  let   PROPERTY_PRICE = 0;
+  let   datasBlockeadas = [];
 
   async function carregarPropriedade() {
     const slug = document.documentElement.dataset.slug || '';
@@ -1112,7 +1109,16 @@
     const prop = data && data[0];
     if (!prop) { document.title = 'NÃ£o encontrado'; return; }
 
-    PROPERTY_ID = prop.id;
+    PROPERTY_ID    = prop.id;
+    PROPERTY_PRICE = parseFloat(prop.price_per_day) || 0;
+    // Set min date = today for both inputs
+    const todayStr = new Date().toISOString().split('T')[0];
+    const checkinEl  = document.getElementById('r-checkin');
+    const checkoutEl = document.getElementById('r-checkout');
+    if (checkinEl)  checkinEl.min  = todayStr;
+    if (checkoutEl) checkoutEl.min = todayStr;
+    // Load blocked dates
+    carregarDatasBlockeadas(prop.id);
     // Update price display in summary section
     const valorDiarias = document.getElementById('valor-diarias');
     if (valorDiarias) {
@@ -1379,7 +1385,102 @@
     if (e.key === 'Escape') fecharGaleriaBtn();
   });
 
+
+  // ---- DATAS BLOQUEADAS ----
+  async function carregarDatasBlockeadas(propertyId) {
+    if (!propertyId) return;
+    const todayStr = new Date().toISOString().split('T')[0];
+    try {
+      const r = await fetch(
+        `${SUPABASE_URL}/rest/v1/blocked_dates?property_id=eq.${propertyId}&blocked_date=gte.${todayStr}&select=blocked_date`,
+        { headers: { apikey: SUPABASE_ANON, Authorization: `Bearer ${SUPABASE_ANON}` } }
+      );
+      const data = await r.json();
+      datasBlockeadas = (data || []).map(d => d.blocked_date);
+      renderCal(); // re-render calendar with real data
+    } catch(e) {
+      console.warn('Erro ao carregar datas bloqueadas:', e);
+    }
+  }
+
+  function verificarBloqueioNoPeriodo(checkin, checkout) {
+    if (!checkin || !checkout || !datasBlockeadas.length) return null;
+    const d1 = new Date(checkin  + 'T12:00:00');
+    const d2 = new Date(checkout + 'T12:00:00');
+    for (const blocked of datasBlockeadas) {
+      const bd = new Date(blocked + 'T12:00:00');
+      if (bd >= d1 && bd <= d2) return blocked;
+    }
+    return null;
+  }
+
+  function verificarDatasBloqueadasNoPeriodo() {
+    const checkin  = document.getElementById('r-checkin').value;
+    const checkout = document.getElementById('r-checkout').value;
+    const aviso    = document.getElementById('aviso-data-bloqueada');
+    if (!aviso) return;
+    const bloqueio = verificarBloqueioNoPeriodo(checkin, checkout);
+    if (bloqueio) {
+      const [ano,mes,dia] = bloqueio.split('-');
+      aviso.textContent = '⚠️ A data ' + dia + '/' + mes + '/' + ano + ' jÃ¡ estÃ¡ reservada. Por favor escolha outro perÃ­odo.';
+      aviso.style.display = 'block';
+    } else {
+      aviso.style.display = 'none';
+    }
+  }
+
+  // ---- RETORNO DO MERCADO PAGO ----
+  function verificarRetornoPagamento() {
+    const params = new URLSearchParams(window.location.search);
+    const status = params.get('pagamento');
+    if (!status) return;
+    // Limpa a URL sem recarregar a página
+    history.replaceState({}, '', window.location.pathname);
+    const overlay = document.getElementById('pagamento-overlay');
+    if (!overlay) return;
+    const configs = {
+      sucesso: {
+        icon: '✅',
+        titulo: 'Pagamento confirmado!',
+        desc: 'Sua reserva estÃ¡ garantida. Vocã receberÃ¡ os detalhes do proprietÃ¡rio por WhatsApp/e-mail em breve.',
+        cor: '#1e4d2b',
+        bg: '#e8f5e9'
+      },
+      pendente: {
+        icon: '⏳',
+        titulo: 'Pagamento em processamento',
+        desc: 'Seu pagamento estÃ¡ sendo analisado (ex: boleto). Você receberÃ¡ a confirmaÃ§Ã£o assim que for aprovado.',
+        cor: '#e65100',
+        bg: '#fff3e0'
+      },
+      erro: {
+        icon: '❌',
+        titulo: 'Pagamento nÃ£o concluÃ­do',
+        desc: 'HouVe um problema com seu pagamento. Tente novamente ou entre em contato com o proprietÃ¡rio.',
+        cor: '#b71c1c',
+        bg: '#ffebee'
+      }
+    };
+    const cfg = configs[status] || configs.erro;
+    overlay.querySelector('.pag-overlay-icon').textContent  = cfg.icon;
+    overlay.querySelector('.pag-overlay-titulo').textContent = cfg.titulo;
+    overlay.querySelector('.pag-overlay-desc').textContent  = cfg.desc;
+    overlay.style.background = cfg.bg;
+    overlay.querySelector('.pag-overlay-titulo').style.color = cfg.cor;
+    overlay.style.display = 'flex';
+  }
+
   renderCal();
+  verificarRetornoPagamento();
 </script>
+
+<!-- OVERLAY RETORNO PAGAMENTO -->
+<div id="pagamento-overlay" style="display:none; position:fixed; inset:0; z-index:9999; background:#e8f5e9; flex-direction:column; align-items:center; justify-content:center; padding:32px; text-align:center;">
+  <div class="pag-overlay-icon" style="font-size:64px; margin-bottom:16px;"></div>
+  <div class="pag-overlay-titulo" style="font-family:'Fraunces',serif; font-size:24px; font-weight:700; margin-bottom:12px;"></div>
+  <div class="pag-overlay-desc" style="font-size:14px; color:#444; max-width:360px; line-height:1.6; margin-bottom:24px;"></div>
+  <button onclick="document.getElementById('pagamento-overlay').style.display='none'" style="background:var(--verde); color:#fff; border:none; border-radius:10px; padding:12px 28px; font-size:15px; font-weight:600; cursor:pointer;">Ok, entendido</button>
+</div>
+
 </body>
 </html>
