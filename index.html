@@ -1007,71 +1007,86 @@
     <a href="/espaco-verde-festas/" class="btn btn-outline">Ver todas →</a>
   </div>
 
-  <div class="chacaras-grid">
-    <a href="/espaco-verde-festas/" class="chacara-card" style="text-decoration:none;color:inherit;display:block;">
-      <div class="chacara-foto-placeholder" style="background: linear-gradient(135deg,#c8e6c9,#81c784);">
-        🏡
-        <span class="chacara-badge-foto">📷 12 fotos</span>
-      </div>
-      <div class="chacara-info">
-        <div class="chacara-local">📍 Maringá — Zona Rural</div>
-        <div class="chacara-nome">Chácara das Palmeiras</div>
-        <div class="chacara-desc">Espaço amplo com piscina, churrasqueira coberta, campo de futebol e casa sede. Ideal para festas e confraternizações.</div>
-        <div class="chacara-tags">
-          <span class="tag">🏊 Piscina</span>
-          <span class="tag">⚽ Campo</span>
-          <span class="tag">🍖 Churrasqueira</span>
-          <span class="tag">🅿️ Estacionamento</span>
-        </div>
-        <div class="chacara-footer">
-          <div class="chacara-preco">a partir de <strong>R$ 1.200</strong>/dia</div>
-          <span class="btn-contato">Solicitar reserva</span>
-        </div>
-      </div>
-    </a>
-
-    <a href="/espaco-verde-festas/" class="chacara-card" style="text-decoration:none;color:inherit;display:block;">
-      <div class="chacara-foto-placeholder" style="background: linear-gradient(135deg,#ffe0b2,#ffb74d);">
-        🌳
-        <span class="chacara-badge-foto">📷 8 fotos</span>
-      </div>
-      <div class="chacara-info">
-        <div class="chacara-local">📍 Sarandi — PR</div>
-        <div class="chacara-nome">Sítio Boa Vista</div>
-        <div class="chacara-desc">Ambiente tranquilo e arborizado com lago para pesca, espaço gourmet e acomodação para até 80 pessoas.</div>
-        <div class="chacara-tags">
-          <span class="tag">🎣 Lago</span>
-          <span class="tag">🍽️ Espaço gourmet</span>
-          <span class="tag">🛌 Hospedagem</span>
-        </div>
-        <div class="chacara-footer">
-          <div class="chacara-preco">a partir de <strong>R$ 900</strong>/dia</div>
-          <span class="btn-contato">Solicitar reserva</span>
-        </div>
-      </div>
-    </a>
-
-    <a href="/espaco-verde-festas/" class="chacara-card" style="text-decoration:none;color:inherit;display:block;">
-      <div class="chacara-foto-placeholder" style="background: linear-gradient(135deg,#b3e5fc,#4fc3f7);">
-        🎉
-        <span class="chacara-badge-foto">📷 15 fotos</span>
-      </div>
-      <div class="chacara-info">
-        <div class="chacara-local">📍 Paiçandu — PR</div>
-        <div class="chacara-nome">Espaço Verde Festas</div>
-        <div class="chacara-desc">Especializado em eventos e casamentos. Salão coberto para 200 pessoas, decoração inclusa e estacionamento amplo.</div>
-        <div class="chacara-tags">
-          <span class="tag">💒 Casamentos</span>
-          <span class="tag">🎪 Salão coberto</span>
-          <span class="tag">👨‍👩‍👧 Até 200 pessoas</span>
-        </div>
-        <div class="chacara-footer">
-          <div class="chacara-preco">a partir de <strong>R$ 2.500</strong>/dia</div>
-          <span class="btn-contato">Solicitar reserva</span>
-        </div>
-      </div>
-    </a>
+  <div class="chacaras-grid" id="chacaras-grid">
+    <!-- Cards carregados dinamicamente do Supabase -->
+    <div id="chacaras-loading" style="grid-column:1/-1; text-align:center; padding:40px; color:#666; font-size:14px;">
+      ⏳ Carregando propriedades...
+    </div>
   </div>
+
+  <script>
+  (async function carregarChacaras() {
+    const SUPABASE_URL  = 'https://tathqoyhcuxthsrghrzx.supabase.co';
+    const SUPABASE_ANON = 'sb_publishable_fLpPGAodcCvJxPkQ223ABQ_ApJKDLRU';
+    const grid    = document.getElementById('chacaras-grid');
+    const loading = document.getElementById('chacaras-loading');
+
+    const paleta = [
+      'linear-gradient(135deg,#c8e6c9,#81c784)',
+      'linear-gradient(135deg,#ffe0b2,#ffb74d)',
+      'linear-gradient(135deg,#b3e5fc,#4fc3f7)',
+      'linear-gradient(135deg,#f8bbd0,#f48fb1)',
+      'linear-gradient(135deg,#e8eaf6,#9fa8da)',
+      'linear-gradient(135deg,#fff9c4,#ffd54f)',
+      'linear-gradient(135deg,#e0f7fa,#4dd0e1)',
+      'linear-gradient(135deg,#fce4ec,#f06292)',
+    ];
+    const icones = ['🏡','🌳','🎉','🌿','🏕️','🌻','🏞️','🎊'];
+
+    try {
+      const r = await fetch(
+        `${SUPABASE_URL}/rest/v1/properties?active=eq.true&order=created_at.desc&select=id,name,slug,city,address,description,price_per_day,max_guests`,
+        { headers: { apikey: SUPABASE_ANON, Authorization: `Bearer ${SUPABASE_ANON}` } }
+      );
+      const props = await r.json();
+
+      if (!props || !props.length) {
+        loading.innerHTML = 'Nenhuma propriedade disponível no momento.';
+        return;
+      }
+
+      loading.remove();
+
+      props.forEach((p, idx) => {
+        const slug = p.slug || p.id;
+        const href = `/${slug}/`;
+        const bg   = paleta[idx % paleta.length];
+        const icon = icones[idx % icones.length];
+        const preco = p.price_per_day
+          ? 'R$ ' + parseFloat(p.price_per_day).toLocaleString('pt-BR', {minimumFractionDigits:0}) + '/dia'
+          : '';
+        const local = [p.city, p.address].filter(Boolean).join(' — ');
+        const desc  = p.description ? p.description.slice(0, 120) + (p.description.length > 120 ? '…' : '') : '';
+        const cap   = p.max_guests ? `👥 Até ${p.max_guests} pessoas` : '';
+
+        const card = document.createElement('a');
+        card.href  = href;
+        card.className = 'chacara-card';
+        card.style.cssText = 'text-decoration:none;color:inherit;display:block;';
+        card.innerHTML = `
+          <div class="chacara-foto-placeholder" style="background: ${bg};">
+            ${icon}
+          </div>
+          <div class="chacara-info">
+            ${local ? `<div class="chacara-local">📍 ${local}</div>` : ''}
+            <div class="chacara-nome">${p.name}</div>
+            ${desc ? `<div class="chacara-desc">${desc}</div>` : ''}
+            <div class="chacara-tags">
+              ${cap ? `<span class="tag">${cap}</span>` : ''}
+            </div>
+            <div class="chacara-footer">
+              ${preco ? `<div class="chacara-preco">a partir de <strong>${preco}</strong></div>` : ''}
+              <span class="btn-contato">Solicitar reserva</span>
+            </div>
+          </div>`;
+        grid.appendChild(card);
+      });
+    } catch(e) {
+      loading.innerHTML = 'Erro ao carregar propriedades. Tente novamente.';
+      console.error(e);
+    }
+  })();
+  </script>
 </section>
 
 <!-- FORNECEDORES -->
