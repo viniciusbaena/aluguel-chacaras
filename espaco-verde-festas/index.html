@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="pt-BR" data-slug="espaco-verde-festas">
+<html lang="pt-BR" data-slug="espaco-verde-festas" data-propid="4f7e9eae-4da6-493f-bc99-2d85f08266e3">
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
@@ -1088,17 +1088,31 @@
   let   PROPERTY_ID   = '';
 
   async function carregarPropriedade() {
-    if (!PROPERTY_SLUG) return;
-    const r = await fetch(
-      `${SUPABASE_URL}/rest/v1/properties?slug=eq.${PROPERTY_SLUG}&active=eq.true&limit=1`,
-      { headers: { apikey: SUPABASE_ANON, Authorization: `Bearer ${SUPABASE_ANON}` } }
-    );
-    const [prop] = await r.json();
+    const slug = document.documentElement.dataset.slug || '';
+    const propId = document.documentElement.dataset.propid || '';
+    let url;
+    if (slug) {
+      url = `https://tathqoyhcuxthsrghrzx.supabase.co/rest/v1/properties?slug=eq.${slug}&active=eq.true&limit=1`;
+    } else if (propId) {
+      url = `https://tathqoyhcuxthsrghrzx.supabase.co/rest/v1/properties?id=eq.${propId}&active=eq.true&limit=1`;
+    } else return;
+
+    const r = await fetch(url, {
+      headers: { apikey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRhdGhxb3loY3V4dGhzcmdocnp4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDk3NTM2NzcsImV4cCI6MjA2NTMyOTY3N30.7J2J9rBzX4FGFidSC9b3Z_FT82aKQPNRHBbM1aMEHOk', Authorization: `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRhdGhxb3loY3V4dGhzcmdocnp4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDk3NTM2NzcsImV4cCI6MjA2NTMyOTY3N30.7J2J9rBzX4FGFidSC9b3Z_FT82aKQPNRHBbM1aMEHOk` }
+    });
+    let data = await r.json();
+    // Fallback: if slug returns empty (column not yet created), try by ID
+    if ((!data || !data.length) && propId) {
+      const r2 = await fetch(
+        `https://tathqoyhcuxthsrghrzx.supabase.co/rest/v1/properties?id=eq.${propId}&active=eq.true&limit=1`,
+        { headers: { apikey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRhdGhxb3loY3V4dGhzcmdocnp4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDk3NTM2NzcsImV4cCI6MjA2NTMyOTY3N30.7J2J9rBzX4FGFidSC9b3Z_FT82aKQPNRHBbM1aMEHOk', Authorization: `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRhdGhxb3loY3V4dGhzcmdocnp4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDk3NTM2NzcsImV4cCI6MjA2NTMyOTY3N30.7J2J9rBzX4FGFidSC9b3Z_FT82aKQPNRHBbM1aMEHOk` } }
+      );
+      data = await r2.json();
+    }
+    const prop = data && data[0];
     if (!prop) { document.title = 'Não encontrado'; return; }
 
     PROPERTY_ID = prop.id;
-
-    // Update title and visible elements
     document.title = prop.name + ' — AluguelDeChácaras.com.br';
     document.querySelectorAll('[data-prop="name"]').forEach(el => el.textContent = prop.name);
     document.querySelectorAll('[data-prop="city"]').forEach(el => el.textContent = prop.city || '');
