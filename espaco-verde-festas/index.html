@@ -996,7 +996,7 @@
 
   // CONTATO
   function abrirWhatsapp() {
-    const msg = encodeURIComponent('Olá! Vi sua chácara no AluguelDeChácaras.com.br e gostaria de mais informações sobre disponibilidade e valores.');
+    const msg = encodeURIComponent('Olá! Vi sua chácara no AluguelDeChácaras.com e gostaria de mais informações sobre disponibilidade e valores.');
     window.open(`https://wa.me/5544999999999?text=${msg}`, '_blank');
   }
 
@@ -1131,7 +1131,7 @@
       const [i,d] = parseFloat(prop.price_per_day).toFixed(2).split('.');
       valorDiarias.textContent = 'R$ ' + i.replace(/\B(?=(\d{3})+(?!\d))/g, '.') + ',' + d;
     }
-    document.title = prop.name + ' — AluguelDeChácaras.com.br';
+    document.title = prop.name + ' — AluguelDeChácaras.com';
     document.querySelectorAll('[data-prop="name"]').forEach(el => el.textContent = prop.name);
     document.querySelectorAll('[data-prop="city"]').forEach(el => el.textContent = prop.city || '');
     document.querySelectorAll('[data-prop="description"]').forEach(el => el.textContent = prop.description || '');
@@ -1288,7 +1288,7 @@
     if (dados.nome) {
       const titulo = document.querySelector('.detalhe-titulo');
       if (titulo) titulo.textContent = dados.nome;
-      document.title = dados.nome + ' — AluguelDeChácaras.com.br';
+      document.title = dados.nome + ' — AluguelDeChácaras.com';
     }
     if (dados.cidade || dados.bairro) {
       const local = document.querySelector('.detalhe-local');
