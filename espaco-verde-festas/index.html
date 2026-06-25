@@ -718,7 +718,7 @@
         </div>
         <div class="campo-reserva">
           <label>WhatsApp</label>
-          <input type="text" id="r-wpp" placeholder="(44) 9 0000-0000"/>
+          <input type="text" id="r-wpp" placeholder="(44) 9 0000-0000" inputmode="numeric" oninput="mascaraWhatsApp(this)"/>
         </div>
         <div class="campo-reserva">
           <label>E-mail</label>
@@ -1141,6 +1141,20 @@
     });
     document.querySelectorAll('[data-prop="max_guests"]').forEach(el => el.textContent = prop.max_guests || '');
     document.querySelectorAll('[data-prop="address"]').forEach(el => el.textContent = prop.address || '');
+  }
+
+  
+  function mascaraWhatsApp(input) {
+    let v = input.value.replace(/\D/g, '').slice(0, 11);
+    if (v.length <= 2) {
+      input.value = v.length ? '(' + v : '';
+    } else if (v.length <= 3) {
+      input.value = '(' + v.slice(0,2) + ') ' + v.slice(2);
+    } else if (v.length <= 7) {
+      input.value = '(' + v.slice(0,2) + ') ' + v.slice(2,3) + ' ' + v.slice(3);
+    } else {
+      input.value = '(' + v.slice(0,2) + ') ' + v.slice(2,3) + ' ' + v.slice(3,7) + '-' + v.slice(7);
+    }
   }
 
   function formatarWhatsApp(numero) {
