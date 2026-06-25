@@ -1,9 +1,10 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
+  <script>if(location.protocol==='http:')location.replace(location.href.replace('http:','https:'));</script>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>AluguelDeChÃ¡caras.com.br</title>
+  <title>AluguelDeChácaras.com.br</title>
   <style>
     body { font-family: Inter, sans-serif; display: flex; align-items: center; 
             justify-content: center; min-height: 100vh; margin: 0; 
@@ -16,9 +17,9 @@
 </head>
 <body>
 <div class="box">
-  <div class="logo">ð¡ AluguelDeChÃ¡caras</div>
+  <div class="logo">🏡 AluguelDeChácaras</div>
   <p id="msg">Verificando...</p>
-  <p><a href="/">â Voltar ao inÃ­cio</a></p>
+  <p><a href="/">← Voltar ao início</a></p>
 </div>
 <script>
 (async function() {
@@ -33,16 +34,16 @@
     );
     var data = await r.json();
     if (data && data.length > 0) {
-      // Property found â dynamically create the page
+      // Property found — dynamically create the page
       sessionStorage.setItem('prop_slug', slug);
       sessionStorage.setItem('prop_id', data[0].id);
       sessionStorage.setItem('prop_name', data[0].name);
-      window.location.replace('/?prop=' + slug);
+      window.location.replace('/' + slug + '/');
       return;
     }
   } catch(e) {}
 
-  document.getElementById('msg').textContent = 'PÃ¡gina nÃ£o encontrada.';
+  document.getElementById('msg').textContent = 'Página não encontrada.';
 })();
 </script>
 </body>
