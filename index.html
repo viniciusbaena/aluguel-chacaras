@@ -1296,7 +1296,7 @@
   </div>
 </footer>
 <div class="footer-bottom">
-  <span class="footer-copy">© 2026 AluguelDeChácaras.com.br — Maringá, PR</span>
+  <span class="footer-copy">© 2026 AluguelDeChácaras.com — Maringá, PR</span>
   <span class="footer-copy">Feito com 💚 no Paraná</span>
 </div>
 
@@ -1702,7 +1702,7 @@
 <script>
   // DADOS DAS CHÁCARAS E FORNECEDORES (base de conhecimento da IA)
   const BASE_CONHECIMENTO = `
-Você é o assistente virtual do site AluguelDeChácaras.com.br, plataforma de aluguel de chácaras para eventos em Maringá e região do Paraná. Seja simpático, objetivo e use emojis com moderação.
+Você é o assistente virtual do site AluguelDeChácaras.com, plataforma de aluguel de chácaras para eventos em Maringá e região do Paraná. Seja simpático, objetivo e use emojis com moderação.
 
 CHÁCARAS CADASTRADAS:
 1. Chácara das Palmeiras — Maringá (Zona Rural)
@@ -1764,7 +1764,7 @@ Responda sempre em português brasileiro. Se não souber algo, sugira que o visi
   }
 
   function mensagemBoasVindas() {
-    adicionarMensagem('ia', 'Olá! 👋 Sou o assistente do AluguelDeChácaras.com.br.\n\nPosso te ajudar a encontrar a chácara ideal para seu evento ou indicar fornecedores de Maringá e região. Como posso ajudar?');
+    adicionarMensagem('ia', 'Olá! 👋 Sou o assistente do AluguelDeChácaras.com.\n\nPosso te ajudar a encontrar a chácara ideal para seu evento ou indicar fornecedores de Maringá e região. Como posso ajudar?');
   }
 
   function adicionarMensagem(tipo, texto) {
@@ -1823,7 +1823,7 @@ Responda sempre em português brasileiro. Se não souber algo, sugira que o visi
     try {
       const mensagens = [
         { role: 'user', content: BASE_CONHECIMENTO + '\n\nAgora responda a conversa abaixo:' },
-        { role: 'assistant', content: 'Entendido! Estou pronto para ajudar os visitantes do AluguelDeChácaras.com.br.' },
+        { role: 'assistant', content: 'Entendido! Estou pronto para ajudar os visitantes do AluguelDeChácaras.com.' },
         ...historico.slice(-10)
       ];
 
