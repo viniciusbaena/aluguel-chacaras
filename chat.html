@@ -84,7 +84,9 @@ async function loadMessages(initial = false) {
   const url = `${N8N}/chat-get-mensagens?booking_id=${bookingId}` + (lastTs && !initial ? `&after=${encodeURIComponent(lastTs)}` : '');
   const r = await fetch(url);
   if (!r.ok) throw new Error('HTTP ' + r.status);
-  const msgs = await r.json();
+  // N8N may return empty body when no messages exist — handle gracefully
+  const text = await r.text();
+  const msgs = text.trim() ? JSON.parse(text) : [];
   const arr = Array.isArray(msgs) ? msgs : [];
 
   const box = document.getElementById('messages');
@@ -95,10 +97,8 @@ async function loadMessages(initial = false) {
   if (initial) box.scrollTop = box.scrollHeight;
 }
 
-// ── load booking info ──
-async function loadBookingInfo() {
-  const r = await fetch(`${N8N}/chat-get-mensagens?booking_id=${bookingId}&info=1`);
-  // Best-effort: N8N returns booking info in header or we just show generic title
+// ── load booking info (best-effort, shows generic title) ──
+function loadBookingInfo() {
   document.getElementById('prop-name').textContent = 'Chat da Reserva';
 }
 
@@ -150,6 +150,7 @@ document.getElementById('send').addEventListener('click', sendMessage);
 
 // ── init ──
 if (bookingId) {
+  loadBookingInfo();
   document.getElementById('send').disabled = false;
   loadMessages(true)
     .then(() => { polling = setInterval(() => loadMessages(false), 4000); })
@@ -158,5 +159,4 @@ if (bookingId) {
     });
 }
 </script>
-</body>
-</html>
+</body
