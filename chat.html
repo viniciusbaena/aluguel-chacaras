@@ -8,199 +8,154 @@
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f0f4f0; height: 100dvh; display: flex; flex-direction: column; }
     header { background: #1e4d2b; color: #fff; padding: 14px 20px; display: flex; align-items: center; gap: 12px; flex-shrink: 0; }
-    header a { color: #fff; text-decoration: none; font-size: 20px; }
+    header a { color: #fff; text-decoration: none; font-size: 20px; line-height: 1; }
     header .info h2 { font-size: 16px; font-weight: 600; }
     header .info p { font-size: 12px; opacity: 0.8; }
     #messages { flex: 1; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 10px; }
-    .msg { max-width: 75%; padding: 10px 14px; border-radius: 12px; font-size: 14px; line-height: 1.5; }
+    .msg { max-width: 75%; padding: 10px 14px; border-radius: 12px; font-size: 14px; line-height: 1.5; word-break: break-word; }
     .msg.mine { align-self: flex-end; background: #1e4d2b; color: #fff; border-bottom-right-radius: 2px; }
     .msg.theirs { align-self: flex-start; background: #fff; color: #333; border-bottom-left-radius: 2px; box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
     .msg .time { font-size: 11px; opacity: 0.65; margin-top: 4px; text-align: right; }
     .msg.theirs .time { text-align: left; }
-    .system-msg { text-align: center; font-size: 12px; color: #999; padding: 4px 0; }
-    #form { background: #fff; border-top: 1px solid #e0e0e0; padding: 12px 16px; display: flex; gap: 10px; flex-shrink: 0; }
-    #input { flex: 1; border: 1px solid #ddd; border-radius: 24px; padding: 10px 16px; font-size: 15px; outline: none; resize: none; max-height: 100px; }
+    .system-msg { text-align: center; font-size: 12px; color: #999; padding: 8px 0; }
+    #composer { background: #fff; border-top: 1px solid #e0e0e0; padding: 12px 16px; display: flex; gap: 10px; flex-shrink: 0; align-items: flex-end; }
+    #input { flex: 1; border: 1px solid #ddd; border-radius: 20px; padding: 10px 16px; font-size: 15px; outline: none; resize: none; max-height: 100px; font-family: inherit; line-height: 1.4; }
     #input:focus { border-color: #1e4d2b; }
-    #send { background: #1e4d2b; color: #fff; border: none; border-radius: 50%; width: 44px; height: 44px; cursor: pointer; font-size: 20px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; }
-    #send:disabled { opacity: 0.4; }
-    #status { text-align: center; padding: 8px; font-size: 12px; color: #999; }
-    .loading { text-align: center; padding: 40px; color: #999; }
-    .error-banner { background: #ffebee; color: #c62828; padding: 12px; text-align: center; font-size: 14px; }
+    #send { background: #1e4d2b; color: #fff; border: none; border-radius: 50%; width: 44px; height: 44px; cursor: pointer; font-size: 18px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; transition: opacity 0.2s; }
+    #send:disabled { opacity: 0.35; cursor: default; }
+    .loading { text-align: center; padding: 40px; color: #999; font-size: 14px; }
+    .error-card { background: #ffebee; color: #c62828; padding: 20px; text-align: center; font-size: 14px; border-radius: 8px; margin: 20px; }
   </style>
 </head>
 <body>
+
 <header>
   <a href="/">🌿</a>
   <div class="info">
     <h2 id="prop-name">Carregando...</h2>
-    <p id="role-label">Chat seguro via AluguelDeChácaras</p>
+    <p>Chat seguro via AluguelDeChácaras</p>
   </div>
 </header>
 
 <div id="messages"><div class="loading">Carregando mensagens...</div></div>
 
-<div id="form">
+<div id="composer">
   <textarea id="input" placeholder="Digite sua mensagem..." rows="1"></textarea>
   <button id="send" disabled>➤</button>
 </div>
 
 <script>
-const SUPABASE_URL = 'https://tathqoyhcuxthsrghrzx.supabase.co';
-const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRhdGhxb3loY3V4dGhzcmdocnp4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDcyNTMxMzcsImV4cCI6MjA2MjgyOTEzN30.lyYalmMPBmNmWQrBQqY5D0RYHkSUfOTBfK-bVS9ZCWQ';
-const N8N_CHAT_URL = 'https://n8n.alugueldechacaras.com/webhook/chat-mensagem';
-
+const N8N = 'https://n8n.alugueldechacaras.com/webhook';
 const params = new URLSearchParams(location.search);
 const bookingId = params.get('id');
-const role = params.get('role') || 'client'; // 'client' or 'owner'
-
-let lastMessageId = null;
-let pollInterval = null;
-let propertyName = '';
+const role = params.get('role') || 'client';
 
 if (!bookingId) {
-  document.getElementById('messages').innerHTML = '<div class="error-banner">❌ Link inválido. Booking ID não encontrado.</div>';
+  document.getElementById('messages').innerHTML = '<div class="error-card">❌ Link inválido. Booking ID não encontrado.</div>';
 }
 
-async function supaFetch(path, opts = {}) {
-  const r = await fetch(`${SUPABASE_URL}${path}`, {
-    ...opts,
-    headers: { apikey: SUPABASE_KEY, Authorization: `Bearer ${SUPABASE_KEY}`, 'Content-Type': 'application/json', ...(opts.headers || {}) }
-  });
-  return r.ok ? r.json() : Promise.reject(await r.text());
-}
+// ── state ──
+let lastTs = null;
+let polling = null;
 
-async function loadBooking() {
-  const data = await supaFetch(`/rest/v1/bookings?select=client_name,properties(name)&id=eq.${bookingId}&limit=1`);
-  if (!data.length) throw new Error('Reserva não encontrada');
-  const b = data[0];
-  propertyName = b.properties?.name || 'Chácara';
-  document.getElementById('prop-name').textContent = propertyName;
-  document.getElementById('role-label').textContent = role === 'client' ? `Falar com o proprietário` : `Falar com ${b.client_name}`;
+// ── helpers ──
+function fmt(iso) {
+  return new Date(iso).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
 }
-
-function formatTime(iso) {
-  const d = new Date(iso);
-  return d.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+function esc(s) {
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>');
 }
-
-function renderMessage(msg) {
+function addMsg(msg, prepend = false) {
+  if (document.querySelector(`[data-id="${msg.id}"]`)) return;
   const mine = msg.sender === role;
-  const div = document.createElement('div');
-  div.className = `msg ${mine ? 'mine' : 'theirs'}`;
-  div.dataset.id = msg.id;
-  div.innerHTML = `<div class="text">${escapeHtml(msg.message)}</div><div class="time">${formatTime(msg.created_at)}</div>`;
-  return div;
+  const el = document.createElement('div');
+  el.className = `msg ${mine ? 'mine' : 'theirs'}`;
+  el.dataset.id = msg.id;
+  el.innerHTML = `<div>${esc(msg.message)}</div><div class="time">${fmt(msg.created_at)}</div>`;
+  const box = document.getElementById('messages');
+  const wasBottom = box.scrollHeight - box.scrollTop - box.clientHeight < 60;
+  if (prepend) box.prepend(el); else box.appendChild(el);
+  if (!prepend && wasBottom) box.scrollTop = box.scrollHeight;
+  lastTs = msg.created_at;
 }
 
-function escapeHtml(str) {
-  return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>');
-}
-
+// ── load messages via N8N proxy ──
 async function loadMessages(initial = false) {
-  let url = `/rest/v1/chat_messages?select=*&booking_id=eq.${bookingId}&order=created_at.asc`;
-  if (!initial && lastMessageId) {
-    url += `&created_at=gt.${encodeURIComponent(document.querySelector('[data-id="'+lastMessageId+'"]')?.dataset?.ts || new Date(0).toISOString())}`;
-  }
+  const url = `${N8N}/chat-get-mensagens?booking_id=${bookingId}` + (lastTs && !initial ? `&after=${encodeURIComponent(lastTs)}` : '');
+  const r = await fetch(url);
+  if (!r.ok) throw new Error('HTTP ' + r.status);
+  const msgs = await r.json();
+  const arr = Array.isArray(msgs) ? msgs : [];
 
-  const msgs = await supaFetch(initial
-    ? `/rest/v1/chat_messages?select=*&booking_id=eq.${bookingId}&order=created_at.asc`
-    : `/rest/v1/chat_messages?select=*&booking_id=eq.${bookingId}&order=created_at.asc&id=neq.${lastMessageId}&created_at=gte.${encodeURIComponent(lastTs())}`
-  );
-
-  const container = document.getElementById('messages');
+  const box = document.getElementById('messages');
   if (initial) {
-    container.innerHTML = '';
-    if (!msgs.length) {
-      container.innerHTML = '<div class="system-msg">Seja o primeiro a enviar uma mensagem 👋</div>';
-    }
+    box.innerHTML = arr.length ? '' : '<div class="system-msg">Nenhuma mensagem ainda. Seja o primeiro! 👋</div>';
   }
-
-  for (const msg of msgs) {
-    if (initial || msg.id !== lastMessageId) {
-      if (!document.querySelector(`[data-id="${msg.id}"]`)) {
-        const el = renderMessage(msg);
-        el.dataset.ts = msg.created_at;
-        container.appendChild(el);
-        lastMessageId = msg.id;
-      }
-    }
-  }
-
-  // Scroll to bottom on initial load or new messages
-  if (msgs.length > 0 || initial) {
-    container.scrollTop = container.scrollHeight;
-  }
+  arr.forEach(m => addMsg(m));
+  if (initial) box.scrollTop = box.scrollHeight;
 }
 
-function lastTs() {
-  const lastEl = document.querySelector('[data-id]');
-  const all = document.querySelectorAll('[data-ts]');
-  if (!all.length) return new Date(0).toISOString();
-  return all[all.length - 1].dataset.ts;
+// ── load booking info ──
+async function loadBookingInfo() {
+  const r = await fetch(`${N8N}/chat-get-mensagens?booking_id=${bookingId}&info=1`);
+  // Best-effort: N8N returns booking info in header or we just show generic title
+  document.getElementById('prop-name').textContent = 'Chat da Reserva';
 }
 
+// ── send ──
 async function sendMessage() {
-  const input = document.getElementById('input');
-  const text = input.value.trim();
+  const inp = document.getElementById('input');
+  const text = inp.value.trim();
   if (!text) return;
-
   const btn = document.getElementById('send');
   btn.disabled = true;
-  input.value = '';
-  input.style.height = 'auto';
+  inp.value = '';
+  inp.style.height = 'auto';
+
+  // Optimistic UI: show instantly
+  const tempId = 'temp-' + Date.now();
+  addMsg({ id: tempId, sender: role, message: text, created_at: new Date().toISOString() });
 
   try {
-    // Save to Supabase directly
-    await supaFetch('/rest/v1/chat_messages', {
-      method: 'POST',
-      headers: { Prefer: 'return=minimal' },
-      body: JSON.stringify({ booking_id: bookingId, sender: role, message: text })
-    });
-
-    // Notify N8N to forward via WhatsApp
-    fetch(N8N_CHAT_URL, {
+    const r = await fetch(`${N8N}/chat-mensagem`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ booking_id: bookingId, sender: role, message: text })
-    }).catch(() => {}); // Fire and forget
-
+    });
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    // Replace temp with real (next poll will pick it up)
+    document.querySelector(`[data-id="${tempId}"]`)?.remove();
     await loadMessages(false);
   } catch (e) {
-    alert('Erro ao enviar mensagem. Tente novamente.');
-    input.value = text;
+    document.querySelector(`[data-id="${tempId}"]`)?.remove();
+    inp.value = text;
+    alert('Erro ao enviar. Tente novamente.');
   } finally {
     btn.disabled = false;
-    input.focus();
+    inp.focus();
   }
 }
 
-// Auto-resize textarea
-document.getElementById('input').addEventListener('input', function() {
+// ── textarea auto-resize ──
+const inp = document.getElementById('input');
+inp.addEventListener('input', function() {
   this.style.height = 'auto';
   this.style.height = Math.min(this.scrollHeight, 100) + 'px';
   document.getElementById('send').disabled = !this.value.trim();
 });
-
-document.getElementById('input').addEventListener('keydown', function(e) {
-  if (e.key === 'Enter' && !e.shiftKey) {
-    e.preventDefault();
-    sendMessage();
-  }
+inp.addEventListener('keydown', function(e) {
+  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
 });
-
 document.getElementById('send').addEventListener('click', sendMessage);
 
-// Init
+// ── init ──
 if (bookingId) {
-  loadBooking().catch(e => {
-    document.getElementById('prop-name').textContent = 'Chat de Reserva';
-  });
-  loadMessages(true).then(() => {
-    pollInterval = setInterval(() => loadMessages(false), 4000);
-  }).catch(e => {
-    document.getElementById('messages').innerHTML = '<div class="error-banner">Erro ao carregar mensagens.</div>';
-  });
   document.getElementById('send').disabled = false;
+  loadMessages(true)
+    .then(() => { polling = setInterval(() => loadMessages(false), 4000); })
+    .catch(() => {
+      document.getElementById('messages').innerHTML = '<div class="error-card">Erro ao carregar mensagens. Verifique sua conexão.</div>';
+    });
 }
 </script>
 </body>
