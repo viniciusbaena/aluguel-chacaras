@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AluguelDeChácaras — Confirmação de Pagamento</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: #f0f4f0;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+    .logo {
+      font-size: 22px;
+      font-weight: 700;
+      color: #1e4d2b;
+      margin-bottom: 32px;
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .card {
+      background: #fff;
+      border-radius: 16px;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+      padding: 48px 40px;
+      max-width: 480px;
+      width: 100%;
+      text-align: center;
+    }
+    .icon { font-size: 64px; margin-bottom: 20px; }
+    h1 { font-size: 24px; margin-bottom: 12px; }
+    p { color: #555; font-size: 16px; line-height: 1.6; margin-bottom: 24px; }
+    .badge {
+      display: inline-block;
+      padding: 6px 18px;
+      border-radius: 99px;
+      font-size: 13px;
+      font-weight: 600;
+      margin-bottom: 28px;
+    }
+    .badge-success { background: #e8f5e9; color: #2e7d32; }
+    .badge-pending { background: #fff8e1; color: #f57f17; }
+    .badge-failure { background: #ffebee; color: #c62828; }
+    .btn {
+      display: inline-block;
+      background: #1e4d2b;
+      color: #fff;
+      padding: 14px 32px;
+      border-radius: 8px;
+      text-decoration: none;
+      font-size: 16px;
+      font-weight: 600;
+      margin-top: 8px;
+    }
+    .btn:hover { background: #2d6a3f; }
+    .help { margin-top: 24px; font-size: 13px; color: #999; }
+    .help a { color: #1e4d2b; text-decoration: none; }
+    /* Success specific */
+    .card.success h1 { color: #2e7d32; }
+    .card.pending h1 { color: #f57f17; }
+    .card.failure h1 { color: #c62828; }
+  </style>
+</head>
+<body>
+
+<a class="logo" href="/">🌿 AluguelDeChácaras</a>
+
+<div class="card" id="card">
+  <div class="icon" id="icon">⏳</div>
+  <div class="badge" id="badge">Processando...</div>
+  <h1 id="title">Verificando pagamento</h1>
+  <p id="desc">Aguarde um momento enquanto confirmamos seu pagamento.</p>
+  <a href="/" class="btn" id="cta">Voltar ao início</a>
+  <p class="help">Dúvidas? Entre em contato: <a href="mailto:contato@alugueldechacaras.com">contato@alugueldechacaras.com</a></p>
+</div>
+
+<script>
+  const params = new URLSearchParams(window.location.search);
+  const status = params.get('status') || params.get('collection_status') || 'unknown';
+  const paymentId = params.get('payment_id') || '';
+  const externalRef = params.get('external_reference') || '';
+
+  const card = document.getElementById('card');
+  const icon = document.getElementById('icon');
+  const badge = document.getElementById('badge');
+  const title = document.getElementById('title');
+  const desc = document.getElementById('desc');
+  const cta = document.getElementById('cta');
+
+  const states = {
+    approved: {
+      cls: 'success',
+      icon: '✅',
+      badgeCls: 'badge-success',
+      badgeText: 'Pagamento aprovado',
+      titleText: 'Reserva confirmada!',
+      descText: 'Seu pagamento foi confirmado. Em instantes você receberá no WhatsApp e e-mail o <strong>endereço completo</strong> da chácara e todos os detalhes da sua estadia.',
+      ctaText: 'Explorar outras chacaras',
+      ctaHref: '/'
+    },
+    pending: {
+      cls: 'pending',
+      icon: '⏳',
+      badgeCls: 'badge-pending',
+      badgeText: 'Aguardando pagamento',
+      titleText: 'Pagamento em processamento',
+      descText: 'Seu pagamento está sendo processado. Assim que for aprovado, você receberá uma confirmação por WhatsApp e e-mail com os detalhes da reserva.',
+      ctaText: 'Voltar ao início',
+      ctaHref: '/'
+    },
+    in_process: {
+      cls: 'pending',
+      icon: '⏳',
+      badgeCls: 'badge-pending',
+      badgeText: 'Em processamento',
+      titleText: 'Pagamento em processamento',
+      descText: 'Seu pagamento está sendo processado. Isso pode levar alguns minutos. Você será notificado por WhatsApp e e-mail quando for confirmado.',
+      ctaText: 'Voltar ao início',
+      ctaHref: '/'
+    },
+    rejected: {
+      cls: 'failure',
+      icon: '❌',
+      badgeCls: 'badge-failure',
+      badgeText: 'Pagamento recusado',
+      titleText: 'Pagamento não aprovado',
+      descText: 'Seu pagamento foi recusado. Verifique os dados do cartão ou tente outro método de pagamento. A reserva não foi perdida — você pode tentar novamente.',
+      ctaText: 'Tentar novamente',
+      ctaHref: 'javascript:history.back()'
+    },
+    cancelled: {
+      cls: 'failure',
+      icon: '🚫',
+      badgeCls: 'badge-failure',
+      badgeText: 'Cancelado',
+      titleText: 'Pagamento cancelado',
+      descText: 'O pagamento foi cancelado. Se foi um engano, você pode voltar e tentar novamente.',
+      ctaText: 'Voltar',
+      ctaHref: '/'
+    }
+  };
+
+  const state = states[status] || {
+    cls: 'pending',
+    icon: '❓',
+    badgeCls: 'badge-pending',
+    badgeText: 'Status desconhecido',
+    titleText: 'Verificando seu pagamento',
+    descText: 'Não foi possível verificar o status do pagamento automaticamente. Se você completou o pagamento, aguarde a confirmação por WhatsApp e e-mail.',
+    ctaText: 'Voltar ao início',
+    ctaHref: '/'
+  };
+
+  card.className = 'card ' + state.cls;
+  icon.textContent = state.icon;
+  badge.className = 'badge ' + state.badgeCls;
+  badge.textContent = state.badgeText;
+  title.textContent = state.titleText;
+  desc.innerHTML = state.descText;
+  cta.textContent = state.ctaText;
+  cta.href = state.ctaHref;
+</script>
+
+</body>
+</html>
