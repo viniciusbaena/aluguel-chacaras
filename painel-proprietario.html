@@ -570,6 +570,7 @@
       .fotos-grid { grid-template-columns: repeat(3, 1fr); }
     }
   </style>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 </head>
 <body>
 
@@ -595,9 +596,8 @@
       Ainda não tem conta? <a href="/#anuncie" style="color:var(--verde);font-weight:600;">Cadastre-se</a>
     </div>
 
-    <div style="margin-top:20px; padding:12px; background:var(--verde-claro); border-radius:8px; font-size:12px; color:var(--verde-escuro); text-align:center;">
-      💡 <strong>Demonstração:</strong> clique em "Entrar no painel" para explorar
-    </div>
+    <div id="login-erro" style="display:none; margin-top:16px; padding:12px; background:#fee2e2; border-radius:8px; font-size:13px; color:#b91c1c; text-align:center;"></div>
+    <div id="login-loading" style="display:none; margin-top:16px; text-align:center; color:var(--cinza); font-size:13px;">⏳ Entrando...</div>
   </div>
 </div>
 
@@ -636,9 +636,9 @@
 
     <div class="sidebar-bottom">
       <div class="user-info">
-        <div class="user-avatar">JP</div>
+        <div class="user-avatar" id="sidebar-avatar">?</div>
         <div>
-          <div class="user-nome">Proprietário</div>
+          <div class="user-nome" id="sidebar-nome">Proprietário</div>
           <div class="user-plano">Comissão 8% por reserva</div>
         </div>
       </div>
@@ -664,22 +664,22 @@
       <div class="stats-grid">
         <div class="stat-card">
           <div class="stat-label">Visualizações</div>
-          <div class="stat-value">247</div>
+          <div class="stat-value" id="stat-visualizacoes">—</div>
           <span class="stat-tag tag-verde">este mês</span>
         </div>
         <div class="stat-card" style="border:1.5px solid #f59e0b; cursor:pointer;" onclick="mostrarTab('reservas', document.querySelectorAll('.nav-item')[2])">
           <div class="stat-label">⏳ Aguardando resposta</div>
-          <div class="stat-value" style="color:#92400e;" id="stat-pendentes">2</div>
+          <div class="stat-value" style="color:#92400e;" id="stat-pendentes">0</div>
           <span class="stat-tag tag-amarelo" id="stat-pendentes-tag">responda já!</span>
         </div>
         <div class="stat-card">
           <div class="stat-label">Reservas confirmadas</div>
-          <div class="stat-value">4</div>
+          <div class="stat-value" id="stat-confirmadas">0</div>
           <span class="stat-tag tag-verde">este mês</span>
         </div>
         <div class="stat-card">
           <div class="stat-label">Receita líquida</div>
-          <div class="stat-value">R$ 4,4k</div>
+          <div class="stat-value" id="stat-receita">R$ 0</div>
           <span class="stat-tag tag-verde">este mês</span>
         </div>
       </div>
@@ -769,146 +769,21 @@
         </div>
       </div>
 
-      <!-- PENDENTES -->
-      <div style="font-size:12px; font-weight:700; color:var(--cinza); text-transform:uppercase; letter-spacing:0.5px; margin-bottom:12px;" id="titulo-pendentes">⏳ Aguardando sua resposta (2)</div>
-
-      <div class="reserva-card pendente" id="reserva-1">
-        <div class="reserva-header">
-          <div class="reserva-cliente">
-            <div class="cliente-avatar">MF</div>
-            <div>
-              <div class="cliente-nome">Maria Fernanda</div>
-              <div class="cliente-contato">📱 (44) 9 8888-1111 • mfernanda@email.com</div>
-            </div>
-          </div>
-          <span class="reserva-badge badge-pendente">⏳ Pendente</span>
-        </div>
-
-        <div class="reserva-infos">
-          <div class="reserva-info-item">
-            <span class="reserva-info-label">Check-in</span>
-            <span class="reserva-info-val">20/07/2026</span>
-          </div>
-          <div class="reserva-info-item">
-            <span class="reserva-info-label">Check-out</span>
-            <span class="reserva-info-val">22/07/2026</span>
-          </div>
-          <div class="reserva-info-item">
-            <span class="reserva-info-label">Dias / Valor</span>
-            <span class="reserva-info-val">3 dias • R$ 3.600</span>
-          </div>
-          <div class="reserva-info-item">
-            <span class="reserva-info-label">Evento / Pessoas</span>
-            <span class="reserva-info-val">Aniversário • ~80 pessoas</span>
+            <!-- DINÂMICO: carregado via Supabase -->
+      <div id="alerta-pendentes" style="display:none; background:#fffbeb; border:1.5px solid #f59e0b; border-radius:12px; padding:16px 20px; margin-bottom:20px; align-items:center; justify-content:space-between; gap:16px;">
+        <div style="display:flex; align-items:center; gap:12px;">
+          <span style="font-size:28px;">🔔</span>
+          <div>
+            <div style="font-weight:700; font-size:14px; color:#92400e;" id="alerta-texto">Você tem solicitações aguardando resposta!</div>
+            <div style="font-size:12px; color:#b45309;">Responda logo para não perder a reserva</div>
           </div>
         </div>
-
-        <div class="reserva-msg">
-          "Olá! Será uma festa de aniversário surpresa de 15 anos para minha filha. Precisamos entrar às 9h para montar a decoração. Podemos combinar isso?"
-        </div>
-
-        <div style="font-size:11px; color:var(--cinza); margin-bottom:12px;">
-          ⏰ Solicitado há 2 horas • Expira em 22 horas
-        </div>
-
-        <div class="reserva-acoes">
-          <button class="btn-confirmar" onclick="confirmarReserva(1)">✅ Confirmar reserva</button>
-          <button class="btn-recusar" onclick="abrirModalRecusar(1)">✕ Recusar</button>
-          <button class="btn-msg-cliente" onclick="msgCliente('44988881111')">💬 Perguntar ao cliente</button>
-        </div>
+        <button onclick="mostrarTab('reservas', document.querySelectorAll('.nav-item')[1])" class="btn btn-verde btn-sm" style="white-space:nowrap;">Ver reservas →</button>
       </div>
 
-      <div class="reserva-card pendente" id="reserva-2">
-        <div class="reserva-header">
-          <div class="reserva-cliente">
-            <div class="cliente-avatar">RS</div>
-            <div>
-              <div class="cliente-nome">Ricardo Santos</div>
-              <div class="cliente-contato">📱 (44) 9 7777-2222 • rsantos@empresa.com</div>
-            </div>
-          </div>
-          <span class="reserva-badge badge-pendente">⏳ Pendente</span>
-        </div>
-
-        <div class="reserva-infos">
-          <div class="reserva-info-item">
-            <span class="reserva-info-label">Check-in</span>
-            <span class="reserva-info-val">05/08/2026</span>
-          </div>
-          <div class="reserva-info-item">
-            <span class="reserva-info-label">Check-out</span>
-            <span class="reserva-info-val">05/08/2026</span>
-          </div>
-          <div class="reserva-info-item">
-            <span class="reserva-info-label">Dias / Valor</span>
-            <span class="reserva-info-val">1 dia • R$ 1.200</span>
-          </div>
-          <div class="reserva-info-item">
-            <span class="reserva-info-label">Evento / Pessoas</span>
-            <span class="reserva-info-val">Confraternização • ~120 pessoas</span>
-          </div>
-        </div>
-
-        <div class="reserva-msg">
-          "Confraternização da empresa. Equipe de 120 pessoas, precisamos de som e churrasqueira funcionando. Tem gerador caso falte luz?"
-        </div>
-
-        <div style="font-size:11px; color:var(--cinza); margin-bottom:12px;">
-          ⏰ Solicitado há 5 horas • Expira em 19 horas
-        </div>
-
-        <div class="reserva-acoes">
-          <button class="btn-confirmar" onclick="confirmarReserva(2)">✅ Confirmar reserva</button>
-          <button class="btn-recusar" onclick="abrirModalRecusar(2)">✕ Recusar</button>
-          <button class="btn-msg-cliente" onclick="msgCliente('44977772222')">💬 Perguntar ao cliente</button>
-        </div>
+      <div id="reservas-container" style="padding:20px 0;">
+        <div style="text-align:center; padding:40px; color:var(--cinza);">⏳ Carregando reservas...</div>
       </div>
-
-      <!-- CONFIRMADAS -->
-      <div style="font-size:12px; font-weight:700; color:var(--cinza); text-transform:uppercase; letter-spacing:0.5px; margin:20px 0 12px;">✅ Confirmadas — aguardando pagamento / concluídas</div>
-
-      <div class="reserva-card confirmada">
-        <div class="reserva-header">
-          <div class="reserva-cliente">
-            <div class="cliente-avatar">AC</div>
-            <div>
-              <div class="cliente-nome">Ana Carvalho</div>
-              <div class="cliente-contato">📱 (44) 9 6666-3333</div>
-            </div>
-          </div>
-          <div style="display:flex; gap:6px;">
-            <span class="reserva-badge badge-confirmada">✅ Confirmada</span>
-            <span class="reserva-badge badge-pago">💳 Pago</span>
-          </div>
-        </div>
-
-        <div class="reserva-infos">
-          <div class="reserva-info-item">
-            <span class="reserva-info-label">Check-in</span>
-            <span class="reserva-info-val">28/06/2026</span>
-          </div>
-          <div class="reserva-info-item">
-            <span class="reserva-info-label">Check-out</span>
-            <span class="reserva-info-val">29/06/2026</span>
-          </div>
-          <div class="reserva-info-item">
-            <span class="reserva-info-label">Dias / Valor</span>
-            <span class="reserva-info-val">2 dias • R$ 2.400</span>
-          </div>
-          <div class="reserva-info-item">
-            <span class="reserva-info-label">Você recebe</span>
-            <span class="reserva-info-val" style="color:var(--verde);">R$ 2.208</span>
-          </div>
-        </div>
-
-        <div class="reserva-acoes">
-          <button class="btn-msg-cliente" style="margin-left:0;" onclick="msgCliente('44966663333')">💬 Falar com Ana</button>
-          <div style="margin-left:auto; font-size:12px; color:var(--cinza); display:flex; align-items:center;">
-            Pagamento confirmado • Endereço liberado ao cliente
-          </div>
-        </div>
-      </div>
-    </div>
 
     <!-- FINANCEIRO -->
     <div class="tabs" id="tab-financeiro">
@@ -921,17 +796,17 @@
 
       <div class="financeiro-resumo">
         <div class="fin-card">
-          <div class="fin-valor">R$ 4.416</div>
+          <div class="fin-valor" id="fin-recebido">R$ 0</div>
           <div class="fin-label">Recebido este mês</div>
           <div class="fin-tag" style="color:var(--verde);">✓ já na sua conta</div>
         </div>
         <div class="fin-card">
-          <div class="fin-valor">R$ 2.208</div>
+          <div class="fin-valor" id="fin-a-receber">R$ 0</div>
           <div class="fin-label">A receber (reservas pagas)</div>
           <div class="fin-tag" style="color:var(--amarelo);">⏳ após check-out</div>
         </div>
         <div class="fin-card">
-          <div class="fin-valor">R$ 384</div>
+          <div class="fin-valor" id="fin-comissao">R$ 0</div>
           <div class="fin-label">Comissão plataforma (8%)</div>
           <div class="fin-tag" style="color:var(--cinza);">descontado automaticamente</div>
         </div>
@@ -950,32 +825,7 @@
               <th style="text-align:left; padding:10px 14px; font-size:11px; font-weight:700; color:var(--cinza); text-transform:uppercase; border-bottom:1px solid var(--cinza-borda);">Status</th>
             </tr>
           </thead>
-          <tbody>
-            <tr style="border-bottom:1px solid #f3f4f6;">
-              <td style="padding:12px 14px; font-weight:600;">Ana Carvalho</td>
-              <td style="padding:12px 14px; color:var(--cinza);">28–29/06/2026</td>
-              <td style="padding:12px 14px;">R$ 2.400</td>
-              <td style="padding:12px 14px; color:var(--vermelho);">− R$ 192</td>
-              <td style="padding:12px 14px; font-weight:700; color:var(--verde);">R$ 2.208</td>
-              <td style="padding:12px 14px;"><span style="background:var(--verde-claro);color:var(--verde-escuro);font-size:11px;font-weight:700;padding:3px 8px;border-radius:20px;">✓ Pago</span></td>
-            </tr>
-            <tr style="border-bottom:1px solid #f3f4f6;">
-              <td style="padding:12px 14px; font-weight:600;">Carlos Ferreira</td>
-              <td style="padding:12px 14px; color:var(--cinza);">10–12/06/2026</td>
-              <td style="padding:12px 14px;">R$ 3.600</td>
-              <td style="padding:12px 14px; color:var(--vermelho);">− R$ 288</td>
-              <td style="padding:12px 14px; font-weight:700; color:var(--verde);">R$ 3.312</td>
-              <td style="padding:12px 14px;"><span style="background:var(--verde-claro);color:var(--verde-escuro);font-size:11px;font-weight:700;padding:3px 8px;border-radius:20px;">✓ Pago</span></td>
-            </tr>
-            <tr>
-              <td style="padding:12px 14px; font-weight:600;">Maria Fernanda</td>
-              <td style="padding:12px 14px; color:var(--cinza);">20–22/07/2026</td>
-              <td style="padding:12px 14px;">R$ 3.600</td>
-              <td style="padding:12px 14px; color:var(--vermelho);">− R$ 288</td>
-              <td style="padding:12px 14px; font-weight:700; color:var(--cinza);">R$ 3.312</td>
-              <td style="padding:12px 14px;"><span style="background:#fef3c7;color:#92400e;font-size:11px;font-weight:700;padding:3px 8px;border-radius:20px;">⏳ Pendente</span></td>
-            </tr>
-          </tbody>
+          <tbody id="historico-tbody"><tr><td colspan="6" style="padding:20px;text-align:center;color:var(--cinza)">⏳ Carregando...</td></tr></tbody>
         </table>
       </div>
 
@@ -1571,17 +1421,266 @@
   let calAnoAtual = new Date().getFullYear();
   let diasStatus = {}; // { 'YYYY-MM-DD': 'disponivel' | 'indisponivel' | 'neutro' }
 
-  // LOGIN
-  function fazerLogin() {
+  // SUPABASE CONFIG
+  const SUPA_URL  = 'https://tathqoyhcuxthsrghrzx.supabase.co';
+  const SUPA_ANON = 'sb_publishable_fLpPGAodcCvJxPkQ223ABQ_ApJKDLRU';
+  const _supa = window.supabase.createClient(SUPA_URL, SUPA_ANON);
+
+  // AUTH
+  async function fazerLogin() {
+    const email = document.getElementById('login-email').value.trim();
+    const senha = document.getElementById('login-senha').value;
+    const erro = document.getElementById('login-erro');
+    const loading = document.getElementById('login-loading');
+    erro.style.display = 'none';
+    loading.style.display = 'block';
+
+    const { data, error } = await _supa.auth.signInWithPassword({ email, password: senha });
+    loading.style.display = 'none';
+
+    if (error) {
+      erro.textContent = 'E-mail ou senha incorretos. Tente novamente.';
+      erro.style.display = 'block';
+      return;
+    }
+    await abrirPainel(data.user);
+  }
+
+  async function fazerLogout() {
+    await _supa.auth.signOut();
+    document.getElementById('painel').classList.remove('ativo');
+    document.getElementById('login-page').style.display = 'flex';
+    document.getElementById('login-email').value = '';
+    document.getElementById('login-senha').value = '';
+  }
+
+  async function abrirPainel(user) {
+    // Update sidebar
+    const nome = user.user_metadata?.full_name || user.email.split('@')[0];
+    const iniciais = nome.split(' ').map(p=>p[0]).join('').toUpperCase().slice(0,2);
+    document.getElementById('sidebar-avatar').textContent = iniciais;
+    document.getElementById('sidebar-nome').textContent = nome;
+
     document.getElementById('login-page').style.display = 'none';
     document.getElementById('painel').classList.add('ativo');
+
+    await carregarDados(user.email);
     renderCalendario();
   }
 
-  function fazerLogout() {
-    document.getElementById('painel').classList.remove('ativo');
-    document.getElementById('login-page').style.display = 'flex';
+  async function carregarDados(email) {
+    // 1. Buscar propriedades do proprietário
+    const { data: props } = await _supa
+      .from('properties')
+      .select('id,name,city,active')
+      .eq('owner_email', email);
+
+    if (!props || props.length === 0) {
+      document.getElementById('reservas-container').innerHTML =
+        '<div style="text-align:center;padding:40px;color:var(--cinza);">📭 Nenhuma chácara cadastrada com este e-mail.<br><small>Entre em contato com o suporte.</small></div>';
+      return;
+    }
+
+    const propIds = props.map(p => p.id);
+    window._minhaProp = props[0];
+
+    // Atualizar status do anúncio
+    const badge = document.getElementById('badge-status-anuncio');
+    if (badge) {
+      badge.textContent = props[0].active ? 'Anúncio ativo' : 'Anúncio inativo';
+      badge.className = 'status-badge ' + (props[0].active ? 'badge-ativo' : 'badge-pausado');
+    }
+
+    // 2. Buscar reservas
+    const { data: bookings } = await _supa
+      .from('bookings')
+      .select('*')
+      .in('property_id', propIds)
+      .order('created_at', { ascending: false });
+
+    if (!bookings) return;
+    window._reservas = bookings;
+
+    renderReservas(bookings);
+    atualizarStats(bookings);
   }
+
+  function fmtDate(d) {
+    if (!d) return '—';
+    const [y,m,day] = d.split('-');
+    return `${day}/${m}/${y}`;
+  }
+
+  function fmtReal(v) {
+    return 'R$ ' + Number(v||0).toLocaleString('pt-BR', {minimumFractionDigits:0, maximumFractionDigits:0});
+  }
+
+  function statusBadge(s) {
+    const map = {
+      pending:   ['⏳ Pendente',   'badge-pendente'],
+      confirmed: ['✅ Confirmada', 'badge-confirmada'],
+      paid:      ['💰 Paga',       'badge-paga'],
+      completed: ['✔ Concluída',  'badge-concluida'],
+      cancelled: ['✕ Cancelada',  'badge-recusada'],
+      rejected:  ['✕ Recusada',   'badge-recusada'],
+    };
+    return map[s] || [s, ''];
+  }
+
+  function renderReservas(bookings) {
+    const pendentes  = bookings.filter(b => b.status === 'pending');
+    const ativas     = bookings.filter(b => ['confirmed','paid'].includes(b.status));
+    const historico  = bookings.filter(b => ['completed','cancelled','rejected'].includes(b.status));
+
+    // Badge
+    const badgeEl = document.getElementById('badge-reservas');
+    if (badgeEl) badgeEl.textContent = pendentes.length || '';
+
+    // Alerta
+    const alerta = document.getElementById('alerta-pendentes');
+    if (alerta) {
+      if (pendentes.length > 0) {
+        alerta.style.display = 'flex';
+        document.getElementById('alerta-texto').textContent =
+          `Você tem ${pendentes.length} solicitaç${pendentes.length>1?'ões':'ão'} aguardando resposta!`;
+      } else {
+        alerta.style.display = 'none';
+      }
+    }
+
+    let html = '';
+
+    if (pendentes.length > 0) {
+      html += `<div style="font-size:12px;font-weight:700;color:var(--cinza);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:12px;">⏳ Aguardando resposta (${pendentes.length})</div>`;
+      pendentes.forEach(b => { html += cardReserva(b); });
+    }
+
+    if (ativas.length > 0) {
+      html += `<div style="font-size:12px;font-weight:700;color:var(--cinza);text-transform:uppercase;letter-spacing:0.5px;margin:20px 0 12px;">✅ Reservas confirmadas (${ativas.length})</div>`;
+      ativas.forEach(b => { html += cardReserva(b); });
+    }
+
+    if (historico.length > 0) {
+      html += `<div style="font-size:12px;font-weight:700;color:var(--cinza);text-transform:uppercase;letter-spacing:0.5px;margin:20px 0 12px;">📋 Histórico (${historico.length})</div>`;
+      historico.forEach(b => { html += cardReserva(b); });
+    }
+
+    if (!html) {
+      html = '<div style="text-align:center;padding:60px;color:var(--cinza);">📭 Nenhuma reserva encontrada ainda.</div>';
+    }
+
+    document.getElementById('reservas-container').innerHTML = html;
+
+    // Tabela financeiro
+    const isPending = s => s === 'pending';
+    const tbody = document.getElementById('historico-tbody');
+    if (tbody) {
+      const rows = bookings.map(b => {
+        const [lbl, cls] = statusBadge(b.status);
+        const total = Number(b.total_price||0);
+        const comissao = Number(b.platform_fee||0);
+        const liquido = Number(b.owner_amount||0);
+        return `<tr style="border-bottom:1px solid #f3f4f6;">
+          <td style="padding:12px 14px; font-weight:600;">${b.client_name}</td>
+          <td style="padding:12px 14px; color:var(--cinza);">${fmtDate(b.check_in)} – ${fmtDate(b.check_out)}</td>
+          <td style="padding:12px 14px;">${fmtReal(total)}</td>
+          <td style="padding:12px 14px; color:var(--vermelho);">− ${fmtReal(comissao)}</td>
+          <td style="padding:12px 14px; font-weight:700; color:var(--verde);">${fmtReal(liquido)}</td>
+          <td style="padding:12px 14px;"><span class="reserva-badge ${cls}" style="font-size:11px;">${lbl}</span></td>
+        </tr>`;
+      }).join('');
+      tbody.innerHTML = rows || '<tr><td colspan="6" style="padding:20px;text-align:center;color:var(--cinza)">Nenhuma reserva ainda.</td></tr>';
+    }
+  }
+
+  function cardReserva(b) {
+    const [lbl, cls] = statusBadge(b.status);
+    const initials = b.client_name.split(' ').map(p=>p[0]).join('').toUpperCase().slice(0,2);
+    const isPending = b.status === 'pending';
+    const wpp = b.client_whatsapp ? b.client_whatsapp.replace(/\D/g,'') : '';
+    const acoesHtml = isPending ? `
+      <div class="reserva-acoes">
+        <button class="btn-confirmar" onclick="confirmarReservaDB('${b.id}', this)">✅ Confirmar reserva</button>
+        <button class="btn-recusar" onclick="recusarReservaDB('${b.id}', this)">✕ Recusar</button>
+        ${wpp ? `<button class="btn-msg-cliente" onclick="msgCliente('${wpp}')">💬 Perguntar ao cliente</button>` : ''}
+      </div>` : (wpp ? `<div style="margin-top:8px;"><button class="btn-msg-cliente" onclick="msgCliente('${wpp}')">💬 WhatsApp do cliente</button></div>` : '');
+
+    return `<div class="reserva-card ${isPending?'pendente':''}" id="res-${b.id}">
+      <div class="reserva-header">
+        <div class="reserva-cliente">
+          <div class="cliente-avatar">${initials}</div>
+          <div>
+            <div class="cliente-nome">${b.client_name}</div>
+            <div class="cliente-contato">📱 ${b.client_whatsapp||'—'} • ${b.client_email||'—'}</div>
+          </div>
+        </div>
+        <span class="reserva-badge ${cls}">${lbl}</span>
+      </div>
+      <div class="reserva-infos">
+        <div class="reserva-info-item"><span class="reserva-info-label">Check-in</span><span class="reserva-info-val">${fmtDate(b.check_in)}</span></div>
+        <div class="reserva-info-item"><span class="reserva-info-label">Check-out</span><span class="reserva-info-val">${fmtDate(b.check_out)}</span></div>
+        <div class="reserva-info-item"><span class="reserva-info-label">Dias / Valor</span><span class="reserva-info-val">${b.total_days||'—'} dias • ${fmtReal(b.total_price)}</span></div>
+        <div class="reserva-info-item"><span class="reserva-info-label">Pessoas</span><span class="reserva-info-val">${b.num_guests||1} pessoas</span></div>
+      </div>
+      ${b.message ? `<div class="reserva-msg">"${b.message}"</div>` : ''}
+      <div style="font-size:11px;color:var(--cinza);margin-bottom:12px;">📅 Solicitado em ${fmtDate(b.created_at?.split('T')[0])}</div>
+      ${acoesHtml}
+    </div>`;
+  }
+
+  async function confirmarReservaDB(id, btn) {
+    btn.disabled = true; btn.textContent = '⏳ Confirmando...';
+    const { error } = await _supa.from('bookings').update({ status: 'confirmed', owner_response: 'accepted', owner_responded_at: new Date().toISOString() }).eq('id', id);
+    if (!error) {
+      mostrarToast('✅ Reserva confirmada!');
+      const card = document.getElementById('res-' + id);
+      if (card) { card.classList.remove('pendente'); card.classList.add('confirmada'); card.querySelector('.reserva-badge').className = 'reserva-badge badge-confirmada'; card.querySelector('.reserva-badge').textContent = '✅ Confirmada'; card.querySelector('.reserva-acoes')?.remove(); }
+      atualizarStats(window._reservas.map(r => r.id === id ? {...r, status: 'confirmed'} : r));
+    } else {
+      btn.disabled = false; btn.textContent = '✅ Confirmar reserva';
+      mostrarToast('Erro ao confirmar. Tente novamente.');
+    }
+  }
+
+  async function recusarReservaDB(id, btn) {
+    if (!confirm('Tem certeza que quer recusar esta reserva?')) return;
+    btn.disabled = true; btn.textContent = '⏳ Recusando...';
+    const { error } = await _supa.from('bookings').update({ status: 'rejected', owner_response: 'rejected', owner_responded_at: new Date().toISOString() }).eq('id', id);
+    if (!error) {
+      mostrarToast('Reserva recusada.');
+      const card = document.getElementById('res-' + id);
+      if (card) { card.classList.remove('pendente'); card.querySelector('.reserva-badge').className = 'reserva-badge badge-recusada'; card.querySelector('.reserva-badge').textContent = '✕ Recusada'; card.querySelector('.reserva-acoes')?.remove(); }
+    } else {
+      btn.disabled = false; btn.textContent = '✕ Recusar';
+      mostrarToast('Erro ao recusar.');
+    }
+  }
+
+  function atualizarStats(bookings) {
+    const pendentes  = bookings.filter(b => b.status === 'pending').length;
+    const confirmadas = bookings.filter(b => ['confirmed','paid'].includes(b.status)).length;
+    const receita = bookings.filter(b => b.status === 'paid').reduce((s,b) => s + Number(b.owner_amount||0), 0);
+    const comissao = bookings.filter(b => b.status === 'paid').reduce((s,b) => s + Number(b.platform_fee||0), 0);
+    const aReceber = bookings.filter(b => b.status === 'confirmed').reduce((s,b) => s + Number(b.owner_amount||0), 0);
+
+    const el = id => document.getElementById(id);
+    if (el('stat-pendentes')) el('stat-pendentes').textContent = pendentes;
+    if (el('stat-confirmadas')) el('stat-confirmadas').textContent = confirmadas;
+    if (el('stat-receita')) el('stat-receita').textContent = fmtReal(receita);
+    if (el('badge-reservas')) el('badge-reservas').textContent = pendentes || '';
+    if (el('fin-recebido')) el('fin-recebido').textContent = fmtReal(receita);
+    if (el('fin-a-receber')) el('fin-a-receber').textContent = fmtReal(aReceber);
+    if (el('fin-comissao')) el('fin-comissao').textContent = fmtReal(comissao);
+  }
+
+  // Verificar sessão ao carregar
+  document.addEventListener('DOMContentLoaded', async () => {
+    const { data: { session } } = await _supa.auth.getSession();
+    if (session) {
+      await abrirPainel(session.user);
+    }
+    inicializarTags();
+  });
 
   function mostrarCadastro() {
     mostrarToast('Para se cadastrar, acesse AluguelDeChácaras.com.br e clique em Anunciar.');
@@ -1621,8 +1720,7 @@
     });
   }
 
-  // Chamar ao carregar e ao trocar de aba
-  document.addEventListener('DOMContentLoaded', inicializarTags);
+  // inicializarTags chamada dentro do DOMContentLoaded principal (ver acima)
 
   // FOTOS
   function adicionarFotos(input) {
