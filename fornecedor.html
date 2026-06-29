@@ -200,6 +200,7 @@
       .modal-img { width: 90vw; height: 55vw; }
     }
   </style>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 </head>
 <body>
 
@@ -209,18 +210,31 @@
 </nav>
 
 <!-- HERO -->
-<div class="hero-fornecedor">
-  <div class="fornecedor-avatar-grande">🎵</div>
+<div <!-- LOADING -->
+<div id="page-loading" style="position:fixed;inset:0;background:rgba(255,255,255,0.95);display:flex;align-items:center;justify-content:center;z-index:999;flex-direction:column;gap:16px;">
+  <div style="font-size:32px;">⏳</div>
+  <div style="font-size:14px;color:#6b7280;font-weight:500;">Carregando fornecedor...</div>
+</div>
+<div id="page-not-found" style="display:none;min-height:100vh;display:none;align-items:center;justify-content:center;text-align:center;padding:40px;margin-top:64px;">
+  <div>
+    <div style="font-size:48px;">😕</div>
+    <div style="font-size:22px;font-weight:700;margin:16px 0 8px;">Fornecedor não encontrado</div>
+    <div style="color:#6b7280;font-size:14px;margin-bottom:24px;">O link pode estar incorreto ou o perfil foi desativado.</div>
+    <a href="/" style="background:var(--terra);color:#fff;padding:12px 24px;border-radius:10px;text-decoration:none;font-weight:600;font-size:14px;">← Voltar ao início</a>
+  </div>
+</div>
+class="hero-fornecedor">
+  <div class="fornecedor-avatar-grande" id="forn-avatar">🎵</div>
   <div class="hero-info">
-    <div class="hero-cat">🎵 DJ e Música</div>
-    <div class="hero-nome">DJ Marquinhos Events</div>
-    <div class="hero-local">📍 Maringá, PR — Atende Maringá, Sarandi, Paiçandu e região</div>
-    <div class="hero-avaliacao">
+    <div class="hero-cat" id="forn-cat">🎵 DJ e Música</div>
+    <div class="hero-nome" id="forn-nome">DJ Marquinhos Events</div>
+    <div class="hero-local" id="forn-local">📍 Maringá, PR</div>
+    <div class="hero-avaliacao" id="forn-avaliacao">
       <span class="estrelas">★★★★★</span>
       <span class="aval-num">4.9</span>
       <span class="aval-qtd">(31 avaliações)</span>
     </div>
-    <div class="hero-tags">
+    <div class="hero-tags" id="forn-tags">
       <span class="hero-tag">🚚 Entrega e montagem inclusa</span>
       <span class="hero-tag">💡 Iluminação LED</span>
       <span class="hero-tag">🎤 Microfone sem fio</span>
@@ -260,8 +274,9 @@
     <!-- SOBRE -->
     <div class="secao">
       <div class="secao-titulo">Sobre o serviço</div>
+    <div id="forn-descricao-container">
       <div class="secao-texto" id="desc-texto">
-        Som profissional para festas e eventos de todos os tamanhos, com mais de 10 anos de experiência na região de Maringá. Sistema de som potente com caixas de alta qualidade, ideal para espaços abertos como chácaras e sítios.
+        <span id="desc-curto">Som profissional para festas e eventos de todos os tamanhos, com mais de 10 anos de experiência na região de Maringá. Sistema de som potente com caixas de alta qualidade, ideal para espaços abertos como chácaras e sítios.</span>
         <span id="desc-mais" style="display:none"> Iluminação LED cênica inclusa em todos os pacotes, criando a atmosfera perfeita para cada tipo de evento. Trabalhamos com playlist 100% personalizada conforme o estilo do evento — sertanejo, pagode, funk, eletrônico, anos 80/90, ou o que você preferir.
 
         Atendemos Maringá, Sarandi, Paiçandu, Marialva e cidades da região. Para cidades acima de 40 km, pode haver taxa de deslocamento. Exigimos sinal de 30% na reserva para confirmação da data.</span>
@@ -439,7 +454,94 @@
 <div class="toast" id="toast"></div>
 
 <script>
-  const fotos = [
+  // SUPABASE - Carregar dados por slug
+  const SUPA_URL  = 'https://tathqoyhcuxthsrghrzx.supabase.co';
+  const SUPA_ANON = 'sb_publishable_fLpPGAodcCvJxPkQ223ABQ_ApJKDLRU';
+  const _supa = window.supabase.createClient(SUPA_URL, SUPA_ANON);
+  let _fornecedor = null;
+
+  async function carregarFornecedor() {
+    const params = new URLSearchParams(window.location.search);
+    const slug = params.get('slug');
+
+    if (!slug) {
+      // Demo mode - manter dados estáticos hardcoded
+      document.getElementById('page-loading').style.display = 'none';
+      return;
+    }
+
+    const { data, error } = await _supa
+      .from('suppliers')
+      .select('*')
+      .eq('slug', slug)
+      .eq('active', true)
+      .single();
+
+    document.getElementById('page-loading').style.display = 'none';
+
+    if (error || !data) {
+      document.querySelector('.hero-fornecedor').style.display = 'none';
+      document.querySelector('.layout-detalhe').style.display = 'none';
+      document.getElementById('page-not-found').style.display = 'flex';
+      return;
+    }
+
+    _fornecedor = data;
+
+    // Atualizar título
+    document.title = `${data.name} — AluguelDeChácaras.com`;
+
+    // Atualizar hero
+    const set = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
+    set('forn-avatar', data.avatar_emoji || '🎵');
+    set('forn-cat', data.category || '');
+    set('forn-nome', data.name);
+    set('forn-local', `📍 ${data.city || ''}, ${data.state || 'PR'}`);
+
+    // Avaliação
+    const avalEl = document.getElementById('forn-avaliacao');
+    if (avalEl && data.rating) {
+      const stars = '★'.repeat(Math.round(data.rating)) + '☆'.repeat(5 - Math.round(data.rating));
+      avalEl.innerHTML = `<span class="estrelas">${stars}</span><span class="aval-num">${data.rating}</span><span class="aval-qtd">(${data.rating_count || 0} avaliações)</span>`;
+    }
+
+    // Tags
+    const tagsEl = document.getElementById('forn-tags');
+    if (tagsEl && data.tags && data.tags.length) {
+      tagsEl.innerHTML = data.tags.map(t => `<span class="hero-tag">${t}</span>`).join('');
+    }
+
+    // Descrição
+    const descEl = document.getElementById('desc-curto');
+    const descMais = document.getElementById('desc-mais');
+    if (descEl && data.description) {
+      const desc = data.description;
+      if (desc.length > 200) {
+        descEl.textContent = desc.slice(0, 200) + '...';
+        if (descMais) descMais.textContent = ' ' + desc.slice(200);
+      } else {
+        descEl.textContent = desc;
+        const btnDesc = document.getElementById('desc-btn');
+        if (btnDesc) btnDesc.style.display = 'none';
+      }
+    }
+
+    // Preço
+    const precoEl = document.getElementById('preco-valor');
+    if (precoEl && data.price_range) precoEl.textContent = data.price_range;
+
+    // WhatsApp no card de contato
+    const wppCard = document.getElementById('wpp-card-numero');
+    if (wppCard && data.whatsapp) {
+      const wppNum = data.whatsapp.replace(/\D/g,'');
+      wppCard.textContent = data.whatsapp;
+      wppCard.href = `https://wa.me/${wppNum}?text=Olá,%20vi%20seu%20perfil%20no%20AluguelDeChácaras.com%20e%20gostaria%20de%20saber%20mais%20sobre%20seus%20serviços.`;
+    }
+  }
+
+  document.addEventListener('DOMContentLoaded', carregarFornecedor);
+
+    const fotos = [
     { icon: '🎵', bg: 'linear-gradient(135deg,#fbd38d,#ed8936)' },
     { icon: '💡', bg: 'linear-gradient(135deg,#b3e5fc,#4fc3f7)' },
     { icon: '🎤', bg: 'linear-gradient(135deg,#f8bbd0,#f48fb1)' },
@@ -483,7 +585,9 @@
 
   function abrirWhatsapp() {
     const msg = encodeURIComponent('Olá! Vi seu serviço no AluguelDeChácaras.com.br e gostaria de mais informações sobre disponibilidade e valores.');
-    const num = window._fornecedorWpp || '5544999999999'; window.open(`https://wa.me/${num}?text=${msg}`, '_blank');
+    const wpp = window._fornecedor?.whatsapp || '5544999999999';
+    const num = wpp.replace(/\D/g,'');
+    window.open(`https://wa.me/${num}?text=${msg}`, '_blank');
   }
 
   function ligar() { const tel = window._fornecedorTel; if (tel) { window.location.href = 'tel:' + tel; } else { mostrarToast('📱 Entre em contato pelo WhatsApp'); } }
