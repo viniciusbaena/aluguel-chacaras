@@ -702,8 +702,8 @@
           <div class="preview-card">
             <div class="preview-foto">🏡</div>
             <div class="preview-info">
-              <div class="preview-nome">Chácara das Palmeiras</div>
-              <div class="preview-local">📍 Maringá — Zona Rural</div>
+              <div class="preview-nome" id="preview-nome">Chácara das Palmeiras</div>
+              <div class="preview-local" id="preview-local">📍 Maringá — Zona Rural</div>
               <div style="display:flex; flex-wrap:wrap; gap:6px; margin:8px 0;">
                 <span style="background:var(--verde-claro);color:var(--verde-escuro);font-size:11px;font-weight:600;padding:3px 10px;border-radius:20px;">🏊 Piscina</span>
                 <span style="background:var(--verde-claro);color:var(--verde-escuro);font-size:11px;font-weight:600;padding:3px 10px;border-radius:20px;">⚽ Campo</span>
@@ -1484,6 +1484,12 @@
     const propIds = props.map(p => p.id);
     window._minhaProp = props[0];
 
+    // Atualizar preview da propriedade na visão geral
+    const previewNome = document.getElementById('preview-nome');
+    const previewLocal = document.getElementById('preview-local');
+    if (previewNome) previewNome.textContent = props[0].name;
+    if (previewLocal) previewLocal.textContent = `📍 ${props[0].city||''} — ${props[0].address||''}`;
+
     // Atualizar status do anúncio
     const badge = document.getElementById('badge-status-anuncio');
     if (badge) {
@@ -1517,18 +1523,20 @@
 
   function statusBadge(s) {
     const map = {
-      pending:   ['⏳ Pendente',   'badge-pendente'],
-      confirmed: ['✅ Confirmada', 'badge-confirmada'],
-      paid:      ['💰 Paga',       'badge-paga'],
-      completed: ['✔ Concluída',  'badge-concluida'],
-      cancelled: ['✕ Cancelada',  'badge-recusada'],
-      rejected:  ['✕ Recusada',   'badge-recusada'],
+      owner_notified:   ['⏳ Pendente',            'badge-pendente'],
+      pending:          ['⏳ Pendente',            'badge-pendente'],
+      payment_pending:  ['💳 Aguard. pagamento',   'badge-pendente'],
+      confirmed:        ['✅ Confirmada',           'badge-confirmada'],
+      paid:             ['💰 Paga',                'badge-paga'],
+      completed:        ['✔ Concluída',            'badge-concluida'],
+      cancelled:        ['✕ Cancelada',            'badge-recusada'],
+      rejected:         ['✕ Recusada',             'badge-recusada'],
     };
     return map[s] || [s, ''];
   }
 
   function renderReservas(bookings) {
-    const pendentes  = bookings.filter(b => b.status === 'pending');
+    const pendentes  = bookings.filter(b => ['owner_notified','pending','payment_pending'].includes(b.status));
     const ativas     = bookings.filter(b => ['confirmed','paid'].includes(b.status));
     const historico  = bookings.filter(b => ['completed','cancelled','rejected'].includes(b.status));
 
@@ -1596,7 +1604,7 @@
   function cardReserva(b) {
     const [lbl, cls] = statusBadge(b.status);
     const initials = b.client_name.split(' ').map(p=>p[0]).join('').toUpperCase().slice(0,2);
-    const isPending = b.status === 'pending';
+    const isPending = ['owner_notified','pending','payment_pending'].includes(b.status);
     const wpp = b.client_whatsapp ? b.client_whatsapp.replace(/\D/g,'') : '';
     const acoesHtml = isPending ? `
       <div class="reserva-acoes">
@@ -1657,11 +1665,11 @@
   }
 
   function atualizarStats(bookings) {
-    const pendentes  = bookings.filter(b => b.status === 'pending').length;
+    const pendentes  = bookings.filter(b => ['owner_notified','pending','payment_pending'].includes(b.status)).length;
     const confirmadas = bookings.filter(b => ['confirmed','paid'].includes(b.status)).length;
     const receita = bookings.filter(b => b.status === 'paid').reduce((s,b) => s + Number(b.owner_amount||0), 0);
     const comissao = bookings.filter(b => b.status === 'paid').reduce((s,b) => s + Number(b.platform_fee||0), 0);
-    const aReceber = bookings.filter(b => b.status === 'confirmed').reduce((s,b) => s + Number(b.owner_amount||0), 0);
+    const aReceber = bookings.filter(b => ['confirmed','payment_pending'].includes(b.status)).reduce((s,b) => s + Number(b.owner_amount||0), 0);
 
     const el = id => document.getElementById(id);
     if (el('stat-pendentes')) el('stat-pendentes').textContent = pendentes;
