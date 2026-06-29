@@ -237,6 +237,7 @@
       .dicas-grid { grid-template-columns: 1fr; }
     }
   </style>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 </head>
 <body>
 
@@ -258,9 +259,8 @@
     <div style="text-align:center; font-size:13px; color:var(--cinza); margin-top:20px;">
       Ainda não tem conta? <a href="/#anuncie" style="color:var(--terra); font-weight:600;">Cadastre-se</a>
     </div>
-    <div style="margin-top:20px; padding:12px; background:var(--terra-claro); border-radius:8px; font-size:12px; color:var(--terra-escuro); text-align:center;">
-      💡 <strong>Demonstração:</strong> clique em "Entrar no painel" para explorar
-    </div>
+    <div id="login-erro" style="display:none; margin-top:16px; padding:12px; background:#fee2e2; border-radius:8px; font-size:13px; color:#b91c1c; text-align:center;"></div>
+    <div id="login-loading" style="display:none; margin-top:16px; text-align:center; color:var(--cinza); font-size:13px;">⏳ Entrando...</div>
   </div>
 </div>
 
@@ -367,7 +367,7 @@
             <div class="page-sub">Edite as informações do seu anúncio</div>
           </div>
         </div>
-        <button class="btn btn-terra-sm btn-sm" onclick="salvar('servico')">💾 Salvar alterações</button>
+        <button class="btn btn-terra-sm btn-sm" onclick="salvarPerfil()">💾 Salvar alterações</button>
       </div>
 
       <!-- DICAS -->
@@ -639,7 +639,7 @@
         <button class="btn btn-sm" id="btn-toggle-forn" onclick="toggleAnuncioForn()" style="background:var(--vermelho);color:#fff;">⏸ Pausar anúncio</button>
         <div style="display:flex; gap:10px;">
           <button class="btn btn-outline btn-sm" onclick="abrirPreviewForn('pre')">👁️ Pré-visualizar</button>
-          <button class="btn btn-terra-sm" onclick="salvar('servico')">💾 Salvar alterações</button>
+          <button class="btn btn-terra-sm" onclick="salvarPerfil()">💾 Salvar alterações</button>
           <button class="btn btn-sm" style="background:var(--terra-escuro);color:#fff;" onclick="abrirPreviewForn('publicado')">🔗 Ver como cliente vê</button>
         </div>
       </div>
@@ -856,15 +856,109 @@
     }
   }
 
-  function fazerLogin() {
-    document.getElementById('login-page').style.display = 'none';
-    document.getElementById('painel').classList.add('ativo');
+  // SUPABASE
+  const SUPA_URL  = 'https://tathqoyhcuxthsrghrzx.supabase.co';
+  const SUPA_ANON = 'sb_publishable_fLpPGAodcCvJxPkQ223ABQ_ApJKDLRU';
+  const _supa = window.supabase.createClient(SUPA_URL, SUPA_ANON);
+
+  async function fazerLogin() {
+    const email = document.getElementById('login-email').value.trim();
+    const senha = document.getElementById('login-senha').value;
+    const erro = document.getElementById('login-erro');
+    const loading = document.getElementById('login-loading');
+    erro.style.display = 'none';
+    loading.style.display = 'block';
+
+    const { data, error } = await _supa.auth.signInWithPassword({ email, password: senha });
+    loading.style.display = 'none';
+    if (error) {
+      erro.textContent = 'E-mail ou senha incorretos. Tente novamente.';
+      erro.style.display = 'block';
+      return;
+    }
+    await abrirPainel(data.user);
   }
 
-  function fazerLogout() {
+  async function fazerLogout() {
+    await _supa.auth.signOut();
     document.getElementById('painel').classList.remove('ativo');
     document.getElementById('login-page').style.display = 'flex';
+    document.getElementById('login-email').value = '';
+    document.getElementById('login-senha').value = '';
   }
+
+  async function abrirPainel(user) {
+    const nome = user.user_metadata?.full_name || user.email.split('@')[0];
+    const iniciais = nome.split(' ').map(p=>p[0]).join('').toUpperCase().slice(0,2);
+    const sideNome = document.getElementById('sidebar-nome');
+    const sideAv = document.getElementById('sidebar-avatar');
+    if (sideNome) sideNome.textContent = nome;
+    if (sideAv) sideAv.textContent = iniciais;
+
+    document.getElementById('login-page').style.display = 'none';
+    document.getElementById('painel').classList.add('ativo');
+    await carregarDadosFornecedor(user.email);
+  }
+
+  async function carregarDadosFornecedor(email) {
+    const { data: suppliers } = await _supa
+      .from('suppliers')
+      .select('*')
+      .eq('email', email)
+      .limit(1);
+
+    const container = document.getElementById('perfil-container');
+
+    if (!suppliers || suppliers.length === 0) {
+      if (container) container.innerHTML = '<div style="padding:40px;text-align:center;color:var(--cinza);">📭 Nenhum perfil encontrado com este e-mail.<br><small>Entre em contato com o suporte.</small></div>';
+      return;
+    }
+
+    const s = suppliers[0];
+    window._meuPerfil = s;
+
+    // Preencher campos do formulário de perfil
+    const set = (id, val) => { const el = document.getElementById(id); if (el) el.value = val || ''; };
+    set('f-nome', s.name);
+    set('f-categoria', s.category);
+    set('f-cidade', s.city);
+    set('f-descricao', s.description);
+    set('f-whatsapp', s.whatsapp);
+    set('f-email-contato', s.email);
+    set('f-preco', s.price_range);
+
+    // Atualizar stats na visão geral
+    const statNome = document.getElementById('stat-nome-servico');
+    if (statNome) statNome.textContent = s.name;
+    const statCat = document.getElementById('stat-categoria');
+    if (statCat) statCat.textContent = s.category || '—';
+    const statRating = document.getElementById('stat-rating');
+    if (statRating) statRating.textContent = s.rating ? `⭐ ${s.rating}` : '⭐ Novo';
+
+    if (container) container.innerHTML = '<div style="padding:20px 0; color:var(--verde); font-size:14px; font-weight:600;">✅ Perfil carregado com sucesso!</div>';
+  }
+
+  async function salvarPerfil() {
+    if (!window._meuPerfil) return;
+    const get = id => document.getElementById(id)?.value || '';
+    const upd = {
+      name: get('f-nome'),
+      category: get('f-categoria'),
+      city: get('f-cidade'),
+      description: get('f-descricao'),
+      whatsapp: get('f-whatsapp'),
+      price_range: get('f-preco'),
+    };
+    const { error } = await _supa.from('suppliers').update(upd).eq('id', window._meuPerfil.id);
+    if (!error) { mostrarToast('✅ Perfil salvo!'); }
+    else mostrarToast('Erro ao salvar. Tente novamente.');
+  }
+
+  // Verificar sessão ao carregar
+  document.addEventListener('DOMContentLoaded', async () => {
+    const { data: { session } } = await _supa.auth.getSession();
+    if (session) await abrirPainel(session.user);
+  });
 
   function mostrarTab(id, btn) {
     document.querySelectorAll('.tabs').forEach(t => t.classList.remove('ativo'));
