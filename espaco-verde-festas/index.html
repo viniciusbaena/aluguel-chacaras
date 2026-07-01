@@ -1140,9 +1140,9 @@
     const propId = document.documentElement.dataset.propid || '';
     let url;
     if (slug) {
-      url = `https://tathqoyhcuxthsrghrzx.supabase.co/rest/v1/properties?slug=eq.${slug}&active=eq.true&limit=1`;
+      url = `https://tathqoyhcuxthsrghrzx.supabase.co/rest/v1/properties?slug=eq.${slug}&active=eq.true&select=id,name,description,address,city,state,price_per_day,max_guests,amenities,photos,active,created_at,updated_at,slug&limit=1`;
     } else if (propId) {
-      url = `https://tathqoyhcuxthsrghrzx.supabase.co/rest/v1/properties?id=eq.${propId}&active=eq.true&limit=1`;
+      url = `https://tathqoyhcuxthsrghrzx.supabase.co/rest/v1/properties?id=eq.${propId}&active=eq.true&select=id,name,description,address,city,state,price_per_day,max_guests,amenities,photos,active,created_at,updated_at,slug&limit=1`;
     } else return;
 
     const r = await fetch(url, {
@@ -1152,7 +1152,7 @@
     // Fallback: if slug returns empty (column not yet created), try by ID
     if ((!data || !data.length) && propId) {
       const r2 = await fetch(
-        `https://tathqoyhcuxthsrghrzx.supabase.co/rest/v1/properties?id=eq.${propId}&active=eq.true&limit=1`,
+        `https://tathqoyhcuxthsrghrzx.supabase.co/rest/v1/properties?id=eq.${propId}&active=eq.true&select=id,name,description,address,city,state,price_per_day,max_guests,amenities,photos,active,created_at,updated_at,slug&limit=1`,
         { headers: { apikey: 'sb_publishable_fLpPGAodcCvJxPkQ223ABQ_ApJKDLRU', Authorization: `Bearer sb_publishable_fLpPGAodcCvJxPkQ223ABQ_ApJKDLRU` } }
       );
       data = await r2.json();
