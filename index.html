@@ -830,6 +830,22 @@
       .anuncie-section { padding: 48px 24px; }
       footer { grid-template-columns: 1fr; padding: 40px 24px; }
       .footer-bottom { padding: 20px 24px; flex-direction: column; gap: 8px; }
+      #nav-mobile-toggle { display: block !important; }
+      .nav-links.aberto {
+        display: flex !important;
+        flex-direction: column;
+        position: absolute;
+        top: 64px;
+        left: 0;
+        right: 0;
+        background: #fff;
+        padding: 16px 24px;
+        gap: 4px;
+        box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+        z-index: 50;
+      }
+      .nav-links.aberto li { list-style: none; }
+      .nav-links.aberto a { display: block; padding: 12px 4px; }
     }
   </style>
 </head>
@@ -838,7 +854,7 @@
 <!-- NAV -->
 <nav>
   <a href="#" class="nav-logo">🌿 Aluguel de <span>Chácaras</span></a>
-  <ul class="nav-links">
+  <ul class="nav-links" id="nav-links">
     <li><a href="#chacaras">Chácaras</a></li>
     <li><a href="#fornecedores">Fornecedores</a></li>
     <li><a href="#como-funciona">Como funciona</a></li>
@@ -848,6 +864,7 @@
     <a href="#" class="btn btn-outline" onclick="abrirModal('login')">Entrar</a>
     <a href="#anuncie" class="btn btn-primary">Anunciar</a>
   </div>
+  <button id="nav-mobile-toggle" aria-label="Abrir menu" aria-expanded="false" aria-controls="nav-links" onclick="toggleMenuMobile()" style="display:none;background:none;border:none;font-size:24px;cursor:pointer;padding:8px;color:#1e4d2b;">☰</button>
 </nav>
 
 <!-- HERO -->
@@ -1350,15 +1367,17 @@
   <div class="modal" id="modal-content"></div>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script>
   const modais = {
     login: {
       titulo: 'Entrar na plataforma',
       sub: 'Acesse seu painel de proprietário ou fornecedor.',
       campos: `
-        <div class="field"><label>E-mail</label><input type="email" placeholder="seuemail@exemplo.com"/></div>
-        <div class="field"><label>Senha</label><input type="password" placeholder="••••••••"/></div>
-        <button class="btn btn-verde" style="width:100%;justify-content:center;margin-top:8px;" onclick="fecharModal()">Entrar</button>
+        <div class="field"><label for="home-login-email">E-mail</label><input type="email" id="home-login-email" placeholder="seuemail@exemplo.com"/></div>
+        <div class="field"><label for="home-login-senha">Senha</label><input type="password" id="home-login-senha" placeholder="••••••••"/></div>
+        <div id="home-login-erro" style="display:none;color:#b91c1c;background:#fee2e2;padding:10px 12px;border-radius:8px;font-size:13px;margin-top:8px;"></div>
+        <button class="btn btn-verde" id="home-login-btn" style="width:100%;justify-content:center;margin-top:8px;" onclick="fazerLoginHome()">Entrar</button>
         <p style="text-align:center;margin-top:16px;font-size:13px;color:#6b7280;">Não tem conta? <a href="#anuncie" onclick="fecharModal()" style="color:#2d7a45;font-weight:600;">Cadastre-se</a></p>
       `
     },
@@ -1375,11 +1394,11 @@
       titulo: 'Cadastrar minha chácara',
       sub: 'Preencha os dados básicos e comece a receber reservas pela plataforma.',
       campos: `
-        <div class="field"><label>Seu nome</label><input type="text" id="cad-chacara-nome" placeholder="Nome completo"/></div>
-        <div class="field"><label>WhatsApp</label><input type="text" id="cad-chacara-whatsapp" placeholder="(44) 9 0000-0000"/></div>
-        <div class="field"><label>Nome da chácara</label><input type="text" id="cad-chacara-nomenegocio" placeholder="Ex: Chácara das Palmeiras"/></div>
-        <div class="field"><label>Cidade</label><input type="text" id="cad-chacara-cidade" placeholder="Ex: Maringá, Sarandi..."/></div>
-        <div class="field"><label>E-mail</label><input type="email" id="cad-chacara-email" placeholder="seuemail@exemplo.com"/></div>
+        <div class="field"><label for="cad-chacara-nome">Seu nome</label><input type="text" id="cad-chacara-nome" placeholder="Nome completo"/></div>
+        <div class="field"><label for="cad-chacara-whatsapp">WhatsApp</label><input type="text" id="cad-chacara-whatsapp" placeholder="(44) 9 0000-0000"/></div>
+        <div class="field"><label for="cad-chacara-nomenegocio">Nome da chácara</label><input type="text" id="cad-chacara-nomenegocio" placeholder="Ex: Chácara das Palmeiras"/></div>
+        <div class="field"><label for="cad-chacara-cidade">Cidade</label><input type="text" id="cad-chacara-cidade" placeholder="Ex: Maringá, Sarandi..."/></div>
+        <div class="field"><label for="cad-chacara-email">E-mail</label><input type="email" id="cad-chacara-email" placeholder="seuemail@exemplo.com"/></div>
         <div id="cad-chacara-erro" style="display:none;color:#b91c1c;background:#fee2e2;padding:10px 12px;border-radius:8px;font-size:13px;margin-top:8px;"></div>
         <button class="btn btn-verde" id="cad-chacara-btn" style="width:100%;justify-content:center;margin-top:8px;" onclick="enviarCadastro('chacara')">Quero me cadastrar!</button>
       `
@@ -1388,10 +1407,10 @@
       titulo: 'Cadastrar meu serviço',
       sub: 'Apareça para quem está organizando eventos na região. Cadastro gratuito!',
       campos: `
-        <div class="field"><label>Seu nome</label><input type="text" id="cad-fornecedor-nome" placeholder="Nome completo"/></div>
-        <div class="field"><label>WhatsApp</label><input type="text" id="cad-fornecedor-whatsapp" placeholder="(44) 9 0000-0000"/></div>
-        <div class="field"><label>Nome do negócio</label><input type="text" id="cad-fornecedor-nomenegocio" placeholder="Ex: DJ Marquinhos Events"/></div>
-        <div class="field"><label>Categoria</label>
+        <div class="field"><label for="cad-fornecedor-nome">Seu nome</label><input type="text" id="cad-fornecedor-nome" placeholder="Nome completo"/></div>
+        <div class="field"><label for="cad-fornecedor-whatsapp">WhatsApp</label><input type="text" id="cad-fornecedor-whatsapp" placeholder="(44) 9 0000-0000"/></div>
+        <div class="field"><label for="cad-fornecedor-nomenegocio">Nome do negócio</label><input type="text" id="cad-fornecedor-nomenegocio" placeholder="Ex: DJ Marquinhos Events"/></div>
+        <div class="field"><label for="cad-fornecedor-categoria">Categoria</label>
           <select id="cad-fornecedor-categoria">
             <option>Bolos e Doces</option>
             <option>DJ e Música</option>
@@ -1404,8 +1423,8 @@
             <option>Salgados</option>
           </select>
         </div>
-        <div class="field"><label>Cidade</label><input type="text" id="cad-fornecedor-cidade" placeholder="Ex: Maringá"/></div>
-        <div class="field"><label>E-mail</label><input type="email" id="cad-fornecedor-email" placeholder="seuemail@exemplo.com"/></div>
+        <div class="field"><label for="cad-fornecedor-cidade">Cidade</label><input type="text" id="cad-fornecedor-cidade" placeholder="Ex: Maringá"/></div>
+        <div class="field"><label for="cad-fornecedor-email">E-mail</label><input type="email" id="cad-fornecedor-email" placeholder="seuemail@exemplo.com"/></div>
         <div id="cad-fornecedor-erro" style="display:none;color:#b91c1c;background:#fee2e2;padding:10px 12px;border-radius:8px;font-size:13px;margin-top:8px;"></div>
         <button class="btn btn-primary" id="cad-fornecedor-btn" style="width:100%;justify-content:center;margin-top:8px;" onclick="enviarCadastro('fornecedor')">Quero me cadastrar!</button>
       `
@@ -1431,6 +1450,53 @@
 
   function fecharModalFora(e) {
     if (e.target === document.getElementById('modal-overlay')) fecharModal();
+  }
+
+  function toggleMenuMobile() {
+    const nav = document.getElementById('nav-links');
+    const btn = document.getElementById('nav-mobile-toggle');
+    const aberto = nav.classList.toggle('aberto');
+    btn.setAttribute('aria-expanded', aberto ? 'true' : 'false');
+    btn.textContent = aberto ? '✕' : '☰';
+  }
+
+  const SUPA_URL_HOME  = 'https://tathqoyhcuxthsrghrzx.supabase.co';
+  const SUPA_ANON_HOME = 'sb_publishable_fLpPGAodcCvJxPkQ223ABQ_ApJKDLRU';
+  let _supaHome = null;
+  function getSupaHome() {
+    if (!_supaHome && window.supabase) _supaHome = window.supabase.createClient(SUPA_URL_HOME, SUPA_ANON_HOME);
+    return _supaHome;
+  }
+
+  async function fazerLoginHome() {
+    const email = document.getElementById('home-login-email').value.trim();
+    const senha = document.getElementById('home-login-senha').value;
+    const erro = document.getElementById('home-login-erro');
+    const btn = document.getElementById('home-login-btn');
+    erro.style.display = 'none';
+    if (!email || !senha) {
+      erro.textContent = 'Preencha e-mail e senha.';
+      erro.style.display = 'block';
+      return;
+    }
+    const supa = getSupaHome();
+    if (!supa) {
+      erro.textContent = 'Erro ao carregar autenticação. Recarregue a página e tente novamente.';
+      erro.style.display = 'block';
+      return;
+    }
+    btn.disabled = true;
+    btn.textContent = 'Entrando...';
+    const { error } = await supa.auth.signInWithPassword({ email, password: senha });
+    if (error) {
+      erro.textContent = 'E-mail ou senha incorretos.';
+      erro.style.display = 'block';
+      btn.disabled = false;
+      btn.textContent = 'Entrar';
+      return;
+    }
+    const { data: sup } = await supa.from('suppliers').select('id').eq('email', email).maybeSingle();
+    window.location.href = sup ? '/painel-fornecedor.html' : '/painel-proprietario.html';
   }
 
   async function enviarCadastro(tipo) {
