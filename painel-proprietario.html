@@ -1435,6 +1435,11 @@
   let calMesAtual = new Date().getMonth();
   let calAnoAtual = new Date().getFullYear();
   let diasStatus = {}; // { 'YYYY-MM-DD': 'disponivel' | 'indisponivel' | 'neutro' }
+  let propriedadeAtual = null;
+
+  const MAPA_COMODIDADES = {"🏊 Piscina": "piscina", "🍖 Churrasqueira": "churrasqueira", "⚽ Campo de futebol": "campo de futebol", "🎣 Lago / Pesca": "lago / pesca", "🅿️ Estacionamento": "estacionamento", "🛌 Hospedagem / Quartos": "hospedagem / quartos", "🏠 Casa sede": "casa sede", "🎮 Salão de jogos": "salão de jogos", "🏐 Quadra poliesportiva": "quadra poliesportiva", "💡 Energia elétrica": "energia elétrica", "💧 Água encanada": "água encanada", "♿ Acessibilidade": "acessibilidade", "🐾 Aceita pets": "aceita pets", "🍽️ Espaço gourmet": "espaço gourmet", "🎪 Salão coberto": "salão coberto", "🌳 Pomar": "pomar"};
+
+  const MAPA_EVENTOS = {"🎂 Aniversários": "aniversários", "💒 Casamentos": "casamentos", "🤝 Confraternizações": "confraternizações", "🏖️ Lazer / Final de semana": "lazer / final de semana", "👔 Eventos corporativos": "eventos corporativos", "🍖 Churrascos": "churrascos", "🎓 Formaturas": "formaturas", "👧 Festas infantis": "festas infantis"};
 
   // SUPABASE CONFIG
   const SUPA_URL  = 'https://tathqoyhcuxthsrghrzx.supabase.co';
@@ -1522,7 +1527,7 @@
     // 1. Buscar propriedades do proprietário
     const { data: props } = await _supa
       .from('properties')
-      .select('id,name,city,active')
+      .select('*')
       .eq('owner_email', email);
 
     if (!props || props.length === 0) {
@@ -1533,6 +1538,8 @@
 
     const propIds = props.map(p => p.id);
     window._minhaProp = props[0];
+    propriedadeAtual = props[0];
+    await preencherFormularioChacara(propriedadeAtual);
 
     // Atualizar preview da propriedade na visão geral
     const previewNome = document.getElementById('preview-nome');
@@ -1780,6 +1787,88 @@
 
   // inicializarTags chamada dentro do DOMContentLoaded principal (ver acima)
 
+  // Preenche o formulario "Minha Chacara" com os dados reais vindos do Supabase
+  async function preencherFormularioChacara(prop) {
+    const set = (id, val) => { const el = document.getElementById(id); if (el) el.value = (val === null || val === undefined) ? '' : val; };
+    set('f-nome', prop.name);
+    set('f-cidade', prop.city);
+    set('f-bairro', prop.neighborhood);
+    set('f-whatsapp', prop.owner_whatsapp);
+    set('f-telefone-alt', prop.phone_alt);
+    set('f-descricao', prop.description);
+    set('f-capacidade', prop.max_guests);
+    set('f-diaria', prop.price_per_day);
+    set('f-fds', prop.price_weekend);
+    set('input-video', prop.video_url);
+
+    const amenities = prop.amenities || [];
+    document.querySelectorAll('#tags-estrutura .tag-check').forEach(function(label) {
+      const canon = MAPA_COMODIDADES[label.textContent.trim()];
+      const checkbox = label.querySelector('input[type="checkbox"]');
+      if (checkbox && canon) {
+        checkbox.checked = amenities.includes(canon);
+        label.classList.toggle('selecionado', checkbox.checked);
+      }
+    });
+
+    const eventTypes = prop.event_types || [];
+    document.querySelectorAll('#tags-eventos .tag-check').forEach(function(label) {
+      const canon = MAPA_EVENTOS[label.textContent.trim()];
+      const checkbox = label.querySelector('input[type="checkbox"]');
+      if (checkbox && canon) {
+        checkbox.checked = eventTypes.includes(canon);
+        label.classList.toggle('selecionado', checkbox.checked);
+      }
+    });
+
+    // Fotos ja existentes no Supabase
+    const grid = document.getElementById('fotos-grid');
+    if (grid) {
+      grid.querySelectorAll('.foto-item:not(#foto-vazia)').forEach(el => el.remove());
+      const vazio = document.getElementById('foto-vazia');
+      (prop.photos || []).forEach(url => {
+        const div = document.createElement('div');
+        div.className = 'foto-item';
+        div._existingUrl = url;
+        div.innerHTML = '<img src="' + url + '" style="width:100%;height:100%;object-fit:cover;border-radius:10px;"/><button class="foto-remove" onclick="removerFoto(this)">✕</button>';
+        if (vazio) grid.insertBefore(div, vazio); else grid.appendChild(div);
+      });
+      atualizarBadgePrincipal();
+      if ((prop.photos || []).length) mostrarBtnSalvarFotos();
+    }
+
+    // Estado do anuncio (ativo/pausado)
+    anuncioAtivo = !!prop.active;
+    sincronizarBotoesAnuncio();
+
+    // Bloqueios de calendario
+    await carregarBloqueios(prop.id);
+  }
+
+  async function carregarBloqueios(propId) {
+    const { data } = await _supa.from('blocked_dates').select('blocked_date').eq('property_id', propId);
+    diasStatus = {};
+    (data || []).forEach(r => { diasStatus[r.blocked_date] = 'indisponivel'; });
+    renderCalendario();
+  }
+
+  function sincronizarBotoesAnuncio() {
+    const btn1 = document.getElementById('btn-toggle-anuncio');
+    const btn2 = document.getElementById('btn-toggle-anuncio-visao');
+    const badge = document.getElementById('badge-status-anuncio');
+    const aviso = document.getElementById('aviso-pausado');
+    const btns = [btn1, btn2].filter(Boolean);
+    if (anuncioAtivo) {
+      btns.forEach(b => { b.textContent = '⏸ Pausar anúncio'; b.style.background = 'var(--vermelho)'; b.style.color = '#fff'; b.className = 'btn btn-sm'; });
+      if (badge) { badge.className = 'status-badge badge-ativo'; badge.textContent = 'Anúncio ativo'; }
+      if (aviso) aviso.style.display = 'none';
+    } else {
+      btns.forEach(b => { b.textContent = '▶ Publicar anúncio'; b.style.background = 'var(--verde)'; b.style.color = '#fff'; b.className = 'btn btn-sm'; });
+      if (badge) { badge.className = 'status-badge badge-inativo'; badge.textContent = 'Anúncio pausado'; }
+      if (aviso) aviso.style.display = 'flex';
+    }
+  }
+
   // FOTOS
   function adicionarFotos(input) {
     const grid = document.getElementById('fotos-grid');
@@ -1795,6 +1884,7 @@
 
         const div = document.createElement('div');
         div.className = 'foto-item';
+        div._file = file;
         div.innerHTML = `<img src="${ev.target.result}" style="width:100%;height:100%;object-fit:cover;border-radius:10px;"/><button class="foto-remove" onclick="removerFoto(this)">✕</button>`;
 
         // Inserir antes do card vazio se ainda existir, senão append
@@ -2082,40 +2172,15 @@
   // TOGGLE ANÚNCIO ATIVO/PAUSADO
   let anuncioAtivo = true;
 
-  function toggleAnuncio() {
-    anuncioAtivo = !anuncioAtivo;
-
-    // Botões — um na Minha Chácara, um na Visão Geral
-    const btn1 = document.getElementById('btn-toggle-anuncio');
-    const btn2 = document.getElementById('btn-toggle-anuncio-visao');
-    const badge = document.getElementById('badge-status-anuncio');
-    const aviso = document.getElementById('aviso-pausado');
-
-    const btns = [btn1, btn2].filter(Boolean);
-
-    if (anuncioAtivo) {
-      // Reativar
-      btns.forEach(b => {
-        b.textContent = '⏸ Pausar anúncio';
-        b.style.background = 'var(--vermelho)';
-        b.style.color = '#fff';
-        b.className = 'btn btn-sm';
-      });
-      if (badge) { badge.className = 'status-badge badge-ativo'; badge.textContent = 'Anúncio ativo'; }
-      if (aviso) aviso.style.display = 'none';
-      mostrarToast('✅ Anúncio reativado! Já aparece nas buscas.');
-    } else {
-      // Pausar
-      btns.forEach(b => {
-        b.textContent = '▶ Publicar anúncio';
-        b.style.background = 'var(--verde)';
-        b.style.color = '#fff';
-        b.className = 'btn btn-sm';
-      });
-      if (badge) { badge.className = 'status-badge badge-inativo'; badge.textContent = 'Anúncio pausado'; }
-      if (aviso) aviso.style.display = 'flex';
-      mostrarToast('⏸ Anúncio pausado. Clique em "Publicar anúncio" para reativar.');
-    }
+  async function toggleAnuncio() {
+    if (!propriedadeAtual) { mostrarToast('⚠️ Não foi possível identificar sua chácara.'); return; }
+    const novoEstado = !anuncioAtivo;
+    const { data, error } = await _supa.from('properties').update({ active: novoEstado }).eq('id', propriedadeAtual.id).select().maybeSingle();
+    if (error) { mostrarToast('⚠️ Erro ao atualizar status: ' + error.message); return; }
+    anuncioAtivo = novoEstado;
+    propriedadeAtual = { ...propriedadeAtual, ...data };
+    sincronizarBotoesAnuncio();
+    mostrarToast(anuncioAtivo ? '✅ Anúncio reativado! Já aparece nas buscas.' : '⏸ Anúncio pausado. Clique em "Publicar anúncio" para reativar.');
   }
 
   function abrirPreview(modo) {
@@ -2266,10 +2331,6 @@
   }
 
   async function salvar(tipo) {
-    if (tipo === 'anuncio' || tipo === 'fotos') {
-      const dados = coletarDadosAnuncio();
-      try { localStorage.setItem('chacara_dados', JSON.stringify(dados)); } catch(e) {}
-    }
     if (tipo === 'senha') {
       const atual = document.getElementById('senha-atual-input')?.value || '';
       const nova = document.getElementById('senha-nova-input')?.value || '';
@@ -2286,14 +2347,113 @@
       mostrarToast('✅ Senha alterada!');
       return;
     }
-    const msgs = {
-      anuncio: '✅ Anúncio salvo com sucesso!',
-      fotos:   '✅ Fotos salvas!',
-      video:   '✅ Vídeo salvo!',
-      calendario: '✅ Calendário atualizado!',
-      config:  '✅ Configurações salvas!'
-    };
-    mostrarToast(msgs[tipo] || '✅ Salvo!');
+
+    if (!propriedadeAtual) { mostrarToast('⚠️ Não foi possível identificar sua chácara.'); return; }
+
+    if (tipo === 'anuncio') {
+      const comodidadesMarcadas = [];
+      document.querySelectorAll('#tags-estrutura .tag-check.selecionado').forEach(t => {
+        const canon = MAPA_COMODIDADES[t.textContent.trim()];
+        if (canon) comodidadesMarcadas.push(canon);
+      });
+      const valoresConhecidos = Object.values(MAPA_COMODIDADES);
+      const comodidadesExtras = (propriedadeAtual.amenities || []).filter(a => !valoresConhecidos.includes(a));
+      const amenitiesFinal = [...comodidadesMarcadas, ...comodidadesExtras];
+
+      const eventosMarcados = [];
+      document.querySelectorAll('#tags-eventos .tag-check.selecionado').forEach(t => {
+        const canon = MAPA_EVENTOS[t.textContent.trim()];
+        if (canon) eventosMarcados.push(canon);
+      });
+
+      const payload = {
+        name: document.getElementById('f-nome')?.value.trim() || null,
+        city: document.getElementById('f-cidade')?.value.trim() || null,
+        neighborhood: document.getElementById('f-bairro')?.value.trim() || null,
+        owner_whatsapp: document.getElementById('f-whatsapp')?.value.trim() || null,
+        phone_alt: document.getElementById('f-telefone-alt')?.value.trim() || null,
+        description: document.getElementById('f-descricao')?.value.trim() || null,
+        max_guests: parseInt(document.getElementById('f-capacidade')?.value) || null,
+        price_per_day: parseFloat(document.getElementById('f-diaria')?.value) || null,
+        price_weekend: parseFloat(document.getElementById('f-fds')?.value) || null,
+        amenities: amenitiesFinal,
+        event_types: eventosMarcados
+      };
+
+      const { data, error } = await _supa.from('properties').update(payload).eq('id', propriedadeAtual.id).select().maybeSingle();
+      if (error) { mostrarToast('⚠️ Erro ao salvar: ' + error.message); return; }
+      propriedadeAtual = { ...propriedadeAtual, ...data };
+      mostrarToast('✅ Anúncio salvo com sucesso!');
+      return;
+    }
+
+    if (tipo === 'video') {
+      const video_url = document.getElementById('input-video')?.value.trim() || null;
+      const { data, error } = await _supa.from('properties').update({ video_url }).eq('id', propriedadeAtual.id).select().maybeSingle();
+      if (error) { mostrarToast('⚠️ Erro ao salvar vídeo: ' + error.message); return; }
+      propriedadeAtual = { ...propriedadeAtual, ...data };
+      mostrarToast('✅ Vídeo salvo!');
+      return;
+    }
+
+    if (tipo === 'fotos') {
+      const itens = Array.from(document.querySelectorAll('#fotos-grid .foto-item:not(#foto-vazia)'));
+      const urls = [];
+      for (const item of itens) {
+        if (item._existingUrl) {
+          urls.push(item._existingUrl);
+        } else if (item._file) {
+          const ext = (item._file.name.split('.').pop() || 'jpg').toLowerCase();
+          const path = propriedadeAtual.id + '/' + Date.now() + '_' + Math.random().toString(36).slice(2) + '.' + ext;
+          const { error: upErr } = await _supa.storage.from('property-photos').upload(path, item._file, { upsert: false });
+          if (upErr) { mostrarToast('⚠️ Erro ao enviar foto: ' + upErr.message); continue; }
+          const { data: pub } = _supa.storage.from('property-photos').getPublicUrl(path);
+          urls.push(pub.publicUrl);
+          item._existingUrl = pub.publicUrl;
+          delete item._file;
+        }
+      }
+      const { data, error } = await _supa.from('properties').update({ photos: urls }).eq('id', propriedadeAtual.id).select().maybeSingle();
+      if (error) { mostrarToast('⚠️ Erro ao salvar fotos: ' + error.message); return; }
+      propriedadeAtual = { ...propriedadeAtual, ...data };
+      mostrarToast('✅ Fotos salvas!');
+      return;
+    }
+
+    if (tipo === 'calendario') {
+      const propId = propriedadeAtual.id;
+      const { data: atuais, error: fetchErr } = await _supa.from('blocked_dates').select('id,blocked_date').eq('property_id', propId);
+      if (fetchErr) { mostrarToast('⚠️ Erro ao ler calendário atual: ' + fetchErr.message); return; }
+      const bloqueadosAtuais = new Map((atuais || []).map(r => [r.blocked_date, r.id]));
+
+      const paraBloquear = Object.entries(diasStatus)
+        .filter(([data, status]) => status === 'indisponivel' && !bloqueadosAtuais.has(data))
+        .map(([data]) => data);
+
+      const paraDesbloquear = [];
+      bloqueadosAtuais.forEach((id, data) => {
+        if (diasStatus[data] !== 'indisponivel') paraDesbloquear.push(id);
+      });
+
+      if (paraBloquear.length) {
+        const rows = paraBloquear.map(d => ({ property_id: propId, blocked_date: d, reason: 'bloqueado_proprietario' }));
+        const { error } = await _supa.from('blocked_dates').insert(rows);
+        if (error) { mostrarToast('⚠️ Erro ao bloquear datas: ' + error.message); return; }
+      }
+      if (paraDesbloquear.length) {
+        const { error } = await _supa.from('blocked_dates').delete().in('id', paraDesbloquear);
+        if (error) { mostrarToast('⚠️ Erro ao liberar datas: ' + error.message); return; }
+      }
+      mostrarToast('✅ Calendário atualizado!');
+      return;
+    }
+
+    if (tipo === 'config') {
+      mostrarToast('⚠️ Edição de dados pessoais ainda não está disponível nesta versão.');
+      return;
+    }
+
+    mostrarToast('✅ Salvo!');
   }
 </script>
 </body>
