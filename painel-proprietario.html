@@ -586,11 +586,11 @@
     <div class="login-title">Bem-vindo de volta!</div>
 
     <div class="field">
-      <label>E-mail</label>
+      <label for="login-email">E-mail</label>
       <input type="email" id="login-email" placeholder="seuemail@exemplo.com" />
     </div>
     <div class="field">
-      <label>Senha</label>
+      <label for="login-senha">Senha</label>
       <input type="password" id="login-senha" placeholder="••••••••" />
     </div>
 
@@ -1040,28 +1040,28 @@
         <div class="card-title">🏡 Informações básicas</div>
         <div class="form-grid">
           <div class="field form-full">
-            <label>Nome da chácara</label>
+            <label for="f-nome">Nome da chácara</label>
             <input type="text" id="f-nome" value="Chácara das Palmeiras"/>
           </div>
           <div class="field">
-            <label>Cidade</label>
+            <label for="f-cidade">Cidade</label>
             <input type="text" id="f-cidade" value="Maringá"/>
           </div>
           <div class="field">
-            <label>Bairro / Localidade</label>
+            <label for="f-bairro">Bairro / Localidade</label>
             <input type="text" id="f-bairro" value="Zona Rural"/>
           </div>
           <div class="field">
-            <label>WhatsApp para contato</label>
-            <input type="text" value="(44) 9 9999-9999"/>
+            <label for="f-whatsapp">WhatsApp para contato</label>
+            <input type="text" id="f-whatsapp" value="(44) 9 9999-9999"/>
           </div>
           <div class="field">
-            <label>Telefone alternativo</label>
-            <input type="text" placeholder="Opcional"/>
+            <label for="f-telefone-alt">Telefone alternativo</label>
+            <input type="text" id="f-telefone-alt" placeholder="Opcional"/>
           </div>
           <div class="field form-full">
-            <label>Descrição do espaço</label>
-            <textarea>Espaço amplo com piscina, churrasqueira coberta, campo de futebol e casa sede. Ideal para festas, confraternizações e eventos em família. Contamos com estacionamento para 30 carros e área verde com muito verde e sombra.</textarea>
+            <label for="f-descricao">Descrição do espaço</label>
+            <textarea id="f-descricao">Espaço amplo com piscina, churrasqueira coberta, campo de futebol e casa sede. Ideal para festas, confraternizações e eventos em família. Contamos com estacionamento para 30 carros e área verde com muito verde e sombra.</textarea>
           </div>
         </div>
       </div>
@@ -1070,15 +1070,15 @@
         <div class="card-title">💰 Capacidade e valores</div>
         <div class="form-3">
           <div class="field">
-            <label>Capacidade máxima (pessoas)</label>
+            <label for="f-capacidade">Capacidade máxima (pessoas)</label>
             <input type="number" id="f-capacidade" value="150"/>
           </div>
           <div class="field">
-            <label>Valor diária (R$)</label>
+            <label for="f-diaria">Valor diária (R$)</label>
             <input type="number" id="f-diaria" value="1200"/>
           </div>
           <div class="field">
-            <label>Valor fim de semana (R$)</label>
+            <label for="f-fds">Valor fim de semana (R$)</label>
             <input type="number" id="f-fds" value="1800"/>
           </div>
         </div>
@@ -1162,7 +1162,7 @@
       <div class="card">
         <div class="card-title">🎬 Vídeo da chácara</div>
         <div class="field">
-          <label>Link do vídeo (YouTube ou Instagram)</label>
+          <label for="input-video">Link do vídeo (YouTube ou Instagram)</label>
           <input type="text" id="input-video" placeholder="https://youtube.com/watch?v=..."/>
         </div>
         <div style="font-size:12px; color:var(--cinza); margin-top:4px;">
@@ -1291,20 +1291,20 @@
         <div class="card-title">👤 Dados pessoais</div>
         <div class="form-grid">
           <div class="field">
-            <label>Nome completo</label>
-            <input type="text" value="Proprietário"/>
+            <label for="perfil-nome">Nome completo</label>
+            <input type="text" id="perfil-nome" value="Proprietário"/>
           </div>
           <div class="field">
-            <label>CPF</label>
-            <input type="text" value="000.000.000-00"/>
+            <label for="perfil-cpf">CPF</label>
+            <input type="text" id="perfil-cpf" value="000.000.000-00"/>
           </div>
           <div class="field">
-            <label>E-mail</label>
-            <input type="email" />
+            <label for="perfil-email">E-mail</label>
+            <input type="email" id="perfil-email" />
           </div>
           <div class="field">
-            <label>WhatsApp</label>
-            <input type="text" value="(44) 9 9999-9999"/>
+            <label for="perfil-whatsapp">WhatsApp</label>
+            <input type="text" id="perfil-whatsapp" value="(44) 9 9999-9999"/>
           </div>
         </div>
       </div>
@@ -1313,11 +1313,11 @@
         <div class="card-title">🔒 Alterar senha</div>
         <div class="form-grid">
           <div class="field">
-            <label>Senha atual</label>
+            <label for="senha-atual-input">Senha atual</label>
             <input type="password" id="senha-atual-input" placeholder="••••••••"/>
           </div>
           <div class="field">
-            <label>Nova senha</label>
+            <label for="senha-nova-input">Nova senha</label>
             <input type="password" id="senha-nova-input" placeholder="••••••••"/>
           </div>
         </div>
@@ -1371,11 +1371,11 @@
         <div class="card-title">🧮 Simulador de ganhos</div>
         <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:16px;">
           <div class="field">
-            <label>Valor da diária (R$)</label>
+            <label for="sim-diaria">Valor da diária (R$)</label>
             <input type="number" id="sim-diaria" value="1200" oninput="simularComissao()" style="border:1.5px solid var(--cinza-borda);border-radius:8px;padding:10px;font-size:14px;font-family:'Inter',sans-serif;outline:none;"/>
           </div>
           <div class="field">
-            <label>Número de dias</label>
+            <label for="sim-dias">Número de dias</label>
             <input type="number" id="sim-dias" value="2" min="1" oninput="simularComissao()" style="border:1.5px solid var(--cinza-borda);border-radius:8px;padding:10px;font-size:14px;font-family:'Inter',sans-serif;outline:none;"/>
           </div>
         </div>
