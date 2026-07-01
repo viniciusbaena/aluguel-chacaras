@@ -728,11 +728,11 @@
 
         <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
           <div class="campo-reserva">
-            <label>📅 Check-in</label>
+            <label for="r-checkin">📅 Check-in</label>
             <input type="date" id="r-checkin" onchange="validarDatas()"/>
           </div>
           <div class="campo-reserva">
-            <label>📅 Check-out</label>
+            <label for="r-checkout">📅 Check-out</label>
             <input type="date" id="r-checkout" onchange="calcularTotal()"/>
           </div>
         </div>
@@ -740,7 +740,7 @@
         <div id="aviso-data-bloqueada" style="display:none; background:#ffebee; color:#b71c1c; border-radius:8px; padding:8px 12px; font-size:12px; font-weight:600; margin-bottom:4px;"></div>
         <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
           <div class="campo-reserva">
-            <label>Nº de convidados</label>
+            <label for="r-pessoas">Nº de convidados</label>
             <select id="r-pessoas">
               <option value="50">Até 50 pessoas</option>
               <option value="100">50 a 100 pessoas</option>
@@ -748,7 +748,7 @@
             </select>
           </div>
           <div class="campo-reserva">
-            <label>Tipo de evento</label>
+            <label for="r-tipo">Tipo de evento</label>
             <select id="r-tipo">
               <option>Aniversário</option>
               <option>Casamento</option>
@@ -759,19 +759,19 @@
           </div>
         </div>
         <div class="campo-reserva">
-          <label>Seu nome</label>
+          <label for="r-nome">Seu nome</label>
           <input type="text" id="r-nome" placeholder="Nome completo"/>
         </div>
         <div class="campo-reserva">
-          <label>WhatsApp</label>
+          <label for="r-wpp">WhatsApp</label>
           <input type="text" id="r-wpp" placeholder="(44) 9 0000-0000" inputmode="numeric" oninput="mascaraWhatsApp(this)"/>
         </div>
         <div class="campo-reserva">
-          <label>E-mail</label>
+          <label for="r-email">E-mail</label>
           <input type="email" id="r-email" placeholder="seuemail@exemplo.com"/>
         </div>
         <div class="campo-reserva">
-          <label>Mensagem para o proprietário (opcional)</label>
+          <label for="r-msg">Mensagem para o proprietário (opcional)</label>
           <textarea id="r-msg" placeholder="Ex: Será uma festa surpresa para 80 pessoas, precisamos entrar às 9h..."></textarea>
         </div>
 
