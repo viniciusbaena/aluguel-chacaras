@@ -1087,11 +1087,10 @@
     const checkin = document.getElementById('r-checkin').value;
     if (checkin) {
       const minCheckout = new Date(checkin);
-      minCheckout.setDate(minCheckout.getDate() + 1);
       document.getElementById('r-checkout').min = minCheckout.toISOString().split('T')[0];
-      // Se checkout já selecionado e menor que checkin, limpa
+      // Se checkout já selecionado e menor que checkin, limpa (checkout == checkin é válido: 1 diária)
       const checkout = document.getElementById('r-checkout').value;
-      if (checkout && checkout <= checkin) {
+      if (checkout && checkout < checkin) {
         document.getElementById('r-checkout').value = '';
         document.getElementById('resumo-periodo').style.display = 'none';
       }
@@ -1105,7 +1104,7 @@
     const checkout = document.getElementById('r-checkout').value;
     const resumo = document.getElementById('resumo-periodo');
 
-    if (checkin && checkout && checkout > checkin) {
+    if (checkin && checkout && checkout >= checkin) {
       const d1 = new Date(checkin + 'T12:00:00');
       const d2 = new Date(checkout + 'T12:00:00');
       const dias = Math.round((d2 - d1) / (1000 * 60 * 60 * 24)) + 1; // inclusivo: dia 14 a 16 = 3 dias
@@ -1219,12 +1218,12 @@
 
     if (!checkin)            { mostrarToast('⚠️ Selecione a data de check-in'); return; }
     if (!checkout)           { mostrarToast('⚠️ Selecione a data de check-out'); return; }
-    if (checkout <= checkin) { mostrarToast('⚠️ Check-out deve ser após o check-in'); return; }
+    if (checkout < checkin) { mostrarToast('⚠️ Check-out não pode ser antes do check-in'); return; }
     if (!nome)               { mostrarToast('⚠️ Informe seu nome'); return; }
     if (!wpp && !email)      { mostrarToast('⚠️ Informe WhatsApp ou e-mail'); return; }
 
     const fmt = d => new Date(d + 'T12:00:00').toLocaleDateString('pt-BR', { day:'2-digit', month:'long', year:'numeric' });
-    const dias = Math.round((new Date(checkout+'T12:00:00') - new Date(checkin+'T12:00:00')) / 86400000);
+    const dias = Math.round((new Date(checkout+'T12:00:00') - new Date(checkin+'T12:00:00')) / 86400000) + 1; // inclusivo
     const periodoTexto = `${fmt(checkin)} → ${fmt(checkout)} (${dias} diária${dias>1?'s':''})`;
 
     const btn = document.querySelector('.btn-reservar');
@@ -1280,7 +1279,7 @@
 
     if (!checkin) { mostrarToast('⚠️ Selecione a data de check-in'); return; }
     if (!checkout) { mostrarToast('⚠️ Selecione a data de check-out'); return; }
-    if (checkout <= checkin) { mostrarToast('⚠️ Check-out deve ser após o check-in'); return; }
+    if (checkout < checkin) { mostrarToast('⚠️ Check-out não pode ser antes do check-in'); return; }
     if (!nome) { mostrarToast('⚠️ Informe seu nome'); return; }
     if (!wpp && !email) { mostrarToast('⚠️ Informe WhatsApp ou e-mail'); return; }
 
