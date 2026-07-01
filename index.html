@@ -1165,88 +1165,83 @@
       <div class="section-eyebrow">Tudo para seu evento</div>
       <h2 class="section-title">Fornecedores parceiros</h2>
     </div>
-    <a href="/#fornecedores" class="btn btn-outline">Ver todos →</a>
   </div>
 
-  <div class="categorias-grid">
-    <div class="categoria-card">
-      <div class="categoria-icon">🎠</div>
-      <div class="categoria-nome">Brinquedos Infantis</div>
-      <div class="categoria-qtd">11 fornecedores</div>
-    </div>
-    <div class="categoria-card">
-      <div class="categoria-icon">🤹</div>
-      <div class="categoria-nome">Recreadores Infantis</div>
-      <div class="categoria-qtd">9 fornecedores</div>
-    </div>
-    <div class="categoria-card">
-      <div class="categoria-icon">🎈</div>
-      <div class="categoria-nome">Brinquedos Infláveis</div>
-      <div class="categoria-qtd">7 fornecedores</div>
-    </div>
-    <div class="categoria-card">
-      <div class="categoria-icon">🥩</div>
-      <div class="categoria-nome">Churrasqueiros</div>
-      <div class="categoria-qtd">7 fornecedores</div>
-    </div>
-    <div class="categoria-card">
-      <div class="categoria-icon">🎸</div>
-      <div class="categoria-nome">Músicos / Shows</div>
-      <div class="categoria-qtd">14 fornecedores</div>
-    </div>
-    <div class="categoria-card">
-      <div class="categoria-icon">🍹</div>
-      <div class="categoria-nome">Bartenders</div>
-      <div class="categoria-qtd">6 fornecedores</div>
-    </div>
-    <div class="categoria-card">
-      <div class="categoria-icon">🍷</div>
-      <div class="categoria-nome">Garçons</div>
-      <div class="categoria-qtd">8 fornecedores</div>
-    </div>
-    <div class="categoria-card">
-      <div class="categoria-icon">🎊</div>
-      <div class="categoria-nome">Decoração e Balões</div>
-      <div class="categoria-qtd">18 fornecedores</div>
-    </div>
-    <div class="categoria-card">
-      <div class="categoria-icon">👨‍🍳</div>
-      <div class="categoria-nome">Cozinheiros(as)</div>
-      <div class="categoria-qtd">9 fornecedores</div>
-    </div>
-    <div class="categoria-card">
-      <div class="categoria-icon">🛒</div>
-      <div class="categoria-nome">Disk Bebidas</div>
-      <div class="categoria-qtd">5 fornecedores</div>
-    </div>
-    <div class="categoria-card">
-      <div class="categoria-icon">🍽️</div>
-      <div class="categoria-nome">Buffets</div>
-      <div class="categoria-qtd">16 fornecedores</div>
-    </div>
-    <div class="categoria-card">
-      <div class="categoria-icon">🎂</div>
-      <div class="categoria-nome">Bolos e Doces</div>
-      <div class="categoria-qtd">14 fornecedores</div>
-    </div>
-    <div class="categoria-card">
-      <div class="categoria-icon">🍡</div>
-      <div class="categoria-nome">Salgados</div>
-      <div class="categoria-qtd">12 fornecedores</div>
-    </div>
-    <div class="categoria-card">
-      <div class="categoria-icon">🍺</div>
-      <div class="categoria-nome">Chopeiras</div>
-      <div class="categoria-qtd">8 fornecedores</div>
-    </div>
-    <div class="categoria-card">
-      <div class="categoria-icon">🎵</div>
-      <div class="categoria-nome">DJ e Música</div>
-      <div class="categoria-qtd">22 fornecedores</div>
+  <div class="chacaras-grid" id="fornecedores-grid">
+    <div id="fornecedores-loading" style="grid-column:1/-1; text-align:center; padding:40px; color:#666; font-size:14px;">
+      ⏳ Carregando fornecedores...
     </div>
   </div>
 
-  <a href="/#fornecedores" style="display:block; text-align:center; margin-top:8px; font-size:14px; font-weight:600; color:var(--terra); text-decoration:none;">Ver todos os fornecedores →</a>
+  <script>
+  (async function carregarFornecedoresHome() {
+    const SUPABASE_URL  = 'https://tathqoyhcuxthsrghrzx.supabase.co';
+    const SUPABASE_ANON = 'sb_publishable_fLpPGAodcCvJxPkQ223ABQ_ApJKDLRU';
+    const grid    = document.getElementById('fornecedores-grid');
+    const loading = document.getElementById('fornecedores-loading');
+
+    const paleta = [
+      'linear-gradient(135deg,#fbd38d,#ed8936)',
+      'linear-gradient(135deg,#b3e5fc,#4fc3f7)',
+      'linear-gradient(135deg,#f8bbd0,#f48fb1)',
+      'linear-gradient(135deg,#c8e6c9,#66bb6a)',
+      'linear-gradient(135deg,#ffe0b2,#ffa726)',
+      'linear-gradient(135deg,#e1bee7,#9c27b0)',
+      'linear-gradient(135deg,#b2dfdb,#00897b)',
+      'linear-gradient(135deg,#fce4ec,#e91e63)',
+    ];
+
+    try {
+      const r = await fetch(
+        `${SUPABASE_URL}/rest/v1/suppliers?active=eq.true&order=created_at.desc&limit=8&select=name,slug,category,city,state,description,whatsapp,price_range,avatar_emoji,rating,rating_count`,
+        { headers: { apikey: SUPABASE_ANON, Authorization: `Bearer ${SUPABASE_ANON}` } }
+      );
+      const forns = await r.json();
+
+      if (!forns || !forns.length) {
+        loading.innerHTML = 'Nenhum fornecedor cadastrado ainda. <a href="#" onclick="abrirModal(\'cadastro-fornecedor\');return false;" style="color:var(--terra);font-weight:600;">Seja o primeiro a anunciar →</a>';
+        return;
+      }
+
+      loading.remove();
+
+      forns.forEach((f, idx) => {
+        if (!f.slug) return;
+        const bg   = paleta[idx % paleta.length];
+        const icon = f.avatar_emoji || '🎉';
+        const local = [f.city, f.state].filter(Boolean).join(' — ');
+        const desc  = f.description ? f.description.slice(0, 120) + (f.description.length > 120 ? '…' : '') : '';
+        const aval  = f.rating ? `⭐ ${f.rating} (${f.rating_count || 0})` : '';
+
+        const card = document.createElement('a');
+        card.href  = `/fornecedor.html?slug=${encodeURIComponent(f.slug)}`;
+        card.className = 'chacara-card';
+        card.style.cssText = 'text-decoration:none;color:inherit;display:block;';
+        card.innerHTML = `
+          <div class="chacara-foto-placeholder" style="background: ${bg};">
+            ${icon}
+          </div>
+          <div class="chacara-info">
+            ${local ? `<div class="chacara-local">📍 ${local}</div>` : ''}
+            <div class="chacara-nome">${f.name}</div>
+            ${desc ? `<div class="chacara-desc">${desc}</div>` : ''}
+            <div class="chacara-tags">
+              ${f.category ? `<span class="tag">${f.category}</span>` : ''}
+              ${aval ? `<span class="tag">${aval}</span>` : ''}
+            </div>
+            <div class="chacara-footer">
+              ${f.price_range ? `<div class="chacara-preco">${f.price_range}</div>` : ''}
+              <span class="btn-contato">Ver perfil</span>
+            </div>
+          </div>`;
+        grid.appendChild(card);
+      });
+    } catch(e) {
+      loading.innerHTML = 'Erro ao carregar fornecedores. Tente novamente.';
+      console.error(e);
+    }
+  })();
+  </script>
 </section>
 
 <!-- COMO FUNCIONA -->
