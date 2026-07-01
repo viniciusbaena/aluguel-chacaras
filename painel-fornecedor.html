@@ -382,7 +382,7 @@
             <div class="page-sub">Edite as informações do seu anúncio</div>
           </div>
         </div>
-        <button class="btn btn-terra-sm btn-sm" onclick="salvarPerfil()">💾 Salvar alterações</button>
+        <button class="btn btn-terra-sm btn-sm" onclick="salvar('servico')">💾 Salvar alterações</button>
       </div>
 
       <!-- DICAS -->
@@ -654,7 +654,7 @@
         <button class="btn btn-sm" id="btn-toggle-forn" onclick="toggleAnuncioForn()" style="background:var(--vermelho);color:#fff;">⏸ Pausar anúncio</button>
         <div style="display:flex; gap:10px;">
           <button class="btn btn-outline btn-sm" onclick="abrirPreviewForn('pre')">👁️ Pré-visualizar</button>
-          <button class="btn btn-terra-sm" onclick="salvarPerfil()">💾 Salvar alterações</button>
+          <button class="btn btn-terra-sm" onclick="salvar('servico')">💾 Salvar alterações</button>
           <button class="btn btn-sm" style="background:var(--terra-escuro);color:#fff;" onclick="abrirPreviewForn('publicado')">🔗 Ver como cliente vê</button>
         </div>
       </div>
@@ -854,21 +854,31 @@
 
   // TOGGLE ANÚNCIO FORNECEDOR
   let anuncioFornAtivo = true;
+  let perfilAtual = null;
+  const MAPA_DIFERENCIAIS = {"🚚 Entrega e montagem inclusa": "entrega e montagem inclusa", "💡 Iluminação inclusa": "iluminação inclusa", "🎤 Microfone sem fio": "microfone sem fio", "📻 Playlist personalizada": "playlist personalizada", "🏆 Mais de 5 anos de experiência": "mais de 5 anos de experiência", "📋 Contrato de serviço": "contrato de serviço", "🔄 Reposição em caso de problema": "reposição em caso de problema", "🎓 Profissional certificado": "profissional certificado", "📍 Atende toda a região": "atende toda a região", "💳 Aceita parcelamento": "aceita parcelamento"};
 
-  function toggleAnuncioForn() {
-    anuncioFornAtivo = !anuncioFornAtivo;
+  function sincronizarBotoesAnuncioForn() {
     const btns = [document.getElementById('btn-toggle-forn'), document.getElementById('btn-toggle-forn-vg')].filter(Boolean);
     const badge = document.getElementById('badge-status-forn');
-
     if (anuncioFornAtivo) {
       btns.forEach(b => { b.textContent = '⏸ Pausar anúncio'; b.style.background = 'var(--vermelho)'; });
       if (badge) { badge.className = 'status-badge badge-ativo'; badge.textContent = 'Anúncio ativo'; }
-      mostrarToast('✅ Anúncio reativado! Já aparece nas buscas.');
     } else {
       btns.forEach(b => { b.textContent = '▶ Publicar anúncio'; b.style.background = 'var(--verde)'; });
       if (badge) { badge.className = 'status-badge badge-inativo'; badge.textContent = 'Anúncio pausado'; }
-      mostrarToast('⏸ Anúncio pausado. Clique em "Publicar anúncio" para reativar.');
     }
+  }
+
+  async function toggleAnuncioForn() {
+    if (!perfilAtual) { mostrarToast('⚠️ Não foi possível identificar seu perfil.'); return; }
+    const novoEstado = !anuncioFornAtivo;
+    const { data, error } = await _supa.from('suppliers').update({ active: novoEstado }).eq('id', perfilAtual.id).select().maybeSingle();
+    if (error) { mostrarToast('⚠️ Erro ao atualizar anúncio: ' + error.message); return; }
+    anuncioFornAtivo = novoEstado;
+    perfilAtual = { ...perfilAtual, ...data };
+    window._meuPerfil = perfilAtual;
+    sincronizarBotoesAnuncioForn();
+    mostrarToast(anuncioFornAtivo ? '✅ Anúncio reativado! Já aparece nas buscas.' : '⏸ Anúncio pausado. Clique em "Publicar anúncio" para reativar.');
   }
 
   // SUPABASE
@@ -957,51 +967,74 @@
       .eq('email', email)
       .limit(1);
 
-    const container = document.getElementById('perfil-container');
-
     if (!suppliers || suppliers.length === 0) {
-      if (container) container.innerHTML = '<div style="padding:40px;text-align:center;color:var(--cinza);">📭 Nenhum perfil encontrado com este e-mail.<br><small>Entre em contato com o suporte.</small></div>';
+      mostrarToast('⚠️ Nenhum perfil encontrado com este e-mail.');
       return;
     }
 
     const s = suppliers[0];
     window._meuPerfil = s;
+    perfilAtual = s;
 
-    // Preencher campos do formulário de perfil
-    const set = (id, val) => { const el = document.getElementById(id); if (el) el.value = val || ''; };
-    set('f-nome', s.name);
-    set('f-categoria', s.category);
-    set('f-cidade', s.city);
-    set('f-descricao', s.description);
-    set('f-whatsapp', s.whatsapp);
-    set('f-email-contato', s.email);
-    set('f-preco', s.price_range);
+    // Preencher campos reais do formulario "Meu Servico"
+    const set = (id, val) => { const el = document.getElementById(id); if (el) el.value = (val === null || val === undefined) ? '' : val; };
+    set('ff-nome', s.name);
+    set('ff-whatsapp', s.whatsapp);
+    set('ff-instagram', s.instagram);
+    set('ff-descricao', s.description);
+    set('ff-area', s.service_area);
+    set('ff-valor', s.price_min !== null && s.price_min !== undefined ? s.price_min : '');
+    set('ff-antecedencia', s.min_notice);
+    set('ff-obs-valores', s.price_notes);
+    set('ff-video', s.video_url);
 
-    // Atualizar stats na visão geral
+    const catEl = document.getElementById('select-categoria');
+    if (catEl && s.category) catEl.value = s.category;
+
+    const formatoEl = document.getElementById('ff-formato-valor');
+    if (formatoEl && s.price_range) formatoEl.value = s.price_range;
+
+    const pagEl = document.getElementById('ff-pagamento');
+    if (pagEl && s.payment_methods) pagEl.value = s.payment_methods;
+
+    // Diferenciais
+    const tags = s.tags || [];
+    document.querySelectorAll('#tab-meu-servico .tags-grid .tag-check').forEach(function(label) {
+      const canon = MAPA_DIFERENCIAIS[label.textContent.trim()];
+      const checkbox = label.querySelector('input[type="checkbox"]');
+      if (checkbox && canon) {
+        checkbox.checked = tags.includes(canon);
+        label.classList.toggle('selecionado', checkbox.checked);
+      }
+    });
+
+    // Fotos existentes
+    const grid = document.getElementById('fotos-grid');
+    if (grid) {
+      grid.querySelectorAll('.foto-item:not(#foto-vazia)').forEach(el => el.remove());
+      const vazio = document.getElementById('foto-vazia');
+      (s.photos || []).forEach(url => {
+        const div = document.createElement('div');
+        div.className = 'foto-item';
+        div._existingUrl = url;
+        div.innerHTML = '<img src="' + url + '" style="width:100%;height:100%;object-fit:cover;border-radius:10px;"/><button class="foto-remove" onclick="removerFotoForn(this)">✕</button>';
+        if (vazio) grid.insertBefore(div, vazio); else grid.appendChild(div);
+      });
+      atualizarBadgeCapa();
+      if ((s.photos || []).length) { const b = document.getElementById('btn-salvar-fotos'); if (b) b.style.display = 'flex'; }
+    }
+
+    // Estado do anuncio
+    anuncioFornAtivo = !!s.active;
+    sincronizarBotoesAnuncioForn();
+
+    // Stats na visao geral
     const statNome = document.getElementById('stat-nome-servico');
     if (statNome) statNome.textContent = s.name;
     const statCat = document.getElementById('stat-categoria');
     if (statCat) statCat.textContent = s.category || '—';
     const statRating = document.getElementById('stat-rating');
     if (statRating) statRating.textContent = s.rating ? `⭐ ${s.rating}` : '⭐ Novo';
-
-    if (container) container.innerHTML = '<div style="padding:20px 0; color:var(--verde); font-size:14px; font-weight:600;">✅ Perfil carregado com sucesso!</div>';
-  }
-
-  async function salvarPerfil() {
-    if (!window._meuPerfil) return;
-    const get = id => document.getElementById(id)?.value || '';
-    const upd = {
-      name: get('f-nome'),
-      category: get('f-categoria'),
-      city: get('f-cidade'),
-      description: get('f-descricao'),
-      whatsapp: get('f-whatsapp'),
-      price_range: get('f-preco'),
-    };
-    const { error } = await _supa.from('suppliers').update(upd).eq('id', window._meuPerfil.id);
-    if (!error) { mostrarToast('✅ Perfil salvo!'); }
-    else mostrarToast('Erro ao salvar. Tente novamente.');
   }
 
   // Verificar sessão ao carregar
@@ -1049,6 +1082,7 @@
         if (document.getElementById('foto-vazia')) document.getElementById('foto-vazia').remove();
         const div = document.createElement('div');
         div.className = 'foto-item';
+        div._file = file;
         div.innerHTML = `<img src="${ev.target.result}" style="width:100%;height:100%;object-fit:cover;border-radius:10px;"/><button class="foto-remove" onclick="removerFotoForn(this)">✕</button>`;
         const vazioAtual = document.getElementById('foto-vazia');
         if (vazioAtual) grid.insertBefore(div, vazioAtual);
@@ -1096,18 +1130,105 @@
     }
   }
 
-  function salvar(tipo) {
-    const msgs = {
-      servico: '✅ Serviço salvo com sucesso!',
-      fotos: '✅ Fotos salvas!',
-      video: '✅ Vídeo salvo!',
-      config: '✅ Configurações salvas!',
-      senha: '✅ Senha alterada!'
-    };
-    const t = document.getElementById('toast');
-    t.textContent = msgs[tipo] || '✅ Salvo!';
-    t.classList.add('show');
-    setTimeout(() => t.classList.remove('show'), 3000);
+  async function salvar(tipo) {
+    if (tipo === 'senha') {
+      const atual = document.getElementById('senha-atual-input')?.value || '';
+      const nova = document.getElementById('senha-nova-input')?.value || '';
+      if (!nova || nova.length < 6) { mostrarToast('⚠️ A nova senha deve ter pelo menos 6 caracteres.'); return; }
+      const { data: { user } } = await _supa.auth.getUser();
+      if (atual && user) {
+        const { error: reAuthErr } = await _supa.auth.signInWithPassword({ email: user.email, password: atual });
+        if (reAuthErr) { mostrarToast('⚠️ Senha atual incorreta.'); return; }
+      }
+      const { error } = await _supa.auth.updateUser({ password: nova });
+      if (error) { mostrarToast('⚠️ Erro ao alterar senha: ' + error.message); return; }
+      document.getElementById('senha-atual-input').value = '';
+      document.getElementById('senha-nova-input').value = '';
+      mostrarToast('✅ Senha alterada!');
+      return;
+    }
+
+    if (!perfilAtual) { mostrarToast('⚠️ Não foi possível identificar seu perfil.'); return; }
+
+    if (tipo === 'servico') {
+      const difMarcados = [];
+      document.querySelectorAll('#tab-meu-servico .tags-grid .tag-check.selecionado').forEach(t => {
+        const canon = MAPA_DIFERENCIAIS[t.textContent.trim()];
+        if (canon) difMarcados.push(canon);
+      });
+      const valoresConhecidos = Object.values(MAPA_DIFERENCIAIS);
+      const difExtras = (perfilAtual.tags || []).filter(t => !valoresConhecidos.includes(t));
+
+      const catEl = document.getElementById('select-categoria');
+
+      const payload = {
+        name: document.getElementById('ff-nome')?.value.trim() || null,
+        whatsapp: document.getElementById('ff-whatsapp')?.value.trim() || null,
+        instagram: document.getElementById('ff-instagram')?.value.trim() || null,
+        description: document.getElementById('ff-descricao')?.value.trim() || null,
+        service_area: document.getElementById('ff-area')?.value.trim() || null,
+        price_min: parseFloat(document.getElementById('ff-valor')?.value) || null,
+        price_range: document.getElementById('ff-formato-valor')?.value || null,
+        payment_methods: document.getElementById('ff-pagamento')?.value || null,
+        min_notice: document.getElementById('ff-antecedencia')?.value.trim() || null,
+        price_notes: document.getElementById('ff-obs-valores')?.value.trim() || null,
+        category: catEl ? catEl.value : null,
+        tags: [...difMarcados, ...difExtras]
+      };
+
+      const { data, error } = await _supa.from('suppliers').update(payload).eq('id', perfilAtual.id).select().maybeSingle();
+      if (error) { mostrarToast('⚠️ Erro ao salvar: ' + error.message); return; }
+      perfilAtual = { ...perfilAtual, ...data };
+      window._meuPerfil = perfilAtual;
+      const statNome = document.getElementById('stat-nome-servico');
+      if (statNome) statNome.textContent = perfilAtual.name;
+      const statCat = document.getElementById('stat-categoria');
+      if (statCat) statCat.textContent = perfilAtual.category || '—';
+      mostrarToast('✅ Serviço salvo com sucesso!');
+      return;
+    }
+
+    if (tipo === 'video') {
+      const video_url = document.getElementById('ff-video')?.value.trim() || null;
+      const { data, error } = await _supa.from('suppliers').update({ video_url }).eq('id', perfilAtual.id).select().maybeSingle();
+      if (error) { mostrarToast('⚠️ Erro ao salvar vídeo: ' + error.message); return; }
+      perfilAtual = { ...perfilAtual, ...data };
+      window._meuPerfil = perfilAtual;
+      mostrarToast('✅ Vídeo salvo!');
+      return;
+    }
+
+    if (tipo === 'fotos') {
+      const itens = Array.from(document.querySelectorAll('#fotos-grid .foto-item:not(#foto-vazia)'));
+      const urls = [];
+      for (const item of itens) {
+        if (item._existingUrl) {
+          urls.push(item._existingUrl);
+        } else if (item._file) {
+          const ext = (item._file.name.split('.').pop() || 'jpg').toLowerCase();
+          const path = perfilAtual.id + '/' + Date.now() + '_' + Math.random().toString(36).slice(2) + '.' + ext;
+          const { error: upErr } = await _supa.storage.from('supplier-photos').upload(path, item._file, { upsert: false });
+          if (upErr) { mostrarToast('⚠️ Erro ao enviar foto: ' + upErr.message); continue; }
+          const { data: pub } = _supa.storage.from('supplier-photos').getPublicUrl(path);
+          urls.push(pub.publicUrl);
+          item._existingUrl = pub.publicUrl;
+          delete item._file;
+        }
+      }
+      const { data, error } = await _supa.from('suppliers').update({ photos: urls }).eq('id', perfilAtual.id).select().maybeSingle();
+      if (error) { mostrarToast('⚠️ Erro ao salvar fotos: ' + error.message); return; }
+      perfilAtual = { ...perfilAtual, ...data };
+      window._meuPerfil = perfilAtual;
+      mostrarToast('✅ Fotos salvas!');
+      return;
+    }
+
+    if (tipo === 'config') {
+      mostrarToast('⚠️ Edição de dados pessoais ainda não está disponível nesta versão.');
+      return;
+    }
+
+    mostrarToast('✅ Salvo!');
   }
 </script>
 </body>
