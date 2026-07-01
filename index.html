@@ -1375,23 +1375,24 @@
       titulo: 'Cadastrar minha chácara',
       sub: 'Preencha os dados básicos e comece a receber reservas pela plataforma.',
       campos: `
-        <div class="field"><label>Seu nome</label><input type="text" placeholder="Nome completo"/></div>
-        <div class="field"><label>WhatsApp</label><input type="text" placeholder="(44) 9 0000-0000"/></div>
-        <div class="field"><label>Nome da chácara</label><input type="text" placeholder="Ex: Chácara das Palmeiras"/></div>
-        <div class="field"><label>Cidade</label><input type="text" placeholder="Ex: Maringá, Sarandi..."/></div>
-        <div class="field"><label>E-mail</label><input type="email" placeholder="seuemail@exemplo.com"/></div>
-        <button class="btn btn-verde" style="width:100%;justify-content:center;margin-top:8px;" onclick="fecharModal()">Quero me cadastrar!</button>
+        <div class="field"><label>Seu nome</label><input type="text" id="cad-chacara-nome" placeholder="Nome completo"/></div>
+        <div class="field"><label>WhatsApp</label><input type="text" id="cad-chacara-whatsapp" placeholder="(44) 9 0000-0000"/></div>
+        <div class="field"><label>Nome da chácara</label><input type="text" id="cad-chacara-nomenegocio" placeholder="Ex: Chácara das Palmeiras"/></div>
+        <div class="field"><label>Cidade</label><input type="text" id="cad-chacara-cidade" placeholder="Ex: Maringá, Sarandi..."/></div>
+        <div class="field"><label>E-mail</label><input type="email" id="cad-chacara-email" placeholder="seuemail@exemplo.com"/></div>
+        <div id="cad-chacara-erro" style="display:none;color:#b91c1c;background:#fee2e2;padding:10px 12px;border-radius:8px;font-size:13px;margin-top:8px;"></div>
+        <button class="btn btn-verde" id="cad-chacara-btn" style="width:100%;justify-content:center;margin-top:8px;" onclick="enviarCadastro('chacara')">Quero me cadastrar!</button>
       `
     },
     'cadastro-fornecedor': {
       titulo: 'Cadastrar meu serviço',
       sub: 'Apareça para quem está organizando eventos na região. Cadastro gratuito!',
       campos: `
-        <div class="field"><label>Seu nome</label><input type="text" placeholder="Nome completo"/></div>
-        <div class="field"><label>WhatsApp</label><input type="text" placeholder="(44) 9 0000-0000"/></div>
-        <div class="field"><label>Nome do negócio</label><input type="text" placeholder="Ex: DJ Marquinhos Events"/></div>
+        <div class="field"><label>Seu nome</label><input type="text" id="cad-fornecedor-nome" placeholder="Nome completo"/></div>
+        <div class="field"><label>WhatsApp</label><input type="text" id="cad-fornecedor-whatsapp" placeholder="(44) 9 0000-0000"/></div>
+        <div class="field"><label>Nome do negócio</label><input type="text" id="cad-fornecedor-nomenegocio" placeholder="Ex: DJ Marquinhos Events"/></div>
         <div class="field"><label>Categoria</label>
-          <select>
+          <select id="cad-fornecedor-categoria">
             <option>Bolos e Doces</option>
             <option>DJ e Música</option>
             <option>Chopeiras</option>
@@ -1403,8 +1404,10 @@
             <option>Salgados</option>
           </select>
         </div>
-        <div class="field"><label>Cidade</label><input type="text" placeholder="Ex: Maringá"/></div>
-        <button class="btn btn-primary" style="width:100%;justify-content:center;margin-top:8px;" onclick="fecharModal()">Quero me cadastrar!</button>
+        <div class="field"><label>Cidade</label><input type="text" id="cad-fornecedor-cidade" placeholder="Ex: Maringá"/></div>
+        <div class="field"><label>E-mail</label><input type="email" id="cad-fornecedor-email" placeholder="seuemail@exemplo.com"/></div>
+        <div id="cad-fornecedor-erro" style="display:none;color:#b91c1c;background:#fee2e2;padding:10px 12px;border-radius:8px;font-size:13px;margin-top:8px;"></div>
+        <button class="btn btn-primary" id="cad-fornecedor-btn" style="width:100%;justify-content:center;margin-top:8px;" onclick="enviarCadastro('fornecedor')">Quero me cadastrar!</button>
       `
     }
   };
@@ -1428,6 +1431,58 @@
 
   function fecharModalFora(e) {
     if (e.target === document.getElementById('modal-overlay')) fecharModal();
+  }
+
+  async function enviarCadastro(tipo) {
+    const prefixo = tipo === 'chacara' ? 'cad-chacara' : 'cad-fornecedor';
+    const erroEl = document.getElementById(prefixo + '-erro');
+    const btn = document.getElementById(prefixo + '-btn');
+    erroEl.style.display = 'none';
+
+    const nome = document.getElementById(prefixo + '-nome').value.trim();
+    const whatsapp = document.getElementById(prefixo + '-whatsapp').value.trim();
+    const nomeNegocio = document.getElementById(prefixo + '-nomenegocio').value.trim();
+    const cidade = document.getElementById(prefixo + '-cidade').value.trim();
+    const email = document.getElementById(prefixo + '-email').value.trim();
+    const categoria = tipo === 'fornecedor' ? document.getElementById('cad-fornecedor-categoria').value : undefined;
+
+    if (!nome || !whatsapp || !nomeNegocio || !email) {
+      erroEl.textContent = 'Preencha todos os campos obrigatórios.';
+      erroEl.style.display = 'block';
+      return;
+    }
+
+    btn.disabled = true;
+    const textoOriginal = btn.textContent;
+    btn.textContent = 'Enviando...';
+
+    try {
+      const r = await fetch('https://n8n.alugueldechacaras.com/webhook/cadastro-novo', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ tipo, nome, whatsapp, email, nome_negocio: nomeNegocio, cidade, categoria })
+      });
+      const data = await r.json();
+      if (!r.ok || !data.ok) {
+        erroEl.textContent = data.erro || 'Não foi possível enviar seu cadastro. Tente novamente.';
+        erroEl.style.display = 'block';
+        btn.disabled = false;
+        btn.textContent = textoOriginal;
+        return;
+      }
+      document.getElementById('modal-content').innerHTML = `
+        <div class="modal-header">
+          <div class="modal-title">✅ Cadastro recebido!</div>
+          <button class="close-btn" onclick="fecharModal()">✕</button>
+        </div>
+        <div class="modal-sub">Recebemos seus dados. Vamos revisar e entrar em contato pelo WhatsApp em breve para confirmar seu cadastro na plataforma.</div>
+      `;
+    } catch (e) {
+      erroEl.textContent = 'Erro de conexão. Verifique sua internet e tente novamente.';
+      erroEl.style.display = 'block';
+      btn.disabled = false;
+      btn.textContent = textoOriginal;
+    }
   }
 </script>
 
