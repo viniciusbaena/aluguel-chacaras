@@ -260,9 +260,20 @@
       <input type="password" id="login-senha"  placeholder="••••••••"/>
     </div>
     <button class="btn btn-terra" onclick="fazerLogin()" style="margin-top:8px;">Entrar no painel</button>
-    <div style="text-align:center; font-size:13px; color:var(--cinza); margin-top:20px;">
-      Ainda não tem conta? <a href="/#anuncie" style="color:var(--terra); font-weight:600;">Cadastre-se</a>
+    <div style="display:flex; justify-content:space-between; gap:8px; flex-wrap:wrap; font-size:13px; color:var(--cinza); margin-top:20px;">
+      <span>Ainda não tem conta? <a href="/#anuncie" style="color:var(--terra); font-weight:600;">Cadastre-se</a></span>
+      <a href="#" onclick="mostrarRecuperarSenha();return false;" style="color:var(--cinza);font-weight:600;">Esqueci minha senha</a>
     </div>
+
+    <div id="recuperar-senha-box" style="display:none; margin-top:16px; padding-top:16px; border-top:1px solid var(--cinza-borda);">
+      <div class="field">
+        <label for="recuperar-email">Informe seu e-mail cadastrado</label>
+        <input type="email" id="recuperar-email" placeholder="seuemail@exemplo.com" />
+      </div>
+      <button class="btn btn-outline" onclick="enviarRecuperacaoSenha()" style="width:100%;justify-content:center;">Enviar link de recuperação</button>
+      <div id="recuperar-msg" style="display:none; margin-top:12px; padding:10px 12px; border-radius:8px; font-size:13px; text-align:center;"></div>
+    </div>
+
     <div id="login-erro" style="display:none; margin-top:16px; padding:12px; background:#fee2e2; border-radius:8px; font-size:13px; color:#b91c1c; text-align:center;"></div>
     <div id="login-loading" style="display:none; margin-top:16px; text-align:center; color:var(--cinza); font-size:13px;">⏳ Entrando...</div>
   </div>
@@ -881,6 +892,41 @@
       return;
     }
     await abrirPainel(data.user);
+  }
+
+  function mostrarRecuperarSenha() {
+    const box = document.getElementById('recuperar-senha-box');
+    const visivel = box.style.display === 'block';
+    box.style.display = visivel ? 'none' : 'block';
+    if (!visivel) {
+      const emailAtual = document.getElementById('login-email').value.trim();
+      if (emailAtual) document.getElementById('recuperar-email').value = emailAtual;
+    }
+  }
+
+  async function enviarRecuperacaoSenha() {
+    const email = document.getElementById('recuperar-email').value.trim();
+    const msg = document.getElementById('recuperar-msg');
+    if (!email) {
+      msg.textContent = 'Informe seu e-mail.';
+      msg.style.background = '#fee2e2';
+      msg.style.color = '#b91c1c';
+      msg.style.display = 'block';
+      return;
+    }
+    const { error } = await _supa.auth.resetPasswordForEmail(email, {
+      redirectTo: 'https://alugueldechacaras.com/redefinir-senha.html'
+    });
+    if (error) {
+      msg.textContent = 'Erro ao enviar: ' + error.message;
+      msg.style.background = '#fee2e2';
+      msg.style.color = '#b91c1c';
+    } else {
+      msg.textContent = '✅ Se este e-mail estiver cadastrado, você receberá um link de recuperação em instantes.';
+      msg.style.background = '#fdf0e8';
+      msg.style.color = 'var(--terra)';
+    }
+    msg.style.display = 'block';
   }
 
   async function fazerLogout() {
