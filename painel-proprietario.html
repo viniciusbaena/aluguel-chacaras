@@ -1314,11 +1314,11 @@
         <div class="form-grid">
           <div class="field">
             <label>Senha atual</label>
-            <input type="password" placeholder="••••••••"/>
+            <input type="password" id="senha-atual-input" placeholder="••••••••"/>
           </div>
           <div class="field">
             <label>Nova senha</label>
-            <input type="password" placeholder="••••••••"/>
+            <input type="password" id="senha-nova-input" placeholder="••••••••"/>
           </div>
         </div>
         <button class="btn btn-outline btn-sm" style="margin-top:4px;" onclick="salvar('senha')">Alterar senha</button>
@@ -2220,18 +2220,33 @@
     return { nome, cidade, bairro, wpp, capacidade, diaria, fds, desc, video, comodidades, eventos, fotos };
   }
 
-  function salvar(tipo) {
+  async function salvar(tipo) {
     if (tipo === 'anuncio' || tipo === 'fotos') {
       const dados = coletarDadosAnuncio();
       try { localStorage.setItem('chacara_dados', JSON.stringify(dados)); } catch(e) {}
+    }
+    if (tipo === 'senha') {
+      const atual = document.getElementById('senha-atual-input')?.value || '';
+      const nova = document.getElementById('senha-nova-input')?.value || '';
+      if (!nova || nova.length < 6) { mostrarToast('⚠️ A nova senha deve ter pelo menos 6 caracteres.'); return; }
+      const { data: { user } } = await _supa.auth.getUser();
+      if (atual && user) {
+        const { error: reAuthErr } = await _supa.auth.signInWithPassword({ email: user.email, password: atual });
+        if (reAuthErr) { mostrarToast('⚠️ Senha atual incorreta.'); return; }
+      }
+      const { error } = await _supa.auth.updateUser({ password: nova });
+      if (error) { mostrarToast('⚠️ Erro ao alterar senha: ' + error.message); return; }
+      document.getElementById('senha-atual-input').value = '';
+      document.getElementById('senha-nova-input').value = '';
+      mostrarToast('✅ Senha alterada!');
+      return;
     }
     const msgs = {
       anuncio: '✅ Anúncio salvo com sucesso!',
       fotos:   '✅ Fotos salvas!',
       video:   '✅ Vídeo salvo!',
       calendario: '✅ Calendário atualizado!',
-      config:  '✅ Configurações salvas!',
-      senha:   '✅ Senha alterada!'
+      config:  '✅ Configurações salvas!'
     };
     mostrarToast(msgs[tipo] || '✅ Salvo!');
   }
