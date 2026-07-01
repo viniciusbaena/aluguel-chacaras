@@ -1402,6 +1402,10 @@
         <div class="field"><label for="cad-chacara-nomenegocio">Nome da chácara</label><input type="text" id="cad-chacara-nomenegocio" placeholder="Ex: Chácara das Palmeiras"/></div>
         <div class="field"><label for="cad-chacara-cidade">Cidade</label><input type="text" id="cad-chacara-cidade" placeholder="Ex: Maringá, Sarandi..."/></div>
         <div class="field"><label for="cad-chacara-email">E-mail</label><input type="email" id="cad-chacara-email" placeholder="seuemail@exemplo.com"/></div>
+        <label class="field" style="display:flex;align-items:flex-start;gap:8px;font-weight:400;font-size:13px;color:#374151;margin-top:6px;cursor:pointer;">
+          <input type="checkbox" id="cad-chacara-termos" style="margin-top:3px;flex-shrink:0;width:auto;"/>
+          <span>Li e aceito os <a href="/termos-de-uso.html" target="_blank" style="color:var(--verde);font-weight:600;">Termos de Uso</a> e a <a href="/politica-de-privacidade.html" target="_blank" style="color:var(--verde);font-weight:600;">Política de Privacidade</a>.</span>
+        </label>
         <div id="cad-chacara-erro" style="display:none;color:#b91c1c;background:#fee2e2;padding:10px 12px;border-radius:8px;font-size:13px;margin-top:8px;"></div>
         <button class="btn btn-verde" id="cad-chacara-btn" style="width:100%;justify-content:center;margin-top:8px;" onclick="enviarCadastro('chacara')">Quero me cadastrar!</button>
       `
@@ -1428,6 +1432,10 @@
         </div>
         <div class="field"><label for="cad-fornecedor-cidade">Cidade</label><input type="text" id="cad-fornecedor-cidade" placeholder="Ex: Maringá"/></div>
         <div class="field"><label for="cad-fornecedor-email">E-mail</label><input type="email" id="cad-fornecedor-email" placeholder="seuemail@exemplo.com"/></div>
+        <label class="field" style="display:flex;align-items:flex-start;gap:8px;font-weight:400;font-size:13px;color:#374151;margin-top:6px;cursor:pointer;">
+          <input type="checkbox" id="cad-fornecedor-termos" style="margin-top:3px;flex-shrink:0;width:auto;"/>
+          <span>Li e aceito os <a href="/termos-de-uso.html" target="_blank" style="color:var(--verde);font-weight:600;">Termos de Uso</a> e a <a href="/politica-de-privacidade.html" target="_blank" style="color:var(--verde);font-weight:600;">Política de Privacidade</a>.</span>
+        </label>
         <div id="cad-fornecedor-erro" style="display:none;color:#b91c1c;background:#fee2e2;padding:10px 12px;border-radius:8px;font-size:13px;margin-top:8px;"></div>
         <button class="btn btn-primary" id="cad-fornecedor-btn" style="width:100%;justify-content:center;margin-top:8px;" onclick="enviarCadastro('fornecedor')">Quero me cadastrar!</button>
       `
@@ -1538,6 +1546,8 @@
     msg.style.display = 'block';
   }
 
+  const TERMOS_VERSAO = '1.0';
+
   async function enviarCadastro(tipo) {
     const prefixo = tipo === 'chacara' ? 'cad-chacara' : 'cad-fornecedor';
     const erroEl = document.getElementById(prefixo + '-erro');
@@ -1550,9 +1560,16 @@
     const cidade = document.getElementById(prefixo + '-cidade').value.trim();
     const email = document.getElementById(prefixo + '-email').value.trim();
     const categoria = tipo === 'fornecedor' ? document.getElementById('cad-fornecedor-categoria').value : undefined;
+    const termosAceitos = document.getElementById(prefixo + '-termos').checked;
 
     if (!nome || !whatsapp || !nomeNegocio || !email) {
       erroEl.textContent = 'Preencha todos os campos obrigatórios.';
+      erroEl.style.display = 'block';
+      return;
+    }
+
+    if (!termosAceitos) {
+      erroEl.textContent = 'Você precisa aceitar os Termos de Uso e a Política de Privacidade para continuar.';
       erroEl.style.display = 'block';
       return;
     }
@@ -1565,7 +1582,7 @@
       const r = await fetch('https://n8n.alugueldechacaras.com/webhook/cadastro-novo', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ tipo, nome, whatsapp, email, nome_negocio: nomeNegocio, cidade, categoria })
+        body: JSON.stringify({ tipo, nome, whatsapp, email, nome_negocio: nomeNegocio, cidade, categoria, termos_aceitos: true, termos_versao: TERMOS_VERSAO })
       });
       const data = await r.json();
       if (!r.ok || !data.ok) {
