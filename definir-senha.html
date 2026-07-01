@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Definir senha — AluguelDeChácaras</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  :root { --verde:#1e4d2b; --verde-claro:#2d6b3f; --terra:#c0622d; --cinza:#6b7280; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background:#f0f4f0; min-height:100vh; display:flex; align-items:center; justify-content:center; padding:24px; }
+  .card { background:#fff; border-radius:16px; padding:36px 32px; max-width:400px; width:100%; box-shadow:0 4px 24px rgba(0,0,0,0.08); }
+  .logo { font-weight:700; font-size:18px; color:var(--verde); margin-bottom:24px; text-align:center; }
+  h2 { font-size:20px; color:var(--verde); margin-bottom:8px; }
+  .sub { font-size:13px; color:var(--cinza); margin-bottom:20px; }
+  label { display:block; font-size:13px; font-weight:600; margin:14px 0 6px; color:#333; }
+  input { width:100%; padding:10px 12px; border:1.5px solid #e0e0e0; border-radius:8px; font-size:14px; outline:none; }
+  input:focus { border-color: var(--verde); }
+  button { width:100%; margin-top:20px; padding:12px; background:var(--verde); color:#fff; border:none; border-radius:8px; font-size:14px; font-weight:600; cursor:pointer; }
+  button:hover { background:var(--verde-claro); }
+  #erro { font-size:13px; color:#b91c1c; background:#fee2e2; padding:10px 12px; border-radius:8px; margin-top:14px; }
+  #loading, #invalido, #sucesso { text-align:center; color:var(--cinza); font-size:14px; }
+  #invalido { color:#b91c1c; }
+  #sucesso { color:var(--verde); font-weight:600; }
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="logo">🌿 Aluguel de Chácaras</div>
+  <div id="loading">⏳ Verificando seu convite...</div>
+
+  <div id="form-area" style="display:none">
+    <h2>Defina sua senha</h2>
+    <div class="sub">Bem-vindo(a)! Crie uma senha para acessar seu painel.</div>
+    <label>Nova senha</label>
+    <input type="password" id="nova-senha" placeholder="Mínimo 6 caracteres" />
+    <label>Confirmar senha</label>
+    <input type="password" id="confirmar-senha" placeholder="Repita a senha" />
+    <div id="erro" style="display:none;"></div>
+    <button onclick="definirSenha()">Criar senha e entrar</button>
+  </div>
+
+  <div id="invalido" style="display:none">
+    ❌ Link inválido ou expirado.<br>Peça um novo convite pelo WhatsApp.
+  </div>
+
+  <div id="sucesso" style="display:none">
+    ✅ Senha criada! Redirecionando para o seu painel...
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script>
+  const SUPA_URL  = 'https://tathqoyhcuxthsrghrzx.supabase.co';
+  const SUPA_ANON = 'sb_publishable_fLpPGAodcCvJxPkQ223ABQ_ApJKDLRU';
+  const _supa = window.supabase.createClient(SUPA_URL, SUPA_ANON);
+
+  const params = new URLSearchParams(location.search);
+  const tipo = params.get('tipo') === 'fornecedor' ? 'fornecedor' : 'chacara';
+
+  async function init() {
+    // supabase-js v2 detects the invite/recovery token in the URL hash automatically
+    const { data: { session } } = await _supa.auth.getSession();
+    document.getElementById('loading').style.display = 'none';
+    if (session) {
+      document.getElementById('form-area').style.display = 'block';
+    } else {
+      document.getElementById('invalido').style.display = 'block';
+    }
+  }
+
+  async function definirSenha() {
+    const nova = document.getElementById('nova-senha').value;
+    const confirmar = document.getElementById('confirmar-senha').value;
+    const erro = document.getElementById('erro');
+    erro.style.display = 'none';
+
+    if (!nova || nova.length < 6) {
+      erro.textContent = 'A senha deve ter pelo menos 6 caracteres.';
+      erro.style.display = 'block';
+      return;
+    }
+    if (nova !== confirmar) {
+      erro.textContent = 'As senhas não coincidem.';
+      erro.style.display = 'block';
+      return;
+    }
+
+    const { error } = await _supa.auth.updateUser({ password: nova });
+    if (error) {
+      erro.textContent = 'Erro ao definir senha: ' + error.message;
+      erro.style.display = 'block';
+      return;
+    }
+
+    document.getElementById('form-area').style.display = 'none';
+    document.getElementById('sucesso').style.display = 'block';
+    setTimeout(() => {
+      location.href = tipo === 'fornecedor' ? '/painel-fornecedor.html' : '/painel-proprietario.html';
+    }, 1800);
+  }
+
+  init();
+</script>
+</body>
+</html>
