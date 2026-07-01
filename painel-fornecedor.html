@@ -303,9 +303,9 @@
 
     <div class="sidebar-bottom">
       <div class="user-info">
-        <div class="user-avatar">DM</div>
+        <div class="user-avatar" id="sidebar-avatar-forn">DM</div>
         <div>
-          <div class="user-nome">DJ Marquinhos</div>
+          <div class="user-nome" id="sidebar-nome-forn">DJ Marquinhos</div>
           <div class="user-plano">Cadastro gratuito</div>
         </div>
       </div>
@@ -356,9 +356,9 @@
           <div style="background:var(--cinza-bg); border-radius:10px; padding:16px; display:flex; align-items:center; gap:14px;">
             <div style="width:48px;height:48px;border-radius:12px;background:var(--terra-claro);display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0;">🎵</div>
             <div>
-              <div style="font-size:11px;font-weight:700;color:var(--terra);text-transform:uppercase;letter-spacing:0.5px;">DJ e Música</div>
-              <div style="font-size:16px;font-weight:700;color:var(--terra-escuro);margin-top:2px;">DJ Marquinhos Events</div>
-              <div style="font-size:12px;color:var(--cinza);margin-top:2px;">📍 Maringá — PR</div>
+              <div id="stat-categoria" style="font-size:11px;font-weight:700;color:var(--terra);text-transform:uppercase;letter-spacing:0.5px;">DJ e Música</div>
+              <div id="stat-nome-servico" style="font-size:16px;font-weight:700;color:var(--terra-escuro);margin-top:2px;">DJ Marquinhos Events</div>
+              <div id="stat-cidade" style="font-size:12px;color:var(--cinza);margin-top:2px;">📍 Maringá — PR</div>
             </div>
           </div>
           <div style="display:flex; gap:10px; margin-top:16px;">
@@ -1032,9 +1032,13 @@
     const statNome = document.getElementById('stat-nome-servico');
     if (statNome) statNome.textContent = s.name;
     const statCat = document.getElementById('stat-categoria');
-    if (statCat) statCat.textContent = s.category || '—';
-    const statRating = document.getElementById('stat-rating');
-    if (statRating) statRating.textContent = s.rating ? `⭐ ${s.rating}` : '⭐ Novo';
+    if (statCat && catEl) statCat.textContent = (catEl.options[catEl.selectedIndex]?.text || s.category || '—').toUpperCase();
+    const statCidade = document.getElementById('stat-cidade');
+    if (statCidade) statCidade.textContent = '📍 ' + (s.city || '—') + (s.state ? ' — ' + s.state : '');
+    const sideNome = document.getElementById('sidebar-nome-forn');
+    if (sideNome) sideNome.textContent = s.name;
+    const sideAvatar = document.getElementById('sidebar-avatar-forn');
+    if (sideAvatar && s.name) sideAvatar.textContent = s.name.trim().split(/\s+/).map(function(w){return w[0];}).slice(0,2).join('').toUpperCase();
   }
 
   // Verificar sessão ao carregar
