@@ -1220,12 +1220,12 @@
 
     if (!checkin)            { mostrarToast('⚠️ Selecione a data de check-in'); return; }
     if (!checkout)           { mostrarToast('⚠️ Selecione a data de check-out'); return; }
-    if (checkout <= checkin) { mostrarToast('⚠️ Check-out deve ser após o check-in'); return; }
+    if (checkout < checkin) { mostrarToast('⚠️ Check-out não pode ser antes do check-in'); return; }
     if (!nome)               { mostrarToast('⚠️ Informe seu nome'); return; }
     if (!wpp && !email)      { mostrarToast('⚠️ Informe WhatsApp ou e-mail'); return; }
 
     const fmt = d => new Date(d + 'T12:00:00').toLocaleDateString('pt-BR', { day:'2-digit', month:'long', year:'numeric' });
-    const dias = Math.round((new Date(checkout+'T12:00:00') - new Date(checkin+'T12:00:00')) / 86400000);
+    const dias = Math.round((new Date(checkout+'T12:00:00') - new Date(checkin+'T12:00:00')) / 86400000) + 1; // inclusivo
     const periodoTexto = `${fmt(checkin)} → ${fmt(checkout)} (${dias} diária${dias>1?'s':''})`;
 
     const btn = document.querySelector('.btn-reservar');
@@ -1281,7 +1281,7 @@
 
     if (!checkin) { mostrarToast('⚠️ Selecione a data de check-in'); return; }
     if (!checkout) { mostrarToast('⚠️ Selecione a data de check-out'); return; }
-    if (checkout <= checkin) { mostrarToast('⚠️ Check-out deve ser após o check-in'); return; }
+    if (checkout < checkin) { mostrarToast('⚠️ Check-out não pode ser antes do check-in'); return; }
     if (!nome) { mostrarToast('⚠️ Informe seu nome'); return; }
     if (!wpp && !email) { mostrarToast('⚠️ Informe WhatsApp ou e-mail'); return; }
 
