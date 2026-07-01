@@ -1089,11 +1089,10 @@
     const checkin = document.getElementById('r-checkin').value;
     if (checkin) {
       const minCheckout = new Date(checkin);
-      minCheckout.setDate(minCheckout.getDate() + 1);
       document.getElementById('r-checkout').min = minCheckout.toISOString().split('T')[0];
-      // Se checkout já selecionado e menor que checkin, limpa
+      // Se checkout já selecionado e menor que checkin, limpa (checkout == checkin é válido: 1 diária)
       const checkout = document.getElementById('r-checkout').value;
-      if (checkout && checkout <= checkin) {
+      if (checkout && checkout < checkin) {
         document.getElementById('r-checkout').value = '';
         document.getElementById('resumo-periodo').style.display = 'none';
       }
@@ -1107,7 +1106,7 @@
     const checkout = document.getElementById('r-checkout').value;
     const resumo = document.getElementById('resumo-periodo');
 
-    if (checkin && checkout && checkout > checkin) {
+    if (checkin && checkout && checkout >= checkin) {
       const d1 = new Date(checkin + 'T12:00:00');
       const d2 = new Date(checkout + 'T12:00:00');
       const dias = Math.round((d2 - d1) / (1000 * 60 * 60 * 24)) + 1; // inclusivo: dia 14 a 16 = 3 dias
