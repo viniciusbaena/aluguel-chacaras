@@ -852,6 +852,14 @@
     document.getElementById('modal-preview-forn').classList.remove('open');
   }
 
+  function mostrarToast(msg) {
+    const t = document.getElementById('toast');
+    if (!t) return;
+    t.textContent = msg;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 3000);
+  }
+
   // TOGGLE ANÚNCIO FORNECEDOR
   let anuncioFornAtivo = true;
   let perfilAtual = null;
