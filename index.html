@@ -1378,7 +1378,15 @@
         <div class="field"><label for="home-login-senha">Senha</label><input type="password" id="home-login-senha" placeholder="••••••••"/></div>
         <div id="home-login-erro" style="display:none;color:#b91c1c;background:#fee2e2;padding:10px 12px;border-radius:8px;font-size:13px;margin-top:8px;"></div>
         <button class="btn btn-verde" id="home-login-btn" style="width:100%;justify-content:center;margin-top:8px;" onclick="fazerLoginHome()">Entrar</button>
-        <p style="text-align:center;margin-top:16px;font-size:13px;color:#6b7280;">Não tem conta? <a href="#anuncie" onclick="fecharModal()" style="color:#2d7a45;font-weight:600;">Cadastre-se</a></p>
+        <div style="display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;margin-top:16px;font-size:13px;color:#6b7280;">
+          <span>Não tem conta? <a href="#anuncie" onclick="fecharModal()" style="color:#2d7a45;font-weight:600;">Cadastre-se</a></span>
+          <a href="#" onclick="mostrarRecuperarSenhaHome();return false;" style="color:#6b7280;font-weight:600;">Esqueci minha senha</a>
+        </div>
+        <div id="home-recuperar-box" style="display:none;margin-top:16px;padding-top:16px;border-top:1px solid #e5e7eb;">
+          <div class="field"><label for="home-recuperar-email">Informe seu e-mail cadastrado</label><input type="email" id="home-recuperar-email" placeholder="seuemail@exemplo.com"/></div>
+          <button class="btn btn-outline" style="width:100%;justify-content:center;" onclick="enviarRecuperacaoSenhaHome()">Enviar link de recuperação</button>
+          <div id="home-recuperar-msg" style="display:none;margin-top:12px;padding:10px 12px;border-radius:8px;font-size:13px;text-align:center;"></div>
+        </div>
       `
     },
     reserva: {
@@ -1497,6 +1505,42 @@
     }
     const { data: sup } = await supa.from('suppliers').select('id').eq('email', email).maybeSingle();
     window.location.href = sup ? '/painel-fornecedor.html' : '/painel-proprietario.html';
+  }
+
+  function mostrarRecuperarSenhaHome() {
+    const box = document.getElementById('home-recuperar-box');
+    const visivel = box.style.display === 'block';
+    box.style.display = visivel ? 'none' : 'block';
+    if (!visivel) {
+      const emailAtual = document.getElementById('home-login-email').value.trim();
+      if (emailAtual) document.getElementById('home-recuperar-email').value = emailAtual;
+    }
+  }
+
+  async function enviarRecuperacaoSenhaHome() {
+    const email = document.getElementById('home-recuperar-email').value.trim();
+    const msg = document.getElementById('home-recuperar-msg');
+    if (!email) {
+      msg.textContent = 'Informe seu e-mail.';
+      msg.style.background = '#fee2e2';
+      msg.style.color = '#b91c1c';
+      msg.style.display = 'block';
+      return;
+    }
+    const supa = getSupaHome();
+    const { error } = await supa.auth.resetPasswordForEmail(email, {
+      redirectTo: 'https://alugueldechacaras.com/redefinir-senha.html'
+    });
+    if (error) {
+      msg.textContent = 'Erro ao enviar: ' + error.message;
+      msg.style.background = '#fee2e2';
+      msg.style.color = '#b91c1c';
+    } else {
+      msg.textContent = '✅ Se este e-mail estiver cadastrado, você receberá um link de recuperação em instantes.';
+      msg.style.background = '#e8f5e9';
+      msg.style.color = '#2d7a45';
+    }
+    msg.style.display = 'block';
   }
 
   async function enviarCadastro(tipo) {
