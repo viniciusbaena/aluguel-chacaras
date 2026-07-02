@@ -303,7 +303,7 @@
 <!-- PAINEL -->
 <div class="painel" id="painel">
   <aside class="sidebar">
-    <div class="sidebar-logo">🌿 Aluguel de <span>Chácaras</span></div>
+    <a href="/index.html" title="Voltar ao site" style="text-decoration:none;color:inherit;display:block;cursor:pointer;"><div class="sidebar-logo">🌿 Aluguel de <span>Chácaras</span></div></a>
     <div class="sidebar-sub">Painel do Fornecedor</div>
     <div class="sidebar-picker" id="sidebar-picker-forn">
       <button class="picker-atual" id="picker-atual-btn-forn" onclick="togglePickerServicos(event)">
@@ -611,7 +611,7 @@
           </div>
           <div class="field">
             <label for="ff-whatsapp">WhatsApp para contato</label>
-            <input type="text" id="ff-whatsapp" value="(44) 9 9999-9999"/>
+            <input type="text" id="ff-whatsapp" value=""/>
           </div>
           <div class="field">
             <label for="ff-instagram">Instagram (opcional)</label>
@@ -717,13 +717,10 @@
       </div>
 
       <!-- BOTÕES FINAIS -->
-      <div style="display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap;">
+      <div style="display:flex; justify-content:center; align-items:center; gap:12px; flex-wrap:wrap; margin-top:8px;">
+        <button class="btn btn-outline btn-sm" onclick="abrirPreviewForn('pre')">👁️ Pré-visualizar (visão do cliente)</button>
+        <button class="btn btn-terra-sm" onclick="salvar('servico')">💾 Salvar alterações</button>
         <button class="btn btn-sm" id="btn-toggle-forn" onclick="toggleAnuncioForn()" style="background:var(--vermelho);color:#fff;">⏸ Pausar anúncio</button>
-        <div style="display:flex; gap:10px;">
-          <button class="btn btn-outline btn-sm" onclick="abrirPreviewForn('pre')">👁️ Pré-visualizar</button>
-          <button class="btn btn-terra-sm" onclick="salvar('servico')">💾 Salvar alterações</button>
-          <button class="btn btn-sm" style="background:var(--terra-escuro);color:#fff;" onclick="abrirPreviewForn('publicado')">🔗 Ver como cliente vê</button>
-        </div>
       </div>
     </div>
 
@@ -739,10 +736,10 @@
       <div class="card">
         <div class="card-title">👤 Dados pessoais</div>
         <div class="form-grid">
-          <div class="field"><label for="perfil-nome">Nome completo</label><input type="text" id="perfil-nome" value="Marcos Silva"/></div>
+          <div class="field"><label for="perfil-nome">Nome completo</label><input type="text" id="perfil-nome" value=""/></div>
           <div class="field"><label for="perfil-cpf">CPF</label><input type="text" id="perfil-cpf" value="000.000.000-00"/></div>
           <div class="field"><label for="perfil-email">E-mail</label><input type="email" id="perfil-email" /></div>
-          <div class="field"><label for="perfil-whatsapp">WhatsApp</label><input type="text" id="perfil-whatsapp" value="(44) 9 9999-9999"/></div>
+          <div class="field"><label for="perfil-whatsapp">WhatsApp</label><input type="text" id="perfil-whatsapp" value=""/></div>
         </div>
       </div>
       <div class="card">
@@ -1024,6 +1021,7 @@
   }
 
   async function abrirPainel(user) {
+    window._authUser = user;
     const nome = user.user_metadata?.full_name || user.email.split('@')[0];
     const iniciais = nome.split(' ').map(p=>p[0]).join('').toUpperCase().slice(0,2);
     const sideNome = document.getElementById('sidebar-nome');
@@ -1064,6 +1062,8 @@
     perfilAtual = suppliers[0];
     preencherFormularioFornecedor(perfilAtual);
     renderPickerServicos();
+    preencherConfig();
+    inicializarMascaras();
   }
 
   function preencherFormularioFornecedor(s) {
@@ -1183,6 +1183,8 @@
     preencherFormularioFornecedor(perfilAtual);
     renderPickerServicos();
     fecharPickerServicos();
+    preencherConfig();
+    inicializarMascaras();
     mostrarToast(`🎯 Agora exibindo: ${perfil.name}`);
   }
 
@@ -1263,12 +1265,56 @@
     if (session) await abrirPainel(session.user);
   });
 
+  function formatarTelBR(value) {
+    let n = (value || '').replace(/\D/g, '').slice(0, 11);
+    if (n.length <= 2) return n.length ? '(' + n : '';
+    const ddd = n.slice(0, 2);
+    const rest = n.slice(2);
+    let meio, fim;
+    if (rest.length >= 9) { meio = rest.slice(0, 5); fim = rest.slice(5, 9); }
+    else if (rest.length > 4) { meio = rest.slice(0, rest.length - 4); fim = rest.slice(-4); }
+    else { return '(' + ddd + ') ' + rest; }
+    return '(' + ddd + ') ' + meio + '-' + fim;
+  }
+
+  function inicializarMascaras() {
+    ['ff-whatsapp', 'perfil-whatsapp', 'novo-servico-whatsapp'].forEach(id => {
+      const el = document.getElementById(id);
+      if (!el) return;
+      if (!el.placeholder) el.placeholder = '(44) 90000-0000';
+      el.setAttribute('inputmode', 'tel');
+      if (!el._maskAttached) {
+        el._maskAttached = true;
+        el.addEventListener('input', () => { el.value = formatarTelBR(el.value); });
+      }
+      if (el.value) el.value = formatarTelBR(el.value);
+    });
+  }
+
+  function preencherConfig() {
+    const s = id => document.getElementById(id);
+    const u = window._authUser || {};
+    const p = perfilAtual || {};
+    if (s('perfil-nome')) s('perfil-nome').value = p.name || (u.user_metadata && u.user_metadata.full_name) || '';
+    if (s('perfil-email')) { s('perfil-email').value = u.email || p.email || ''; s('perfil-email').setAttribute('readonly', ''); s('perfil-email').style.background = '#f9fafb'; }
+    if (s('perfil-whatsapp')) s('perfil-whatsapp').value = formatarTelBR(p.whatsapp || '');
+    const cpf = s('perfil-cpf');
+    if (cpf && (cpf.value === '000.000.000-00' || !cpf.value)) { cpf.value = ''; cpf.placeholder = 'Opcional'; }
+  }
+
   function mostrarTab(id, btn) {
     document.querySelectorAll('.tabs').forEach(t => t.classList.remove('ativo'));
     document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('ativo'));
-    document.getElementById('tab-' + id).classList.add('ativo');
-    if (btn) btn.classList.add('ativo');
+    const tab = document.getElementById('tab-' + id);
+    if (tab) tab.classList.add('ativo');
+    let navBtn = null;
+    document.querySelectorAll('.nav-item').forEach(n => {
+      const oc = n.getAttribute('onclick') || '';
+      if (oc.includes("'" + id + "'")) navBtn = n;
+    });
+    (navBtn || btn) && (navBtn || btn).classList.add('ativo');
     if (id === 'meu-servico') inicializarTags();
+    if (id === 'configuracoes') preencherConfig();
   }
 
   function selecionarCat(el) {
@@ -1444,7 +1490,16 @@
     }
 
     if (tipo === 'config') {
-      mostrarToast('⚠️ Edição de dados pessoais ainda não está disponível nesta versão.');
+      if (!perfilAtual) { mostrarToast('⚠️ Selecione um serviço primeiro.'); return; }
+      const nome = document.getElementById('perfil-nome')?.value.trim() || null;
+      const wpp = document.getElementById('perfil-whatsapp')?.value.trim() || null;
+      const { data, error } = await _supa.from('suppliers').update({ name: nome, whatsapp: wpp }).eq('id', perfilAtual.id).select().maybeSingle();
+      if (error) { mostrarToast('⚠️ Erro ao salvar dados: ' + error.message); return; }
+      perfilAtual = { ...perfilAtual, ...data };
+      window._meuPerfil = perfilAtual;
+      const _fw = document.getElementById('ff-whatsapp'); if (_fw) _fw.value = formatarTelBR(wpp || '');
+      const _sn = document.getElementById('sidebar-nome'); if (_sn && nome) _sn.textContent = nome;
+      mostrarToast('✅ Dados atualizados!');
       return;
     }
 
