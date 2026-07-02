@@ -65,6 +65,26 @@
       font-size: 14px; font-family: 'Inter', sans-serif; outline: none; transition: border 0.15s; color: var(--preto);
     }
     .field input:focus, .field select:focus, .field textarea:focus { border-color: var(--terra); }
+    .sidebar-picker { margin-bottom: 20px; position: relative; }
+    .picker-atual { width: 100%; display:flex; align-items:center; justify-content:space-between; gap:8px; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.16); border-radius: 10px; padding: 10px 12px; cursor:pointer; color:#fff; font-size: 13px; font-weight:600; text-align:left; font-family:'Inter',sans-serif; }
+    .picker-atual:hover { background: rgba(255,255,255,0.16); }
+    .picker-atual-nome { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+    .picker-arrow { font-size:10px; color:rgba(255,255,255,0.6); flex-shrink:0; transition:transform 0.15s; }
+    .picker-arrow.aberto { transform:rotate(180deg); }
+    .picker-lista { position:absolute; top:calc(100% + 6px); left:0; right:0; background:#fff; border-radius:10px; box-shadow:0 8px 24px rgba(0,0,0,0.3); padding:6px; z-index:100; max-height:280px; overflow-y:auto; display:none; }
+    .picker-lista.aberto { display:block; }
+    .picker-item { display:flex; align-items:center; justify-content:space-between; gap:8px; padding:9px 10px; border-radius:7px; cursor:pointer; font-size:13px; color:var(--terra-escuro); }
+    .picker-item:hover { background:var(--terra-claro); }
+    .picker-item.ativo { background:var(--terra-claro); font-weight:700; }
+    .picker-item-nome { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+    .picker-item-status { font-size:9px; padding:2px 7px; border-radius:20px; font-weight:700; flex-shrink:0; }
+    .picker-item-status.on { background:#dcfce7; color:#166534; }
+    .picker-item-status.off { background:#f3f4f6; color:#6b7280; }
+    .picker-nova { display:flex; align-items:center; gap:8px; padding:9px 10px; border-radius:7px; cursor:pointer; font-size:13px; color:var(--terra); font-weight:700; border-top:1px solid #eee; margin-top:4px; padding-top:11px; }
+    .picker-nova:hover { background:var(--terra-claro); }
+    .modal { background: #fff; border-radius: 16px; padding: 28px; width: 100%; max-width: 440px; animation: slideUp 0.2s ease; }
+    .modal-titulo { font-family: 'Fraunces', serif; font-size: 18px; color: var(--terra-escuro); margin-bottom: 6px; }
+    .modal-sub { font-size: 13px; color: var(--cinza); margin-bottom: 20px; }
     .field textarea { resize: vertical; min-height: 100px; }
 
     .btn {
@@ -285,6 +305,13 @@
   <aside class="sidebar">
     <div class="sidebar-logo">🌿 Aluguel de <span>Chácaras</span></div>
     <div class="sidebar-sub">Painel do Fornecedor</div>
+    <div class="sidebar-picker" id="sidebar-picker-forn">
+      <button class="picker-atual" id="picker-atual-btn-forn" onclick="togglePickerServicos(event)">
+        <span class="picker-atual-nome" id="picker-nome-atual-forn">Carregando...</span>
+        <span class="picker-arrow" id="picker-arrow-forn">▾</span>
+      </button>
+      <div class="picker-lista" id="picker-lista-forn"></div>
+    </div>
 
     <div class="sidebar-section">Meu Anúncio</div>
     <button class="nav-item ativo" onclick="mostrarTab('visao-geral', this)">
@@ -370,6 +397,45 @@
         </div>
 
 
+      </div>
+    </div>
+
+    <!-- MODAL NOVO SERVIÇO -->
+    <div class="modal-overlay" id="modal-novo-servico" onclick="if(event.target===this)fecharNovoServico()">
+      <div class="modal">
+        <div class="modal-titulo">🎯 Cadastrar novo serviço</div>
+        <div class="modal-sub">Ele entrará com o mesmo login. Depois é só preencher os detalhes.</div>
+        <div class="field">
+          <label for="novo-servico-nome">Nome do negócio</label>
+          <input type="text" id="novo-servico-nome" placeholder="Ex: Buffet Sabor & Arte" />
+        </div>
+        <div class="field">
+          <label for="novo-servico-categoria">Categoria</label>
+          <select id="novo-servico-categoria">
+            <option value="">Selecione...</option>
+            <option value="buffet">Buffet e Alimentação</option>
+            <option value="dj">DJ e Música</option>
+            <option value="decoracao">Decoração</option>
+            <option value="fotografia">Fotografia e Vídeo</option>
+            <option value="bar">Bar e Bebidas</option>
+            <option value="doces">Doces e Bolos</option>
+            <option value="cerimonial">Cerimonial e Organização</option>
+            <option value="outros">Outros</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="novo-servico-cidade">Cidade</label>
+          <input type="text" id="novo-servico-cidade" placeholder="Ex: Maringá" />
+        </div>
+        <div class="field">
+          <label for="novo-servico-whatsapp">WhatsApp de contato</label>
+          <input type="text" id="novo-servico-whatsapp" placeholder="(44) 99999-9999" />
+        </div>
+        <div id="novo-servico-erro" style="display:none; margin-bottom:12px; padding:10px 12px; background:#fee2e2; border-radius:8px; font-size:13px; color:#b91c1c; text-align:center;"></div>
+        <div style="display:flex; gap:10px; justify-content:flex-end;">
+          <button onclick="fecharNovoServico()" style="background:#f3f4f6;border:none;border-radius:8px;padding:10px 18px;font-size:13px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif;">Cancelar</button>
+          <button id="btn-confirmar-novo-servico" onclick="confirmarNovoServico()" style="background:var(--terra-escuro);color:#fff;border:none;border-radius:8px;padding:10px 18px;font-size:13px;font-weight:700;cursor:pointer;font-family:'Inter',sans-serif;">Cadastrar serviço</button>
+        </div>
       </div>
     </div>
 
@@ -864,6 +930,7 @@
   // TOGGLE ANÚNCIO FORNECEDOR
   let anuncioFornAtivo = true;
   let perfilAtual = null;
+  let meusPerfis = [];
   const MAPA_DIFERENCIAIS = {"🚚 Entrega e montagem inclusa": "entrega e montagem inclusa", "💡 Iluminação inclusa": "iluminação inclusa", "🎤 Microfone sem fio": "microfone sem fio", "📻 Playlist personalizada": "playlist personalizada", "🏆 Mais de 5 anos de experiência": "mais de 5 anos de experiência", "📋 Contrato de serviço": "contrato de serviço", "🔄 Reposição em caso de problema": "reposição em caso de problema", "🎓 Profissional certificado": "profissional certificado", "📍 Atende toda a região": "atende toda a região", "💳 Aceita parcelamento": "aceita parcelamento"};
 
   function sincronizarBotoesAnuncioForn() {
@@ -985,18 +1052,21 @@
     const { data: suppliers } = await _supa
       .from('suppliers')
       .select('*')
-      .eq('email', email)
-      .limit(1);
+      .eq('email', email);
 
     if (!suppliers || suppliers.length === 0) {
       mostrarToast('⚠️ Nenhum perfil encontrado com este e-mail.');
       return;
     }
 
-    const s = suppliers[0];
-    window._meuPerfil = s;
-    perfilAtual = s;
+    meusPerfis = suppliers;
+    window._meuPerfil = suppliers[0];
+    perfilAtual = suppliers[0];
+    preencherFormularioFornecedor(perfilAtual);
+    renderPickerServicos();
+  }
 
+  function preencherFormularioFornecedor(s) {
     // Preencher campos reais do formulario "Meu Servico"
     const set = (id, val) => { const el = document.getElementById(id); if (el) el.value = (val === null || val === undefined) ? '' : val; };
     set('ff-nome', s.name);
@@ -1010,13 +1080,13 @@
     set('ff-video', s.video_url);
 
     const catEl = document.getElementById('select-categoria');
-    if (catEl && s.category) catEl.value = s.category;
+    if (catEl) catEl.value = s.category || '';
 
     const formatoEl = document.getElementById('ff-formato-valor');
-    if (formatoEl && s.price_range) formatoEl.value = s.price_range;
+    if (formatoEl) formatoEl.value = s.price_range || '';
 
     const pagEl = document.getElementById('ff-pagamento');
-    if (pagEl && s.payment_methods) pagEl.value = s.payment_methods;
+    if (pagEl) pagEl.value = s.payment_methods || '';
 
     // Diferenciais
     const tags = s.tags || [];
@@ -1042,7 +1112,8 @@
         if (vazio) grid.insertBefore(div, vazio); else grid.appendChild(div);
       });
       atualizarBadgeCapa();
-      if ((s.photos || []).length) { const b = document.getElementById('btn-salvar-fotos'); if (b) b.style.display = 'flex'; }
+      const b = document.getElementById('btn-salvar-fotos');
+      if (b) b.style.display = (s.photos || []).length ? 'flex' : 'none';
     }
 
     // Estado do anuncio
@@ -1060,6 +1131,125 @@
     if (sideNome) sideNome.textContent = s.name;
     const sideAvatar = document.getElementById('sidebar-avatar-forn');
     if (sideAvatar && s.name) sideAvatar.textContent = s.name.trim().split(/\s+/).map(function(w){return w[0];}).slice(0,2).join('').toUpperCase();
+
+    const nomeAtual = document.getElementById('picker-nome-atual-forn');
+    if (nomeAtual) nomeAtual.textContent = s.name;
+  }
+
+  function renderPickerServicos() {
+    const lista = document.getElementById('picker-lista-forn');
+    if (!lista) return;
+    let html = '';
+    meusPerfis.forEach(p => {
+      const ativo = perfilAtual && p.id === perfilAtual.id;
+      html += `<div class="picker-item ${ativo ? 'ativo' : ''}" onclick="selecionarPerfil('${p.id}')">
+        <span class="picker-item-nome">${p.name}</span>
+        <span class="picker-item-status ${p.active ? 'on' : 'off'}">${p.active ? 'ativo' : 'inativo'}</span>
+      </div>`;
+    });
+    html += `<div class="picker-nova" onclick="abrirNovoServico()">➕ Novo serviço</div>`;
+    lista.innerHTML = html;
+
+    const nomeAtual = document.getElementById('picker-nome-atual-forn');
+    if (nomeAtual && perfilAtual) nomeAtual.textContent = perfilAtual.name;
+  }
+
+  function togglePickerServicos(ev) {
+    if (ev) ev.stopPropagation();
+    const lista = document.getElementById('picker-lista-forn');
+    const arrow = document.getElementById('picker-arrow-forn');
+    if (!lista) return;
+    lista.classList.toggle('aberto');
+    if (arrow) arrow.classList.toggle('aberto');
+  }
+
+  function fecharPickerServicos() {
+    const lista = document.getElementById('picker-lista-forn');
+    const arrow = document.getElementById('picker-arrow-forn');
+    if (lista) lista.classList.remove('aberto');
+    if (arrow) arrow.classList.remove('aberto');
+  }
+
+  document.addEventListener('click', function(e) {
+    const picker = document.getElementById('sidebar-picker-forn');
+    if (picker && !picker.contains(e.target)) fecharPickerServicos();
+  });
+
+  function selecionarPerfil(id) {
+    const perfil = meusPerfis.find(p => p.id === id);
+    if (!perfil) return;
+    perfilAtual = perfil;
+    window._meuPerfil = perfil;
+    preencherFormularioFornecedor(perfilAtual);
+    renderPickerServicos();
+    fecharPickerServicos();
+    mostrarToast(`🎯 Agora exibindo: ${perfil.name}`);
+  }
+
+  function abrirNovoServico() {
+    fecharPickerServicos();
+    document.getElementById('novo-servico-nome').value = '';
+    document.getElementById('novo-servico-categoria').value = '';
+    document.getElementById('novo-servico-cidade').value = '';
+    document.getElementById('novo-servico-whatsapp').value = '';
+    document.getElementById('novo-servico-erro').style.display = 'none';
+    document.getElementById('modal-novo-servico').classList.add('open');
+  }
+
+  function fecharNovoServico() {
+    document.getElementById('modal-novo-servico').classList.remove('open');
+  }
+
+  async function confirmarNovoServico() {
+    const nome = document.getElementById('novo-servico-nome').value.trim();
+    const categoria = document.getElementById('novo-servico-categoria').value;
+    const cidade = document.getElementById('novo-servico-cidade').value.trim();
+    const whatsapp = document.getElementById('novo-servico-whatsapp').value.trim();
+    const erroEl = document.getElementById('novo-servico-erro');
+    erroEl.style.display = 'none';
+
+    if (!nome) { erroEl.textContent = 'Informe o nome do negócio.'; erroEl.style.display = 'block'; return; }
+    if (!categoria) { erroEl.textContent = 'Selecione uma categoria.'; erroEl.style.display = 'block'; return; }
+    if (!whatsapp || whatsapp.replace(/\D/g,'').length < 10) { erroEl.textContent = 'Informe um WhatsApp válido.'; erroEl.style.display = 'block'; return; }
+
+    const btn = document.getElementById('btn-confirmar-novo-servico');
+    btn.disabled = true;
+    btn.textContent = 'Cadastrando...';
+
+    try {
+      const { data: { session } } = await _supa.auth.getSession();
+      if (!session) { erroEl.textContent = 'Sessão expirada. Recarregue a página e entre novamente.'; erroEl.style.display = 'block'; return; }
+
+      const resp = await fetch('https://n8n.alugueldechacaras.com/webhook/adicionar-anuncio', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          tipo: 'fornecedor',
+          access_token: session.access_token,
+          nome_negocio: nome,
+          categoria, cidade, whatsapp
+        })
+      });
+      const result = await resp.json();
+      if (!result.ok) {
+        erroEl.textContent = result.erro || 'Não foi possível cadastrar. Tente novamente.';
+        erroEl.style.display = 'block';
+        return;
+      }
+
+      fecharNovoServico();
+      await carregarDadosFornecedor(session.user.email);
+      const novo = meusPerfis.find(p => p.id === result.id);
+      if (novo) selecionarPerfil(novo.id);
+      irParaMeuServico();
+      mostrarToast('✅ Serviço cadastrado! Preencha os detalhes abaixo.');
+    } catch (e) {
+      erroEl.textContent = 'Erro de conexão. Tente novamente.';
+      erroEl.style.display = 'block';
+    } finally {
+      btn.disabled = false;
+      btn.textContent = 'Cadastrar serviço';
+    }
   }
 
   // Verificar sessão ao carregar
