@@ -4,6 +4,7 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Redefinir senha — AluguelDeChácaras</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22%3E%3Ctext y=%22.9em%22 font-size=%2290%22%3E%F0%9F%8C%BF%3C/text%3E%3C/svg%3E" />
 <style>
   * { margin:0; padding:0; box-sizing:border-box; }
   :root { --verde:#1e4d2b; --verde-claro:#2d6b3f; --terra:#c0622d; --cinza:#6b7280; }
@@ -89,7 +90,13 @@
 
     const { data: userData, error } = await _supa.auth.updateUser({ password: nova });
     if (error) {
-      erro.textContent = 'Erro ao redefinir senha: ' + error.message;
+      const msgLower = (error.message || '').toLowerCase();
+      const linkExpirado = msgLower.includes('jwt') || msgLower.includes('expired') || msgLower.includes('invalid') || msgLower.includes('sub claim') || msgLower.includes('not exist');
+      if (linkExpirado) {
+        erro.innerHTML = 'Este link de recuperação expirou ou já foi usado (cada link só funciona uma vez). <a href="/?recuperar=1" style="color:#b91c1c;font-weight:700;text-decoration:underline;">Solicitar um novo link</a>.';
+      } else {
+        erro.textContent = 'Erro ao redefinir senha: ' + error.message;
+      }
       erro.style.display = 'block';
       btn.disabled = false;
       btn.textContent = 'Salvar nova senha';
