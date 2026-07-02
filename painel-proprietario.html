@@ -1786,7 +1786,7 @@
 
     // Badge
     const badgeEl = document.getElementById('badge-reservas');
-    if (badgeEl) badgeEl.textContent = pendentes.length || '';
+    if (badgeEl) { badgeEl.textContent = pendentes.length || ''; badgeEl.style.display = pendentes.length ? '' : 'none'; }
 
     // Alerta
     const alerta = document.getElementById('alerta-pendentes');
@@ -1919,7 +1919,7 @@
     if (el('stat-pendentes')) el('stat-pendentes').textContent = pendentes;
     if (el('stat-confirmadas')) el('stat-confirmadas').textContent = confirmadas;
     if (el('stat-receita')) el('stat-receita').textContent = fmtReal(receita);
-    if (el('badge-reservas')) el('badge-reservas').textContent = pendentes || '';
+    if (el('badge-reservas')) { const _b=el('badge-reservas'); _b.textContent = pendentes || ''; _b.style.display = pendentes ? '' : 'none'; }
     if (el('fin-recebido')) el('fin-recebido').textContent = fmtReal(receita);
     if (el('fin-a-receber')) el('fin-a-receber').textContent = fmtReal(aReceber);
     if (el('fin-comissao')) el('fin-comissao').textContent = fmtReal(comissao);
