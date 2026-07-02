@@ -1615,7 +1615,6 @@
       const supa = getSupaHome();
       const { error: loginError } = await supa.auth.signInWithPassword({ email, password: senha });
       if (loginError) {
-        // Conta foi criada com sucesso, mas o login automático falhou — manda para a tela de login.
         document.getElementById('modal-content').innerHTML = `
           <div class="modal-header">
             <div class="modal-title">✅ Conta criada!</div>
@@ -2068,4 +2067,49 @@ Responda sempre em português brasileiro. Se não souber algo, sugira que o visi
     document.getElementById('chat-suggestions').style.display = 'none';
     adicionarMensagem('user', texto);
     mostrarTyping();
-    envi
+    enviando = true;
+    document.getElementById('chat-send').disabled = true;
+
+    try {
+      const mensagens = [
+        { role: 'user', content: BASE_CONHECIMENTO + '\n\nAgora responda a conversa abaixo:' },
+        { role: 'assistant', content: 'Entendido! Estou pronto para ajudar os visitantes do AluguelDeChácaras.com.' },
+        ...historico.slice(-10)
+      ];
+
+      const response = await fetch('https://api.anthropic.com/v1/messages', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          model: 'claude-sonnet-4-6',
+          max_tokens: 1000,
+          messages: mensagens
+        })
+      });
+
+      const data = await response.json();
+      const resposta = data.content?.map(b => b.text || '').join('') || 'Desculpe, não consegui processar sua pergunta. Tente novamente!';
+
+      removerTyping();
+      adicionarMensagem('ia', resposta);
+    } catch (err) {
+      removerTyping();
+      adicionarMensagem('ia', 'Ops, tive um problema de conexão. Tente novamente em instantes! 🙏');
+    }
+
+    enviando = false;
+    document.getElementById('chat-send').disabled = false;
+  }
+
+  function enviarSugestao(texto) {
+    document.getElementById('chat-input').value = texto;
+    enviarMensagem();
+  }
+
+  function teclaEnter(e) {
+    if (e.key === 'Enter') enviarMensagem();
+  }
+</script>
+</body>
+</html>
+
