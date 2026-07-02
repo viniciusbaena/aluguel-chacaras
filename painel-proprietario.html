@@ -2454,4 +2454,19 @@
       }
       if (paraDesbloquear.length) {
         const { error } = await _supa.from('blocked_dates').delete().in('id', paraDesbloquear);
-       
+        if (error) { mostrarToast('⚠️ Erro ao liberar datas: ' + error.message); return; }
+      }
+      mostrarToast('✅ Calendário atualizado!');
+      return;
+    }
+
+    if (tipo === 'config') {
+      mostrarToast('⚠️ Edição de dados pessoais ainda não está disponível nesta versão.');
+      return;
+    }
+
+    mostrarToast('✅ Salvo!');
+  }
+</script>
+</body>
+</html>
