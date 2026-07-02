@@ -1402,6 +1402,8 @@
         <div class="field"><label for="cad-chacara-nomenegocio">Nome da chácara</label><input type="text" id="cad-chacara-nomenegocio" placeholder="Ex: Chácara das Palmeiras"/></div>
         <div class="field"><label for="cad-chacara-cidade">Cidade</label><input type="text" id="cad-chacara-cidade" placeholder="Ex: Maringá, Sarandi..."/></div>
         <div class="field"><label for="cad-chacara-email">E-mail</label><input type="email" id="cad-chacara-email" placeholder="seuemail@exemplo.com"/></div>
+        <div class="field"><label for="cad-chacara-senha">Crie uma senha</label><input type="password" id="cad-chacara-senha" placeholder="Mínimo 6 caracteres" autocomplete="new-password"/></div>
+        <div class="field"><label for="cad-chacara-senha2">Confirme a senha</label><input type="password" id="cad-chacara-senha2" placeholder="Repita a senha" autocomplete="new-password"/></div>
         <label class="field" style="display:flex;align-items:flex-start;gap:8px;font-weight:400;font-size:13px;color:#374151;margin-top:6px;cursor:pointer;">
           <input type="checkbox" id="cad-chacara-termos" style="margin-top:3px;flex-shrink:0;width:auto;"/>
           <span>Li e aceito os <a href="/termos-de-uso.html" target="_blank" style="color:var(--verde);font-weight:600;">Termos de Uso</a> e a <a href="/politica-de-privacidade.html" target="_blank" style="color:var(--verde);font-weight:600;">Política de Privacidade</a>.</span>
@@ -1432,6 +1434,8 @@
         </div>
         <div class="field"><label for="cad-fornecedor-cidade">Cidade</label><input type="text" id="cad-fornecedor-cidade" placeholder="Ex: Maringá"/></div>
         <div class="field"><label for="cad-fornecedor-email">E-mail</label><input type="email" id="cad-fornecedor-email" placeholder="seuemail@exemplo.com"/></div>
+        <div class="field"><label for="cad-fornecedor-senha">Crie uma senha</label><input type="password" id="cad-fornecedor-senha" placeholder="Mínimo 6 caracteres" autocomplete="new-password"/></div>
+        <div class="field"><label for="cad-fornecedor-senha2">Confirme a senha</label><input type="password" id="cad-fornecedor-senha2" placeholder="Repita a senha" autocomplete="new-password"/></div>
         <label class="field" style="display:flex;align-items:flex-start;gap:8px;font-weight:400;font-size:13px;color:#374151;margin-top:6px;cursor:pointer;">
           <input type="checkbox" id="cad-fornecedor-termos" style="margin-top:3px;flex-shrink:0;width:auto;"/>
           <span>Li e aceito os <a href="/termos-de-uso.html" target="_blank" style="color:var(--verde);font-weight:600;">Termos de Uso</a> e a <a href="/politica-de-privacidade.html" target="_blank" style="color:var(--verde);font-weight:600;">Política de Privacidade</a>.</span>
@@ -1559,11 +1563,25 @@
     const nomeNegocio = document.getElementById(prefixo + '-nomenegocio').value.trim();
     const cidade = document.getElementById(prefixo + '-cidade').value.trim();
     const email = document.getElementById(prefixo + '-email').value.trim();
+    const senha = document.getElementById(prefixo + '-senha').value;
+    const senha2 = document.getElementById(prefixo + '-senha2').value;
     const categoria = tipo === 'fornecedor' ? document.getElementById('cad-fornecedor-categoria').value : undefined;
     const termosAceitos = document.getElementById(prefixo + '-termos').checked;
 
     if (!nome || !whatsapp || !nomeNegocio || !email) {
       erroEl.textContent = 'Preencha todos os campos obrigatórios.';
+      erroEl.style.display = 'block';
+      return;
+    }
+
+    if (!senha || senha.length < 6) {
+      erroEl.textContent = 'A senha deve ter pelo menos 6 caracteres.';
+      erroEl.style.display = 'block';
+      return;
+    }
+
+    if (senha !== senha2) {
+      erroEl.textContent = 'As senhas não coincidem.';
       erroEl.style.display = 'block';
       return;
     }
@@ -1576,13 +1594,13 @@
 
     btn.disabled = true;
     const textoOriginal = btn.textContent;
-    btn.textContent = 'Enviando...';
+    btn.textContent = 'Criando sua conta...';
 
     try {
       const r = await fetch('https://n8n.alugueldechacaras.com/webhook/cadastro-novo', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ tipo, nome, whatsapp, email, nome_negocio: nomeNegocio, cidade, categoria, termos_aceitos: true, termos_versao: TERMOS_VERSAO })
+        body: JSON.stringify({ tipo, nome, whatsapp, email, senha, nome_negocio: nomeNegocio, cidade, categoria, termos_aceitos: true, termos_versao: TERMOS_VERSAO })
       });
       const data = await r.json();
       if (!r.ok || !data.ok) {
@@ -1592,13 +1610,24 @@
         btn.textContent = textoOriginal;
         return;
       }
-      document.getElementById('modal-content').innerHTML = `
-        <div class="modal-header">
-          <div class="modal-title">✅ Cadastro recebido!</div>
-          <button class="close-btn" onclick="fecharModal()">✕</button>
-        </div>
-        <div class="modal-sub">Recebemos seus dados. Vamos revisar e entrar em contato pelo WhatsApp em breve para confirmar seu cadastro na plataforma.</div>
-      `;
+
+      btn.textContent = 'Entrando...';
+      const supa = getSupaHome();
+      const { error: loginError } = await supa.auth.signInWithPassword({ email, password: senha });
+      if (loginError) {
+        // Conta foi criada com sucesso, mas o login automático falhou — manda para a tela de login.
+        document.getElementById('modal-content').innerHTML = `
+          <div class="modal-header">
+            <div class="modal-title">✅ Conta criada!</div>
+            <button class="close-btn" onclick="fecharModal()">✕</button>
+          </div>
+          <div class="modal-sub">Sua conta foi criada. Faça login com o e-mail e a senha que você cadastrou para preencher os detalhes do seu anúncio.</div>
+          <button class="btn btn-verde" style="width:100%;justify-content:center;margin-top:8px;" onclick="fecharModal();abrirModal('login')">Ir para o login</button>
+        `;
+        return;
+      }
+
+      window.location.href = tipo === 'chacara' ? '/painel-proprietario.html?editar=1' : '/painel-fornecedor.html?editar=1';
     } catch (e) {
       erroEl.textContent = 'Erro de conexão. Verifique sua internet e tente novamente.';
       erroEl.style.display = 'block';
@@ -2039,49 +2068,4 @@ Responda sempre em português brasileiro. Se não souber algo, sugira que o visi
     document.getElementById('chat-suggestions').style.display = 'none';
     adicionarMensagem('user', texto);
     mostrarTyping();
-    enviando = true;
-    document.getElementById('chat-send').disabled = true;
-
-    try {
-      const mensagens = [
-        { role: 'user', content: BASE_CONHECIMENTO + '\n\nAgora responda a conversa abaixo:' },
-        { role: 'assistant', content: 'Entendido! Estou pronto para ajudar os visitantes do AluguelDeChácaras.com.' },
-        ...historico.slice(-10)
-      ];
-
-      const response = await fetch('https://api.anthropic.com/v1/messages', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          model: 'claude-sonnet-4-6',
-          max_tokens: 1000,
-          messages: mensagens
-        })
-      });
-
-      const data = await response.json();
-      const resposta = data.content?.map(b => b.text || '').join('') || 'Desculpe, não consegui processar sua pergunta. Tente novamente!';
-
-      removerTyping();
-      adicionarMensagem('ia', resposta);
-    } catch (err) {
-      removerTyping();
-      adicionarMensagem('ia', 'Ops, tive um problema de conexão. Tente novamente em instantes! 🙏');
-    }
-
-    enviando = false;
-    document.getElementById('chat-send').disabled = false;
-  }
-
-  function enviarSugestao(texto) {
-    document.getElementById('chat-input').value = texto;
-    enviarMensagem();
-  }
-
-  function teclaEnter(e) {
-    if (e.key === 'Enter') enviarMensagem();
-  }
-</script>
-</body>
-</html>
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            
+    envi
