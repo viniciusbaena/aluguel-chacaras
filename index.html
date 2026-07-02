@@ -763,13 +763,23 @@
 
     .modal-overlay.open { display: flex; }
 
+    .modal-overlay { padding: 24px; }
+
     .modal {
       background: #fff;
       border-radius: 20px;
       padding: 36px;
       width: 100%;
-      max-width: 480px;
+      max-width: 560px;
+      max-height: calc(100vh - 48px);
+      overflow-y: auto;
       animation: slideUp 0.2s ease;
+    }
+
+    .field-row { display: flex; gap: 12px; }
+    .field-row .field { flex: 1; min-width: 0; }
+    @media (max-width: 480px) {
+      .field-row { flex-direction: column; gap: 0; }
     }
 
     @keyframes slideUp {
@@ -1398,13 +1408,19 @@
       titulo: 'Cadastrar minha chácara',
       sub: 'Preencha os dados básicos e comece a receber reservas pela plataforma.',
       campos: `
-        <div class="field"><label for="cad-chacara-nome">Seu nome</label><input type="text" id="cad-chacara-nome" placeholder="Nome completo"/></div>
-        <div class="field"><label for="cad-chacara-whatsapp">WhatsApp</label><input type="text" id="cad-chacara-whatsapp" placeholder="(44) 9 0000-0000"/></div>
-        <div class="field"><label for="cad-chacara-nomenegocio">Nome da chácara</label><input type="text" id="cad-chacara-nomenegocio" placeholder="Ex: Chácara das Palmeiras"/></div>
-        <div class="field"><label for="cad-chacara-cidade">Cidade</label><input type="text" id="cad-chacara-cidade" placeholder="Ex: Maringá, Sarandi..."/></div>
+        <div class="field-row">
+          <div class="field"><label for="cad-chacara-nome">Seu nome</label><input type="text" id="cad-chacara-nome" placeholder="Nome completo"/></div>
+          <div class="field"><label for="cad-chacara-whatsapp">WhatsApp</label><input type="text" id="cad-chacara-whatsapp" placeholder="(44) 9 0000-0000"/></div>
+        </div>
+        <div class="field-row">
+          <div class="field"><label for="cad-chacara-nomenegocio">Nome da chácara</label><input type="text" id="cad-chacara-nomenegocio" placeholder="Ex: Chácara das Palmeiras"/></div>
+          <div class="field"><label for="cad-chacara-cidade">Cidade</label><input type="text" id="cad-chacara-cidade" placeholder="Ex: Maringá, Sarandi..."/></div>
+        </div>
         <div class="field"><label for="cad-chacara-email">E-mail</label><input type="email" id="cad-chacara-email" placeholder="seuemail@exemplo.com"/></div>
-        <div class="field"><label for="cad-chacara-senha">Crie uma senha</label><input type="password" id="cad-chacara-senha" placeholder="Mínimo 6 caracteres" autocomplete="new-password"/></div>
-        <div class="field"><label for="cad-chacara-senha2">Confirme a senha</label><input type="password" id="cad-chacara-senha2" placeholder="Repita a senha" autocomplete="new-password"/></div>
+        <div class="field-row">
+          <div class="field"><label for="cad-chacara-senha">Crie uma senha</label><input type="password" id="cad-chacara-senha" placeholder="Mínimo 6 caracteres" autocomplete="new-password"/></div>
+          <div class="field"><label for="cad-chacara-senha2">Confirme a senha</label><input type="password" id="cad-chacara-senha2" placeholder="Repita a senha" autocomplete="new-password"/></div>
+        </div>
         <div style="font-size:12px;color:#6b7280;margin-top:-8px;margin-bottom:8px;">Você vai usar seu e-mail e essa senha pra entrar no painel depois.</div>
         <label class="field" style="display:flex;flex-direction:row;align-items:flex-start;gap:8px;font-weight:400;font-size:13px;color:#374151;margin-top:6px;cursor:pointer;">
           <input type="checkbox" id="cad-chacara-termos" style="margin-top:3px;flex-shrink:0;width:auto;"/>
@@ -1418,26 +1434,34 @@
       titulo: 'Cadastrar meu serviço',
       sub: 'Apareça para quem está organizando eventos na região. Cadastro gratuito!',
       campos: `
-        <div class="field"><label for="cad-fornecedor-nome">Seu nome</label><input type="text" id="cad-fornecedor-nome" placeholder="Nome completo"/></div>
-        <div class="field"><label for="cad-fornecedor-whatsapp">WhatsApp</label><input type="text" id="cad-fornecedor-whatsapp" placeholder="(44) 9 0000-0000"/></div>
-        <div class="field"><label for="cad-fornecedor-nomenegocio">Nome do negócio</label><input type="text" id="cad-fornecedor-nomenegocio" placeholder="Ex: DJ Marquinhos Events"/></div>
-        <div class="field"><label for="cad-fornecedor-categoria">Categoria</label>
-          <select id="cad-fornecedor-categoria">
-            <option>Bolos e Doces</option>
-            <option>DJ e Música</option>
-            <option>Chopeiras</option>
-            <option>Decoração e Balões</option>
-            <option>Brinquedos Infantis</option>
-            <option>Buffets</option>
-            <option>Animadores e Recreadores</option>
-            <option>Churrasqueiros</option>
-            <option>Salgados</option>
-          </select>
+        <div class="field-row">
+          <div class="field"><label for="cad-fornecedor-nome">Seu nome</label><input type="text" id="cad-fornecedor-nome" placeholder="Nome completo"/></div>
+          <div class="field"><label for="cad-fornecedor-whatsapp">WhatsApp</label><input type="text" id="cad-fornecedor-whatsapp" placeholder="(44) 9 0000-0000"/></div>
         </div>
-        <div class="field"><label for="cad-fornecedor-cidade">Cidade</label><input type="text" id="cad-fornecedor-cidade" placeholder="Ex: Maringá"/></div>
-        <div class="field"><label for="cad-fornecedor-email">E-mail</label><input type="email" id="cad-fornecedor-email" placeholder="seuemail@exemplo.com"/></div>
-        <div class="field"><label for="cad-fornecedor-senha">Crie uma senha</label><input type="password" id="cad-fornecedor-senha" placeholder="Mínimo 6 caracteres" autocomplete="new-password"/></div>
-        <div class="field"><label for="cad-fornecedor-senha2">Confirme a senha</label><input type="password" id="cad-fornecedor-senha2" placeholder="Repita a senha" autocomplete="new-password"/></div>
+        <div class="field-row">
+          <div class="field"><label for="cad-fornecedor-nomenegocio">Nome do negócio</label><input type="text" id="cad-fornecedor-nomenegocio" placeholder="Ex: DJ Marquinhos Events"/></div>
+          <div class="field"><label for="cad-fornecedor-categoria">Categoria</label>
+            <select id="cad-fornecedor-categoria">
+              <option>Bolos e Doces</option>
+              <option>DJ e Música</option>
+              <option>Chopeiras</option>
+              <option>Decoração e Balões</option>
+              <option>Brinquedos Infantis</option>
+              <option>Buffets</option>
+              <option>Animadores e Recreadores</option>
+              <option>Churrasqueiros</option>
+              <option>Salgados</option>
+            </select>
+          </div>
+        </div>
+        <div class="field-row">
+          <div class="field"><label for="cad-fornecedor-cidade">Cidade</label><input type="text" id="cad-fornecedor-cidade" placeholder="Ex: Maringá"/></div>
+          <div class="field"><label for="cad-fornecedor-email">E-mail</label><input type="email" id="cad-fornecedor-email" placeholder="seuemail@exemplo.com"/></div>
+        </div>
+        <div class="field-row">
+          <div class="field"><label for="cad-fornecedor-senha">Crie uma senha</label><input type="password" id="cad-fornecedor-senha" placeholder="Mínimo 6 caracteres" autocomplete="new-password"/></div>
+          <div class="field"><label for="cad-fornecedor-senha2">Confirme a senha</label><input type="password" id="cad-fornecedor-senha2" placeholder="Repita a senha" autocomplete="new-password"/></div>
+        </div>
         <div style="font-size:12px;color:#6b7280;margin-top:-8px;margin-bottom:8px;">Você vai usar seu e-mail e essa senha pra entrar no painel depois.</div>
         <label class="field" style="display:flex;flex-direction:row;align-items:flex-start;gap:8px;font-weight:400;font-size:13px;color:#374151;margin-top:6px;cursor:pointer;">
           <input type="checkbox" id="cad-fornecedor-termos" style="margin-top:3px;flex-shrink:0;width:auto;"/>
