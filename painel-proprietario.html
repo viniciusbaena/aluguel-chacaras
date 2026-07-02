@@ -138,6 +138,23 @@
     .sidebar-logo span { color: #7ee8b0; }
     .sidebar-sub { font-size: 11px; color: rgba(255,255,255,0.4); padding: 0 8px; margin-bottom: 32px; text-transform: uppercase; letter-spacing: 1px; }
 
+    .sidebar-picker { margin-bottom: 20px; position: relative; }
+    .picker-atual { width: 100%; display:flex; align-items:center; justify-content:space-between; gap:8px; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.14); border-radius: 10px; padding: 10px 12px; cursor:pointer; color:#fff; font-size: 13px; font-weight:600; text-align:left; font-family:'Inter',sans-serif; }
+    .picker-atual:hover { background: rgba(255,255,255,0.14); }
+    .picker-atual-nome { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+    .picker-arrow { font-size:10px; color:rgba(255,255,255,0.5); flex-shrink:0; transition:transform 0.15s; }
+    .picker-arrow.aberto { transform:rotate(180deg); }
+    .picker-lista { position:absolute; top:calc(100% + 6px); left:0; right:0; background:#fff; border-radius:10px; box-shadow:0 8px 24px rgba(0,0,0,0.3); padding:6px; z-index:100; max-height:280px; overflow-y:auto; display:none; }
+    .picker-lista.aberto { display:block; }
+    .picker-item { display:flex; align-items:center; justify-content:space-between; gap:8px; padding:9px 10px; border-radius:7px; cursor:pointer; font-size:13px; color:var(--verde-escuro); }
+    .picker-item:hover { background:var(--verde-claro); }
+    .picker-item.ativo { background:var(--verde-claro); font-weight:700; }
+    .picker-item-nome { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+    .picker-item-status { font-size:9px; padding:2px 7px; border-radius:20px; font-weight:700; flex-shrink:0; }
+    .picker-item-status.on { background:#dcfce7; color:#166534; }
+    .picker-item-status.off { background:#f3f4f6; color:#6b7280; }
+    .picker-nova { display:flex; align-items:center; gap:8px; padding:9px 10px; border-radius:7px; cursor:pointer; font-size:13px; color:var(--verde); font-weight:700; border-top:1px solid #eee; margin-top:4px; padding-top:11px; }
+    .picker-nova:hover { background:var(--verde-claro); }
     .sidebar-section { font-size: 10px; font-weight: 700; color: rgba(255,255,255,0.3); text-transform: uppercase; letter-spacing: 1px; padding: 0 8px; margin: 20px 0 8px; }
 
     .nav-item {
@@ -622,6 +639,13 @@
   <aside class="sidebar">
     <div class="sidebar-logo">🌿 Aluguel de <span>Chácaras</span></div>
     <div class="sidebar-sub">Painel do Proprietário</div>
+    <div class="sidebar-picker" id="sidebar-picker">
+      <button class="picker-atual" id="picker-atual-btn" onclick="togglePickerChacaras(event)">
+        <span class="picker-atual-nome" id="picker-nome-atual">Carregando...</span>
+        <span class="picker-arrow" id="picker-arrow">▾</span>
+      </button>
+      <div class="picker-lista" id="picker-lista"></div>
+    </div>
 
     <div class="sidebar-section">Meu Anúncio</div>
     <button class="nav-item ativo" onclick="mostrarTab('visao-geral', this)">
@@ -967,6 +991,31 @@
         <div style="display:flex; gap:10px; justify-content:flex-end;">
           <button onclick="fecharModalRecusar()" style="background:#f3f4f6;border:none;border-radius:8px;padding:10px 18px;font-size:13px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif;">Cancelar</button>
           <button onclick="recusarConfirmado()" style="background:var(--vermelho);color:#fff;border:none;border-radius:8px;padding:10px 18px;font-size:13px;font-weight:700;cursor:pointer;font-family:'Inter',sans-serif;">Confirmar recusa</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- MODAL NOVA CHÁCARA -->
+    <div class="modal-overlay" id="modal-nova-chacara" onclick="if(event.target===this)fecharNovaChacara()">
+      <div class="modal">
+        <div class="modal-titulo">🏡 Cadastrar nova chácara</div>
+        <div class="modal-sub">Ela entrará com o mesmo login. Depois é só preencher os detalhes.</div>
+        <div class="field">
+          <label for="nova-chacara-nome">Nome da chácara</label>
+          <input type="text" id="nova-chacara-nome" placeholder="Ex: Chácara Brasil" />
+        </div>
+        <div class="field">
+          <label for="nova-chacara-cidade">Cidade</label>
+          <input type="text" id="nova-chacara-cidade" placeholder="Ex: Maringá" />
+        </div>
+        <div class="field">
+          <label for="nova-chacara-whatsapp">WhatsApp de contato</label>
+          <input type="text" id="nova-chacara-whatsapp" placeholder="(44) 99999-9999" />
+        </div>
+        <div id="nova-chacara-erro" style="display:none; margin-bottom:12px; padding:10px 12px; background:#fee2e2; border-radius:8px; font-size:13px; color:#b91c1c; text-align:center;"></div>
+        <div style="display:flex; gap:10px; justify-content:flex-end;">
+          <button onclick="fecharNovaChacara()" style="background:#f3f4f6;border:none;border-radius:8px;padding:10px 18px;font-size:13px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif;">Cancelar</button>
+          <button id="btn-confirmar-nova-chacara" onclick="confirmarNovaChacara()" style="background:var(--verde-escuro);color:#fff;border:none;border-radius:8px;padding:10px 18px;font-size:13px;font-weight:700;cursor:pointer;font-family:'Inter',sans-serif;">Cadastrar chácara</button>
         </div>
       </div>
     </div>
@@ -1437,6 +1486,7 @@
   let calAnoAtual = new Date().getFullYear();
   let diasStatus = {}; // { 'YYYY-MM-DD': 'disponivel' | 'indisponivel' | 'neutro' }
   let propriedadeAtual = null;
+  let minhasPropriedades = [];
 
   const MAPA_COMODIDADES = {"🏊 Piscina": "piscina", "🍖 Churrasqueira": "churrasqueira", "⚽ Campo de futebol": "campo de futebol", "🎣 Lago / Pesca": "lago / pesca", "🅿️ Estacionamento": "estacionamento", "🛌 Hospedagem / Quartos": "hospedagem / quartos", "🏠 Casa sede": "casa sede", "🎮 Salão de jogos": "salão de jogos", "🏐 Quadra poliesportiva": "quadra poliesportiva", "💡 Energia elétrica": "energia elétrica", "💧 Água encanada": "água encanada", "♿ Acessibilidade": "acessibilidade", "🐾 Aceita pets": "aceita pets", "🍽️ Espaço gourmet": "espaço gourmet", "🎪 Salão coberto": "salão coberto", "🌳 Pomar": "pomar"};
 
@@ -1550,22 +1600,12 @@
     }
 
     const propIds = props.map(p => p.id);
+    minhasPropriedades = props;
     window._minhaProp = props[0];
     propriedadeAtual = props[0];
     await preencherFormularioChacara(propriedadeAtual);
-
-    // Atualizar preview da propriedade na visão geral
-    const previewNome = document.getElementById('preview-nome');
-    const previewLocal = document.getElementById('preview-local');
-    if (previewNome) previewNome.textContent = props[0].name;
-    if (previewLocal) previewLocal.textContent = `📍 ${props[0].city||''} — ${props[0].address||''}`;
-
-    // Atualizar status do anúncio
-    const badge = document.getElementById('badge-status-anuncio');
-    if (badge) {
-      badge.textContent = props[0].active ? 'Anúncio ativo' : 'Anúncio inativo';
-      badge.className = 'status-badge ' + (props[0].active ? 'badge-ativo' : 'badge-pausado');
-    }
+    atualizarPreviewPropriedade(propriedadeAtual);
+    renderPickerChacaras();
 
     // 2. Buscar reservas
     const { data: bookings } = await _supa
@@ -1579,6 +1619,138 @@
 
     renderReservas(bookings);
     atualizarStats(bookings);
+  }
+
+  function atualizarPreviewPropriedade(prop) {
+    if (!prop) return;
+    const previewNome = document.getElementById('preview-nome');
+    const previewLocal = document.getElementById('preview-local');
+    if (previewNome) previewNome.textContent = prop.name;
+    if (previewLocal) previewLocal.textContent = `📍 ${prop.city||''} — ${prop.address||''}`;
+
+    const badge = document.getElementById('badge-status-anuncio');
+    if (badge) {
+      badge.textContent = prop.active ? 'Anúncio ativo' : 'Anúncio inativo';
+      badge.className = 'status-badge ' + (prop.active ? 'badge-ativo' : 'badge-pausado');
+    }
+
+    const nomeAtual = document.getElementById('picker-nome-atual');
+    if (nomeAtual) nomeAtual.textContent = prop.name;
+  }
+
+  function renderPickerChacaras() {
+    const lista = document.getElementById('picker-lista');
+    if (!lista) return;
+    let html = '';
+    minhasPropriedades.forEach(p => {
+      const ativo = propriedadeAtual && p.id === propriedadeAtual.id;
+      html += `<div class="picker-item ${ativo ? 'ativo' : ''}" onclick="selecionarPropriedade('${p.id}')">
+        <span class="picker-item-nome">${p.name}</span>
+        <span class="picker-item-status ${p.active ? 'on' : 'off'}">${p.active ? 'ativo' : 'inativo'}</span>
+      </div>`;
+    });
+    html += `<div class="picker-nova" onclick="abrirNovaChacara()">➕ Nova chácara</div>`;
+    lista.innerHTML = html;
+
+    const nomeAtual = document.getElementById('picker-nome-atual');
+    if (nomeAtual && propriedadeAtual) nomeAtual.textContent = propriedadeAtual.name;
+  }
+
+  function togglePickerChacaras(ev) {
+    if (ev) ev.stopPropagation();
+    const lista = document.getElementById('picker-lista');
+    const arrow = document.getElementById('picker-arrow');
+    if (!lista) return;
+    lista.classList.toggle('aberto');
+    if (arrow) arrow.classList.toggle('aberto');
+  }
+
+  function fecharPickerChacaras() {
+    const lista = document.getElementById('picker-lista');
+    const arrow = document.getElementById('picker-arrow');
+    if (lista) lista.classList.remove('aberto');
+    if (arrow) arrow.classList.remove('aberto');
+  }
+
+  document.addEventListener('click', function(e) {
+    const picker = document.getElementById('sidebar-picker');
+    if (picker && !picker.contains(e.target)) fecharPickerChacaras();
+  });
+
+  async function selecionarPropriedade(id) {
+    const prop = minhasPropriedades.find(p => p.id === id);
+    if (!prop) return;
+    propriedadeAtual = prop;
+    window._minhaProp = prop;
+    await preencherFormularioChacara(propriedadeAtual);
+    atualizarPreviewPropriedade(propriedadeAtual);
+    renderPickerChacaras();
+    fecharPickerChacaras();
+    renderCalendario();
+    mostrarToast(`🏡 Agora exibindo: ${prop.name}`);
+  }
+
+  function abrirNovaChacara() {
+    fecharPickerChacaras();
+    document.getElementById('nova-chacara-nome').value = '';
+    document.getElementById('nova-chacara-cidade').value = '';
+    document.getElementById('nova-chacara-whatsapp').value = '';
+    document.getElementById('nova-chacara-erro').style.display = 'none';
+    document.getElementById('modal-nova-chacara').classList.add('open');
+  }
+
+  function fecharNovaChacara() {
+    document.getElementById('modal-nova-chacara').classList.remove('open');
+  }
+
+  async function confirmarNovaChacara() {
+    const nome = document.getElementById('nova-chacara-nome').value.trim();
+    const cidade = document.getElementById('nova-chacara-cidade').value.trim();
+    const whatsapp = document.getElementById('nova-chacara-whatsapp').value.trim();
+    const erroEl = document.getElementById('nova-chacara-erro');
+    erroEl.style.display = 'none';
+
+    if (!nome) { erroEl.textContent = 'Informe o nome da chácara.'; erroEl.style.display = 'block'; return; }
+    if (!whatsapp || whatsapp.replace(/\D/g,'').length < 10) { erroEl.textContent = 'Informe um WhatsApp válido.'; erroEl.style.display = 'block'; return; }
+
+    const btn = document.getElementById('btn-confirmar-nova-chacara');
+    btn.disabled = true;
+    btn.textContent = 'Cadastrando...';
+
+    try {
+      const { data: { session } } = await _supa.auth.getSession();
+      if (!session) { erroEl.textContent = 'Sessão expirada. Recarregue a página e entre novamente.'; erroEl.style.display = 'block'; return; }
+
+      const resp = await fetch('https://n8n.alugueldechacaras.com/webhook/adicionar-anuncio', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          tipo: 'chacara',
+          access_token: session.access_token,
+          nome_negocio: nome,
+          cidade, whatsapp
+        })
+      });
+      const result = await resp.json();
+      if (!result.ok) {
+        erroEl.textContent = result.erro || 'Não foi possível cadastrar. Tente novamente.';
+        erroEl.style.display = 'block';
+        return;
+      }
+
+      fecharNovaChacara();
+      await carregarDados(session.user.email);
+      const nova = minhasPropriedades.find(p => p.id === result.id);
+      if (nova) await selecionarPropriedade(nova.id);
+      irParaMinhaChacara();
+      mostrarToast('✅ Chácara cadastrada! Preencha os detalhes abaixo.');
+    } catch (e) {
+      erroEl.textContent = 'Erro de conexão. Tente novamente.';
+      erroEl.style.display = 'block';
+    } finally {
+      btn.disabled = false;
+      btn.textContent = 'Cadastrar chácara';
+    }
   }
 
   function fmtDate(d) {
