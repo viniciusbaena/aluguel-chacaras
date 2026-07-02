@@ -1240,4 +1240,20 @@
         }
       }
       const { data, error } = await _supa.from('suppliers').update({ photos: urls }).eq('id', perfilAtual.id).select().maybeSingle();
-      if (error) { mostrarToast('⚠️ Erro ao salvar fotos: ' + error.message); 
+      if (error) { mostrarToast('⚠️ Erro ao salvar fotos: ' + error.message); return; }
+      perfilAtual = { ...perfilAtual, ...data };
+      window._meuPerfil = perfilAtual;
+      mostrarToast('✅ Fotos salvas!');
+      return;
+    }
+
+    if (tipo === 'config') {
+      mostrarToast('⚠️ Edição de dados pessoais ainda não está disponível nesta versão.');
+      return;
+    }
+
+    mostrarToast('✅ Salvo!');
+  }
+</script>
+</body>
+</html>
