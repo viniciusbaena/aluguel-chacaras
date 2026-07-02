@@ -637,7 +637,7 @@
 <div class="painel" id="painel">
   <!-- SIDEBAR -->
   <aside class="sidebar">
-    <div class="sidebar-logo">🌿 Aluguel de <span>Chácaras</span></div>
+    <a href="/index.html" title="Voltar ao site" style="text-decoration:none;color:inherit;display:block;cursor:pointer;"><div class="sidebar-logo">🌿 Aluguel de <span>Chácaras</span></div></a>
     <div class="sidebar-sub">Painel do Proprietário</div>
     <div class="sidebar-picker" id="sidebar-picker">
       <button class="picker-atual" id="picker-atual-btn" onclick="togglePickerChacaras(event)">
@@ -653,7 +653,7 @@
     </button>
     <button class="nav-item" onclick="mostrarTab('reservas', this)" style="position:relative;">
       <span class="nav-icon">🔔</span> Reservas
-      <span id="badge-reservas" style="background:#ef4444;color:#fff;border-radius:20px;padding:1px 7px;font-size:10px;font-weight:700;margin-left:auto;">2</span>
+      <span id="badge-reservas" style="background:#ef4444;color:#fff;border-radius:20px;padding:1px 7px;font-size:10px;font-weight:700;margin-left:auto;"></span>
     </button>
     <button class="nav-item" onclick="mostrarTab('financeiro', this)">
       <span class="nav-icon">💰</span> Financeiro
@@ -724,11 +724,11 @@
       </div>
 
       <!-- ALERTA RESERVAS PENDENTES -->
-      <div id="alerta-pendentes" style="background:#fffbeb; border:1.5px solid #f59e0b; border-radius:12px; padding:16px 20px; margin-bottom:20px; display:flex; align-items:center; justify-content:space-between; gap:16px; animation:piscar-borda 1.5s ease-in-out infinite;">
+      <div id="alerta-pendentes" style="background:#fffbeb; border:1.5px solid #f59e0b; border-radius:12px; padding:16px 20px; margin-bottom:20px; display:none; align-items:center; justify-content:space-between; gap:16px; animation:piscar-borda 1.5s ease-in-out infinite;">
         <div style="display:flex; align-items:center; gap:12px;">
           <span style="font-size:28px;">🔔</span>
           <div>
-            <div style="font-weight:700; font-size:14px; color:#92400e;" id="alerta-texto">Você tem 2 solicitações de reserva aguardando resposta</div>
+            <div style="font-weight:700; font-size:14px; color:#92400e;" id="alerta-texto">Você tem solicitações de reserva aguardando resposta</div>
             <div style="font-size:12px; color:#b45309; margin-top:2px;">Responda em até 24h para não perder a reserva.</div>
           </div>
         </div>
@@ -1237,13 +1237,10 @@
         <div><strong>Anúncio pausado.</strong> Seu anúncio está fora do ar e não aparece nas buscas. Clique em "Publicar anúncio" para reativar.</div>
       </div>
 
-      <div style="display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap;">
-        <button class="btn btn-danger btn-sm" id="btn-toggle-anuncio" onclick="toggleAnuncio()">⏸ Pausar anúncio</button>
-        <div style="display:flex; gap:10px;">
-          <button class="btn btn-outline" onclick="abrirPreview('pre')">👁️ Pré-visualizar</button>
-          <button class="btn btn-verde" onclick="salvar('anuncio')">💾 Salvar alterações</button>
-          <button class="btn" style="background:var(--terra);color:#fff;" onclick="abrirPreview('publicado')">🔗 Ver como cliente vê</button>
-        </div>
+      <div style="display:flex; justify-content:center; align-items:center; gap:12px; flex-wrap:wrap; margin-top:8px;">
+        <button class="btn btn-outline" onclick="abrirPreview('pre')">👁️ Pré-visualizar (visão do cliente)</button>
+        <button class="btn btn-verde" onclick="salvar('anuncio')">💾 Salvar alterações</button>
+        <button class="btn btn-sm" id="btn-toggle-anuncio" onclick="toggleAnuncio()">▶ Publicar anúncio</button>
       </div>
     </div>
 
@@ -1561,6 +1558,7 @@
   }
 
   async function abrirPainel(user) {
+    window._authUser = user;
     // Update sidebar
     const nome = user.user_metadata?.full_name || user.email.split('@')[0];
     const iniciais = nome.split(' ').map(p=>p[0]).join('').toUpperCase().slice(0,2);
@@ -1608,17 +1606,18 @@
     renderPickerChacaras();
 
     // 2. Buscar reservas
-    const { data: bookings } = await _supa
+    const { data: bookings, error: bookErr } = await _supa
       .from('bookings')
       .select('*')
       .in('property_id', propIds)
       .order('created_at', { ascending: false });
 
-    if (!bookings) return;
-    window._reservas = bookings;
+    if (bookErr) console.warn('Erro ao carregar reservas:', bookErr.message);
+    window._reservas = bookings || [];
 
-    renderReservas(bookings);
-    atualizarStats(bookings);
+    preencherConfig();
+    inicializarMascaras();
+    renderParaPropriedade();
   }
 
   function atualizarPreviewPropriedade(prop) {
@@ -1687,6 +1686,9 @@
     renderPickerChacaras();
     fecharPickerChacaras();
     renderCalendario();
+    preencherConfig();
+    inicializarMascaras();
+    renderParaPropriedade();
     mostrarToast(`🏡 Agora exibindo: ${prop.name}`);
   }
 
@@ -1923,6 +1925,56 @@
     if (el('fin-comissao')) el('fin-comissao').textContent = fmtReal(comissao);
   }
 
+  // === Helpers: mascara telefone, escopo por chacara, config (add sessao 02/07) ===
+  function formatarTelBR(value) {
+    let n = (value || '').replace(/\D/g, '').slice(0, 11);
+    if (n.length <= 2) return n.length ? '(' + n : '';
+    const ddd = n.slice(0, 2);
+    const rest = n.slice(2);
+    let meio, fim;
+    if (rest.length >= 9) { meio = rest.slice(0, 5); fim = rest.slice(5, 9); }
+    else if (rest.length > 4) { meio = rest.slice(0, rest.length - 4); fim = rest.slice(-4); }
+    else { return '(' + ddd + ') ' + rest; }
+    return '(' + ddd + ') ' + meio + '-' + fim;
+  }
+
+  function inicializarMascaras() {
+    ['f-whatsapp', 'f-telefone-alt', 'perfil-whatsapp', 'nova-chacara-whatsapp'].forEach(id => {
+      const el = document.getElementById(id);
+      if (!el) return;
+      if (!el.placeholder) el.placeholder = '(44) 90000-0000';
+      el.setAttribute('inputmode', 'tel');
+      if (!el._maskAttached) {
+        el._maskAttached = true;
+        el.addEventListener('input', () => { el.value = formatarTelBR(el.value); });
+      }
+      if (el.value) el.value = formatarTelBR(el.value);
+    });
+  }
+
+  function preencherConfig() {
+    const s = id => document.getElementById(id);
+    const u = window._authUser || {};
+    const p = propriedadeAtual || {};
+    if (s('perfil-nome')) s('perfil-nome').value = p.owner_name || (u.user_metadata && u.user_metadata.full_name) || '';
+    if (s('perfil-email')) { s('perfil-email').value = u.email || p.owner_email || ''; s('perfil-email').setAttribute('readonly', ''); s('perfil-email').style.background = '#f9fafb'; }
+    if (s('perfil-whatsapp')) s('perfil-whatsapp').value = formatarTelBR(p.owner_whatsapp || '');
+    const cpf = s('perfil-cpf');
+    if (cpf && (cpf.value === '000.000.000-00' || !cpf.value)) { cpf.value = ''; cpf.placeholder = 'Opcional'; }
+  }
+
+  function reservasDaPropriedadeAtual() {
+    const all = window._reservas || [];
+    if (!propriedadeAtual) return all;
+    return all.filter(b => b.property_id === propriedadeAtual.id);
+  }
+
+  function renderParaPropriedade() {
+    const lista = reservasDaPropriedadeAtual();
+    renderReservas(lista);
+    atualizarStats(lista);
+  }
+
   // Verificar sessão ao carregar
   document.addEventListener('DOMContentLoaded', async () => {
     let { data: { session } } = await _supa.auth.getSession();
@@ -1945,10 +1997,17 @@
   function mostrarTab(id, btn) {
     document.querySelectorAll('.tabs').forEach(t => t.classList.remove('ativo'));
     document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('ativo'));
-    document.getElementById('tab-' + id).classList.add('ativo');
-    if (btn) btn.classList.add('ativo');
+    const tab = document.getElementById('tab-' + id);
+    if (tab) tab.classList.add('ativo');
+    let navBtn = null;
+    document.querySelectorAll('.nav-item').forEach(n => {
+      const oc = n.getAttribute('onclick') || '';
+      if (oc.includes("'" + id + "'")) navBtn = n;
+    });
+    (navBtn || btn) && (navBtn || btn).classList.add('ativo');
     if (id === 'calendario') renderCalendario();
     if (id === 'minha-chacara') inicializarTags();
+    if (id === 'configuracoes') preencherConfig();
   }
 
   // TAGS CLICÁVEIS — inicializar e vincular diretamente cada checkbox
@@ -2032,6 +2091,7 @@
     sincronizarBotoesAnuncio();
 
     // Bloqueios de calendario
+    inicializarMascaras();
     await carregarBloqueios(prop.id);
   }
 
@@ -2587,6 +2647,10 @@
     }
 
     if (tipo === 'fotos') {
+      const _bf = document.getElementById('btn-salvar-fotos');
+      const _bfOrig = _bf ? _bf.innerHTML : '';
+      if (_bf) { _bf.disabled = true; _bf.innerHTML = '⏳ Enviando fotos...'; }
+      const _restoreBf = () => { if (_bf) { _bf.disabled = false; _bf.innerHTML = _bfOrig; } };
       const itens = Array.from(document.querySelectorAll('#fotos-grid .foto-item:not(#foto-vazia)'));
       const urls = [];
       for (const item of itens) {
@@ -2604,8 +2668,9 @@
         }
       }
       const { data, error } = await _supa.from('properties').update({ photos: urls }).eq('id', propriedadeAtual.id).select().maybeSingle();
-      if (error) { mostrarToast('⚠️ Erro ao salvar fotos: ' + error.message); return; }
+      if (error) { _restoreBf(); mostrarToast('⚠️ Erro ao salvar fotos: ' + error.message); return; }
       propriedadeAtual = { ...propriedadeAtual, ...data };
+      if (_bf) { _bf.innerHTML = '✅ Fotos salvas!'; setTimeout(() => { _bf.innerHTML = _bfOrig; _bf.disabled = false; }, 2500); }
       mostrarToast('✅ Fotos salvas!');
       return;
     }
@@ -2639,7 +2704,15 @@
     }
 
     if (tipo === 'config') {
-      mostrarToast('⚠️ Edição de dados pessoais ainda não está disponível nesta versão.');
+      if (!propriedadeAtual) { mostrarToast('⚠️ Selecione uma chácara primeiro.'); return; }
+      const nome = document.getElementById('perfil-nome')?.value.trim() || null;
+      const wpp = document.getElementById('perfil-whatsapp')?.value.trim() || null;
+      const { data, error } = await _supa.from('properties').update({ owner_name: nome, owner_whatsapp: wpp }).eq('id', propriedadeAtual.id).select().maybeSingle();
+      if (error) { mostrarToast('⚠️ Erro ao salvar dados: ' + error.message); return; }
+      propriedadeAtual = { ...propriedadeAtual, ...data };
+      const _fw = document.getElementById('f-whatsapp'); if (_fw) _fw.value = formatarTelBR(wpp || '');
+      atualizarPreviewPropriedade(propriedadeAtual);
+      mostrarToast('✅ Dados atualizados!');
       return;
     }
 
