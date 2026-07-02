@@ -1063,7 +1063,12 @@
 
   // Verificar sessão ao carregar
   document.addEventListener('DOMContentLoaded', async () => {
-    const { data: { session } } = await _supa.auth.getSession();
+    let { data: { session } } = await _supa.auth.getSession();
+    if (!session) {
+      // pequena espera para evitar corrida de inicializacao ao vir de outra pagina (ex: apos cadastro com login automatico)
+      await new Promise(r => setTimeout(r, 500));
+      ({ data: { session } } = await _supa.auth.getSession());
+    }
     if (session) await abrirPainel(session.user);
   });
 
