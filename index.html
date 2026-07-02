@@ -1404,7 +1404,8 @@
         <div class="field"><label for="cad-chacara-email">E-mail</label><input type="email" id="cad-chacara-email" placeholder="seuemail@exemplo.com"/></div>
         <div class="field"><label for="cad-chacara-senha">Crie uma senha</label><input type="password" id="cad-chacara-senha" placeholder="Mínimo 6 caracteres" autocomplete="new-password"/></div>
         <div class="field"><label for="cad-chacara-senha2">Confirme a senha</label><input type="password" id="cad-chacara-senha2" placeholder="Repita a senha" autocomplete="new-password"/></div>
-        <label class="field" style="display:flex;align-items:flex-start;gap:8px;font-weight:400;font-size:13px;color:#374151;margin-top:6px;cursor:pointer;">
+        <div style="font-size:12px;color:#6b7280;margin-top:-8px;margin-bottom:8px;">Você vai usar seu e-mail e essa senha pra entrar no painel depois.</div>
+        <label class="field" style="display:flex;flex-direction:row;align-items:flex-start;gap:8px;font-weight:400;font-size:13px;color:#374151;margin-top:6px;cursor:pointer;">
           <input type="checkbox" id="cad-chacara-termos" style="margin-top:3px;flex-shrink:0;width:auto;"/>
           <span>Li e aceito os <a href="/termos-de-uso.html" target="_blank" style="color:var(--verde);font-weight:600;">Termos de Uso</a> e a <a href="/politica-de-privacidade.html" target="_blank" style="color:var(--verde);font-weight:600;">Política de Privacidade</a>.</span>
         </label>
@@ -1436,7 +1437,8 @@
         <div class="field"><label for="cad-fornecedor-email">E-mail</label><input type="email" id="cad-fornecedor-email" placeholder="seuemail@exemplo.com"/></div>
         <div class="field"><label for="cad-fornecedor-senha">Crie uma senha</label><input type="password" id="cad-fornecedor-senha" placeholder="Mínimo 6 caracteres" autocomplete="new-password"/></div>
         <div class="field"><label for="cad-fornecedor-senha2">Confirme a senha</label><input type="password" id="cad-fornecedor-senha2" placeholder="Repita a senha" autocomplete="new-password"/></div>
-        <label class="field" style="display:flex;align-items:flex-start;gap:8px;font-weight:400;font-size:13px;color:#374151;margin-top:6px;cursor:pointer;">
+        <div style="font-size:12px;color:#6b7280;margin-top:-8px;margin-bottom:8px;">Você vai usar seu e-mail e essa senha pra entrar no painel depois.</div>
+        <label class="field" style="display:flex;flex-direction:row;align-items:flex-start;gap:8px;font-weight:400;font-size:13px;color:#374151;margin-top:6px;cursor:pointer;">
           <input type="checkbox" id="cad-fornecedor-termos" style="margin-top:3px;flex-shrink:0;width:auto;"/>
           <span>Li e aceito os <a href="/termos-de-uso.html" target="_blank" style="color:var(--verde);font-weight:600;">Termos de Uso</a> e a <a href="/politica-de-privacidade.html" target="_blank" style="color:var(--verde);font-weight:600;">Política de Privacidade</a>.</span>
         </label>
@@ -1512,6 +1514,13 @@
     }
     const { data: sup } = await supa.from('suppliers').select('id').eq('email', email).maybeSingle();
     window.location.href = sup ? '/painel-fornecedor.html' : '/painel-proprietario.html';
+  }
+
+  function abrirRecuperacaoSenha(email) {
+    fecharModal();
+    abrirModal('login');
+    document.getElementById('home-login-email').value = email;
+    mostrarRecuperarSenhaHome();
   }
 
   function mostrarRecuperarSenhaHome() {
@@ -1604,7 +1613,13 @@
       });
       const data = await r.json();
       if (!r.ok || !data.ok) {
-        erroEl.textContent = data.erro || 'Não foi possível enviar seu cadastro. Tente novamente.';
+        const msg = data.erro || 'Não foi possível enviar seu cadastro. Tente novamente.';
+        if (msg.includes('já possui cadastro')) {
+          const emailEsc = email.replace(/'/g, "\\'");
+          erroEl.innerHTML = msg + ' <a href="#" onclick="fecharModal();abrirModal(\'login\');return false;" style="color:#b91c1c;font-weight:700;text-decoration:underline;">Fazer login</a> · <a href="#" onclick="abrirRecuperacaoSenha(\'' + emailEsc + '\');return false;" style="color:#b91c1c;font-weight:700;text-decoration:underline;">Esqueci minha senha</a>';
+        } else {
+          erroEl.textContent = msg;
+        }
         erroEl.style.display = 'block';
         btn.disabled = false;
         btn.textContent = textoOriginal;
