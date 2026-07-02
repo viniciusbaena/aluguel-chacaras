@@ -30,6 +30,10 @@
 (async function() {
   var slug = window.location.pathname.replace(/^\//, '').replace(/\/$/, '');
   if (!slug) { window.location.replace('/'); return; }
+  if (new URLSearchParams(window.location.search).get('_r') === '1') {
+    document.getElementById('msg').textContent = 'Esta chácara está sendo preparada. Tente novamente em instantes.';
+    return;
+  }
 
   // Check if it's a known property slug in Supabase
   try {
@@ -43,7 +47,7 @@
       sessionStorage.setItem('prop_slug', slug);
       sessionStorage.setItem('prop_id', data[0].id);
       sessionStorage.setItem('prop_name', data[0].name);
-      window.location.replace('/' + slug + '/');
+      window.location.replace('/' + slug + '/?_r=1');
       return;
     }
   } catch(e) {}
