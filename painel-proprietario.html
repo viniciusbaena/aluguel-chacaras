@@ -927,14 +927,6 @@
 
           <hr style="border:none; border-top:1px solid var(--cinza-borda); margin-bottom:20px;"/>
 
-          <!-- Tipos de evento -->
-          <div style="margin-bottom:20px;">
-            <div style="font-size:16px; font-weight:700; color:var(--verde-escuro); margin-bottom:12px;">Tipos de evento aceitos</div>
-            <div id="prev-eventos" style="display:flex; flex-wrap:wrap; gap:8px;"></div>
-          </div>
-
-          <hr style="border:none; border-top:1px solid var(--cinza-borda); margin-bottom:20px;"/>
-
           <!-- Card de reserva simulado -->
           <div style="background:var(--verde-claro); border:1.5px solid var(--verde); border-radius:14px; padding:20px;">
             <div style="font-size:13px; color:var(--cinza); margin-bottom:6px;">A partir de</div>
@@ -1142,6 +1134,7 @@
             <input type="number" id="f-fds" value="1800"/>
           </div>
         </div>
+        <button class="btn btn-verde btn-sm" style="margin-top:14px;" onclick="salvar('anuncio')">💾 Salvar capacidade e valores</button>
         <div class="form-grid" style="margin-top:16px;">
           <div class="field form-full">
             <div style="background:var(--verde-claro); border:1.5px solid var(--verde); border-radius:10px; padding:14px 16px; display:flex; gap:12px; align-items:flex-start;">
@@ -1175,21 +1168,6 @@
           <label class="tag-check"><input type="checkbox"/> 🍽️ Espaço gourmet</label>
           <label class="tag-check"><input type="checkbox"/> 🎪 Salão coberto</label>
           <label class="tag-check"><input type="checkbox"/> 🌳 Pomar</label>
-        </div>
-      </div>
-
-      <div class="card">
-        <div class="card-title">🎉 Tipos de evento aceitos</div>
-        <div style="font-size:12px;color:var(--cinza);margin-bottom:12px;">Clique para marcar os tipos de evento que sua chácara aceita.</div>
-        <div class="tags-grid" id="tags-eventos">
-          <label class="tag-check selecionado"><input type="checkbox" checked/> 🎂 Aniversários</label>
-          <label class="tag-check selecionado"><input type="checkbox" checked/> 💒 Casamentos</label>
-          <label class="tag-check selecionado"><input type="checkbox" checked/> 🤝 Confraternizações</label>
-          <label class="tag-check selecionado"><input type="checkbox" checked/> 🏖️ Lazer / Final de semana</label>
-          <label class="tag-check"><input type="checkbox"/> 👔 Eventos corporativos</label>
-          <label class="tag-check selecionado"><input type="checkbox" checked/> 🍖 Churrascos</label>
-          <label class="tag-check"><input type="checkbox"/> 🎓 Formaturas</label>
-          <label class="tag-check"><input type="checkbox"/> 👧 Festas infantis</label>
         </div>
       </div>
 
@@ -2063,16 +2041,6 @@
       }
     });
 
-    const eventTypes = prop.event_types || [];
-    document.querySelectorAll('#tags-eventos .tag-check').forEach(function(label) {
-      const canon = MAPA_EVENTOS[label.textContent.trim()];
-      const checkbox = label.querySelector('input[type="checkbox"]');
-      if (checkbox && canon) {
-        checkbox.checked = eventTypes.includes(canon);
-        label.classList.toggle('selecionado', checkbox.checked);
-      }
-    });
-
     // Fotos ja existentes no Supabase
     const grid = document.getElementById('fotos-grid');
     if (grid) {
@@ -2498,18 +2466,6 @@
     });
     if (tagsEstrutura.length === 0) prevEstrutura.innerHTML = '<div style="font-size:13px;color:var(--cinza);">Nenhuma comodidade selecionada.</div>';
 
-    // Tipos de evento
-    const tagsEventos = document.querySelectorAll('#tags-eventos .tag-check.selecionado');
-    const prevEventos = document.getElementById('prev-eventos');
-    prevEventos.innerHTML = '';
-    tagsEventos.forEach(t => {
-      const span = document.createElement('span');
-      span.style.cssText = 'background:var(--terra-claro);color:var(--terra);padding:5px 14px;border-radius:20px;font-size:13px;font-weight:600;';
-      span.textContent = t.textContent.trim();
-      prevEventos.appendChild(span);
-    });
-    if (tagsEventos.length === 0) prevEventos.innerHTML = '<div style="font-size:13px;color:var(--cinza);">Nenhum tipo de evento selecionado.</div>';
-
     // Galeria de fotos em miniatura
     if (dados.fotos && dados.fotos.length > 1) {
       const existingGal = document.getElementById('prev-galeria-mini');
@@ -2568,19 +2524,13 @@
       comodidades.push(t.textContent.trim());
     });
 
-    // Tipos de evento selecionados
-    const eventos = [];
-    document.querySelectorAll('#tags-eventos .tag-check.selecionado').forEach(t => {
-      eventos.push(t.textContent.trim());
-    });
-
     // Fotos em base64
     const fotos = [];
     document.querySelectorAll('#fotos-grid .foto-item:not(#foto-vazia) img').forEach(img => {
       fotos.push(img.src);
     });
 
-    return { nome, cidade, bairro, wpp, capacidade, diaria, fds, desc, video, comodidades, eventos, fotos };
+    return { nome, cidade, bairro, wpp, capacidade, diaria, fds, desc, video, comodidades, fotos };
   }
 
   async function salvar(tipo) {
@@ -2613,12 +2563,6 @@
       const comodidadesExtras = (propriedadeAtual.amenities || []).filter(a => !valoresConhecidos.includes(a));
       const amenitiesFinal = [...comodidadesMarcadas, ...comodidadesExtras];
 
-      const eventosMarcados = [];
-      document.querySelectorAll('#tags-eventos .tag-check.selecionado').forEach(t => {
-        const canon = MAPA_EVENTOS[t.textContent.trim()];
-        if (canon) eventosMarcados.push(canon);
-      });
-
       const payload = {
         name: document.getElementById('f-nome')?.value.trim() || null,
         city: document.getElementById('f-cidade')?.value.trim() || null,
@@ -2629,8 +2573,7 @@
         max_guests: parseInt(document.getElementById('f-capacidade')?.value) || null,
         price_per_day: parseFloat(document.getElementById('f-diaria')?.value) || null,
         price_weekend: parseFloat(document.getElementById('f-fds')?.value) || null,
-        amenities: amenitiesFinal,
-        event_types: eventosMarcados
+        amenities: amenitiesFinal
       };
 
       const { data, error } = await _supa.from('properties').update(payload).eq('id', propriedadeAtual.id).select().maybeSingle();
