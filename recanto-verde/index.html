@@ -536,22 +536,6 @@
 
     <hr class="divider"/>
 
-    <!-- TIPOS DE EVENTO -->
-    <div class="secao">
-      <div class="secao-titulo">Tipos de evento aceitos</div>
-      <div class="eventos-grid">
-        <span class="evento-tag">🎂 Aniversários</span>
-        <span class="evento-tag">💒 Casamentos</span>
-        <span class="evento-tag">🤝 Confraternizações</span>
-        <span class="evento-tag">🍖 Churrascos</span>
-        <span class="evento-tag">🏖️ Lazer / Final de semana</span>
-        <span class="evento-tag">🎓 Formaturas</span>
-        <span class="evento-tag">👧 Festas infantis</span>
-      </div>
-    </div>
-
-    <hr class="divider"/>
-
     <!-- REGRAS -->
     <div class="secao">
       <div class="secao-titulo">Regras e informações</div>
@@ -1379,16 +1363,6 @@
       if (grid) {
         grid.innerHTML = dados.comodidades.map(c =>
           `<div class="estrutura-item"><span class="estrutura-icon">${c.split(' ')[0]}</span> ${c.split(' ').slice(1).join(' ')}</div>`
-        ).join('');
-      }
-    }
-
-    // Tipos de evento
-    if (dados.eventos && dados.eventos.length > 0) {
-      const eventoGrid = document.querySelector('.eventos-grid');
-      if (eventoGrid) {
-        eventoGrid.innerHTML = dados.eventos.map(e =>
-          `<span class="evento-tag">${e}</span>`
         ).join('');
       }
     }
