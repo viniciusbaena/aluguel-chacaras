@@ -748,7 +748,7 @@
                 <span style="background:var(--verde-claro);color:var(--verde-escuro);font-size:11px;font-weight:600;padding:3px 10px;border-radius:20px;">⚽ Campo</span>
                 <span style="background:var(--verde-claro);color:var(--verde-escuro);font-size:11px;font-weight:600;padding:3px 10px;border-radius:20px;">🍖 Churrasqueira</span>
               </div>
-              <div class="preview-preco">a partir de <strong>R$ 1.200</strong>/dia</div>
+              <div class="preview-preco">a partir de <strong id="preview-preco-valor">R$ —</strong>/dia</div>
             </div>
           </div>
           <div style="display:flex; gap:10px; margin-top:16px; flex-wrap:wrap;">
@@ -1626,6 +1626,9 @@
     const previewLocal = document.getElementById('preview-local');
     if (previewNome) previewNome.textContent = prop.name;
     if (previewLocal) previewLocal.textContent = `📍 ${prop.city||''} — ${prop.address||''}`;
+
+    const previewPreco = document.getElementById('preview-preco-valor');
+    if (previewPreco) previewPreco.textContent = prop.price_per_day ? ('R$ ' + Number(prop.price_per_day).toLocaleString('pt-BR')) : 'R$ —';
 
     const badge = document.getElementById('badge-status-anuncio');
     if (badge) {
@@ -2633,6 +2636,7 @@
       const { data, error } = await _supa.from('properties').update(payload).eq('id', propriedadeAtual.id).select().maybeSingle();
       if (error) { mostrarToast('⚠️ Erro ao salvar: ' + error.message); return; }
       propriedadeAtual = { ...propriedadeAtual, ...data };
+      atualizarPreviewPropriedade(propriedadeAtual);
       mostrarToast('✅ Anúncio salvo com sucesso!');
       return;
     }
