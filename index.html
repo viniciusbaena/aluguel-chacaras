@@ -1043,6 +1043,7 @@
     if (!label) return;
     label.classList.toggle('marcado');
     atualizarBadge();
+    if (window.aplicarFiltros) window.aplicarFiltros();
   });
 
   function atualizarBadge() {
@@ -1055,25 +1056,16 @@
   }
 
   function buscar() {
-    const cidade = document.getElementById('f-cidade').value;
-    const pessoas = document.getElementById('f-pessoas').value;
-    // Simula resultado
-    const base = 38;
-    const filtros = [cidade,pessoas].filter(Boolean).length;
-    const resultado = Math.max(3, base - filtros * 8 - Math.floor(Math.random()*5));
-    document.getElementById('resultado-count').textContent = resultado + ' chácaras encontradas';
+    if (window.aplicarFiltros) window.aplicarFiltros();
     document.querySelector('#chacaras').scrollIntoView({ behavior: 'smooth' });
   }
 
   function limparFiltros() {
-    document.getElementById('f-cidade').value = '';
-    document.getElementById('f-pessoas').value = '';
-    if(document.getElementById('f-preco')) document.getElementById('f-preco').value = '';
-    if(document.getElementById('f-data')) document.getElementById('f-data').value = '';
-    if(document.getElementById('f-acesso')) document.getElementById('f-acesso').value = '';
+    ['f-cidade','f-pessoas','f-preco','f-data','f-data-inicio','f-data-fim'].forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
+    const ord = document.getElementById('f-ordem'); if (ord) ord.selectedIndex = 0;
     document.querySelectorAll('.filtro-check.marcado').forEach(el => el.classList.remove('marcado'));
-    document.getElementById('resultado-count').textContent = '38 chácaras disponíveis';
     atualizarBadge();
+    if (window.aplicarFiltros) window.aplicarFiltros();
   }
 </script>
 
@@ -1095,76 +1087,117 @@
   </div>
 
   <script>
-  (async function carregarChacaras() {
-    const SUPABASE_URL  = 'https://tathqoyhcuxthsrghrzx.supabase.co';
-    const SUPABASE_ANON = 'sb_publishable_fLpPGAodcCvJxPkQ223ABQ_ApJKDLRU';
-    const grid    = document.getElementById('chacaras-grid');
-    const loading = document.getElementById('chacaras-loading');
+  const _SB_H = 'https://tathqoyhcuxthsrghrzx.supabase.co';
+  const _AN_H = 'sb_publishable_fLpPGAodcCvJxPkQ223ABQ_ApJKDLRU';
+  const _paleta = ['linear-gradient(135deg,#c8e6c9,#81c784)','linear-gradient(135deg,#ffe0b2,#ffb74d)','linear-gradient(135deg,#b3e5fc,#4fc3f7)','linear-gradient(135deg,#f8bbd0,#f48fb1)','linear-gradient(135deg,#e8eaf6,#9fa8da)','linear-gradient(135deg,#fff9c4,#ffd54f)','linear-gradient(135deg,#e0f7fa,#4dd0e1)','linear-gradient(135deg,#fce4ec,#f06292)'];
+  const _icones = ['\uD83C\uDFE1','\uD83C\uDF33','\uD83C\uDF89','\uD83C\uDF3F','\uD83C\uDFD5\uFE0F','\uD83C\uDF3B','\uD83C\uDFDE\uFE0F','\uD83C\uDF8A'];
+  const _COMOD = {piscina:'piscina',churrasqueira:'churrasqueira',campo:'campo',lago:'lago',hospedagem:'hospedagem',salao:'salao',quadra:'quadra',playground:'playground',gourmet:'gourmet',gerador:'gerador',pets:'pets',acessivel:'acessib'};
+  let _chacarasAll = [];
+  let _bloqueios = {};
 
-    const paleta = [
-      'linear-gradient(135deg,#c8e6c9,#81c784)',
-      'linear-gradient(135deg,#ffe0b2,#ffb74d)',
-      'linear-gradient(135deg,#b3e5fc,#4fc3f7)',
-      'linear-gradient(135deg,#f8bbd0,#f48fb1)',
-      'linear-gradient(135deg,#e8eaf6,#9fa8da)',
-      'linear-gradient(135deg,#fff9c4,#ffd54f)',
-      'linear-gradient(135deg,#e0f7fa,#4dd0e1)',
-      'linear-gradient(135deg,#fce4ec,#f06292)',
-    ];
-    const icones = ['🏡','🌳','🎉','🌿','🏕️','🌻','🏞️','🎊'];
+  function _norm(x){ return (x||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,''); }
+  function _datasIntervalo(ini,fim){ const out=[]; const d=new Date(ini+'T12:00:00'); const e=new Date(fim+'T12:00:00'); let g=0; while(d<=e && g<400){ out.push(d.toISOString().split('T')[0]); d.setDate(d.getDate()+1); g++; } return out; }
 
-    try {
-      const r = await fetch(
-        `${SUPABASE_URL}/rest/v1/properties?active=eq.true&order=created_at.desc&select=id,name,slug,city,address,description,price_per_day,max_guests,photos`,
-        { cache: 'no-store', headers: { apikey: SUPABASE_ANON, Authorization: `Bearer ${SUPABASE_ANON}` } }
-      );
-      const props = await r.json();
+  function _card(p, idx){
+    const slug = p.slug || p.id;
+    const bg = _paleta[idx % _paleta.length];
+    const icon = _icones[idx % _icones.length];
+    const preco = p.price_per_day ? 'R$ ' + parseFloat(p.price_per_day).toLocaleString('pt-BR', {minimumFractionDigits:0}) + '/dia' : '';
+    const local = [p.city, p.neighborhood].filter(Boolean).join(' \u2014 ');
+    const desc = p.description ? p.description.slice(0,120) + (p.description.length>120?'\u2026':'') : '';
+    const cap = p.max_guests ? ('\uD83D\uDC65 At\u00e9 ' + p.max_guests + ' pessoas') : '';
+    const card = document.createElement('a');
+    card.href = '/' + slug + '/';
+    card.className = 'chacara-card';
+    card.style.cssText = 'text-decoration:none;color:inherit;display:block;';
+    card.innerHTML = `
+      <div class="chacara-foto-placeholder" style="${(p.photos&&p.photos.length)?`background-image:url('${p.photos[0]}');background-size:cover;background-position:center;`:`background: ${bg};`}">
+        ${(p.photos&&p.photos.length)?'':icon}
+      </div>
+      <div class="chacara-info">
+        ${local ? `<div class="chacara-local">\uD83D\uDCCD ${local}</div>` : ''}
+        <div class="chacara-nome">${p.name}</div>
+        ${desc ? `<div class="chacara-desc">${desc}</div>` : ''}
+        <div class="chacara-tags">${cap ? `<span class="tag">${cap}</span>` : ''}</div>
+        <div class="chacara-footer">
+          ${preco ? `<div class="chacara-preco">a partir de <strong>${preco}</strong></div>` : ''}
+          <span class="btn-contato">Solicitar reserva</span>
+        </div>
+      </div>`;
+    return card;
+  }
 
-      if (!props || !props.length) {
-        loading.innerHTML = 'Nenhuma propriedade disponível no momento.';
-        return;
-      }
-
-      loading.remove();
-
-      props.forEach((p, idx) => {
-        const slug = p.slug || p.id;
-        const href = `/${slug}/`;
-        const bg   = paleta[idx % paleta.length];
-        const icon = icones[idx % icones.length];
-        const preco = p.price_per_day
-          ? 'R$ ' + parseFloat(p.price_per_day).toLocaleString('pt-BR', {minimumFractionDigits:0}) + '/dia'
-          : '';
-        const local = [p.city, p.address].filter(Boolean).join(' — ');
-        const desc  = p.description ? p.description.slice(0, 120) + (p.description.length > 120 ? '…' : '') : '';
-        const cap   = p.max_guests ? `👥 Até ${p.max_guests} pessoas` : '';
-
-        const card = document.createElement('a');
-        card.href  = href;
-        card.className = 'chacara-card';
-        card.style.cssText = 'text-decoration:none;color:inherit;display:block;';
-        card.innerHTML = `
-          <div class="chacara-foto-placeholder" style="${(p.photos&&p.photos.length)?`background-image:url('${p.photos[0]}');background-size:cover;background-position:center;`:`background: ${bg};`}">
-            ${(p.photos&&p.photos.length)?'':icon}
-          </div>
-          <div class="chacara-info">
-            ${local ? `<div class="chacara-local">📍 ${local}</div>` : ''}
-            <div class="chacara-nome">${p.name}</div>
-            ${desc ? `<div class="chacara-desc">${desc}</div>` : ''}
-            <div class="chacara-tags">
-              ${cap ? `<span class="tag">${cap}</span>` : ''}
-            </div>
-            <div class="chacara-footer">
-              ${preco ? `<div class="chacara-preco">a partir de <strong>${preco}</strong></div>` : ''}
-              <span class="btn-contato">Solicitar reserva</span>
-            </div>
-          </div>`;
-        grid.appendChild(card);
-      });
-    } catch(e) {
-      loading.innerHTML = 'Erro ao carregar propriedades. Tente novamente.';
-      console.error(e);
+  function renderChacaras(list){
+    const grid = document.getElementById('chacaras-grid');
+    if (!grid) return;
+    grid.innerHTML = '';
+    if (!list.length) {
+      grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:40px;color:#666;font-size:14px;">\uD83D\uDD0D Nenhuma ch\u00e1cara encontrada com esses filtros. <a href="#" onclick="limparFiltros();return false;" style="color:var(--terra);font-weight:600;">Limpar filtros</a></div>';
+      return;
     }
+    list.forEach((p,idx) => grid.appendChild(_card(p,idx)));
+  }
+
+  function aplicarFiltros(){
+    const g = id => document.getElementById(id);
+    const cidade = _norm((g('f-cidade') ? g('f-cidade').value : '').trim());
+    const pv = g('f-pessoas') ? g('f-pessoas').value : '';
+    const prv = g('f-preco') ? g('f-preco').value : '';
+    const comods = Array.prototype.map.call(document.querySelectorAll('.filtro-check.marcado input'), i => i.value);
+    const di = g('f-data-inicio') ? g('f-data-inicio').value : '';
+    const df = g('f-data-fim') ? g('f-data-fim').value : '';
+    const du = g('f-data') ? g('f-data').value : '';
+    const ordem = g('f-ordem') ? g('f-ordem').value : '';
+
+    let capMin = 0;
+    if (pv.indexOf('50 a 100') >= 0) capMin = 50;
+    else if (pv.indexOf('100 a 200') >= 0) capMin = 100;
+    else if (pv.indexOf('Mais de 200') >= 0) capMin = 200;
+
+    let prMin = 0, prMax = Infinity;
+    if (prv.indexOf('At\u00e9 R$ 500') >= 0) { prMax = 500; }
+    else if (prv.indexOf('500 a R$ 1.000') >= 0) { prMin = 500; prMax = 1000; }
+    else if (prv.indexOf('1.000 a R$ 2.000') >= 0) { prMin = 1000; prMax = 2000; }
+    else if (prv.indexOf('Acima de R$ 2.000') >= 0) { prMin = 2000; }
+
+    let datasReq = [];
+    if (di && df) datasReq = _datasIntervalo(di, df);
+    else if (du) datasReq = [du];
+
+    let list = _chacarasAll.filter(p => {
+      if (cidade) { const hay = _norm([p.city,p.neighborhood,p.address,p.name].filter(Boolean).join(' ')); if (hay.indexOf(cidade) < 0) return false; }
+      if (capMin && (p.max_guests||0) < capMin) return false;
+      const price = parseFloat(p.price_per_day) || 0;
+      if (price < prMin || price > prMax) return false;
+      if (comods.length) { const ams = (p.amenities||[]).map(_norm); for (const c of comods) { const kw = _COMOD[c] || c; if (!ams.some(a => a.indexOf(kw) >= 0)) return false; } }
+      if (datasReq.length) { const bset = _bloqueios[p.id] || {}; if (datasReq.some(d => bset[d])) return false; }
+      return true;
+    });
+
+    if (ordem.indexOf('Menor pre\u00e7o') >= 0) list = list.slice().sort((a,b) => (parseFloat(a.price_per_day)||0) - (parseFloat(b.price_per_day)||0));
+    else if (ordem.indexOf('Mais recentes') >= 0) list = list.slice().sort((a,b) => new Date(b.created_at) - new Date(a.created_at));
+
+    renderChacaras(list);
+    const cnt = g('resultado-count');
+    if (cnt) cnt.textContent = list.length + (list.length === 1 ? ' ch\u00e1cara encontrada' : ' ch\u00e1caras encontradas');
+  }
+  window.aplicarFiltros = aplicarFiltros;
+
+  (async function carregarChacaras() {
+    const loading = document.getElementById('chacaras-loading');
+    try {
+      const r = await fetch(`${_SB_H}/rest/v1/properties?active=eq.true&order=created_at.desc&select=id,name,slug,city,address,neighborhood,description,price_per_day,max_guests,amenities,photos,created_at`, { cache: 'no-store', headers: { apikey: _AN_H, Authorization: `Bearer ${_AN_H}` } });
+      const props = await r.json();
+      if (!props || !props.length) { loading.innerHTML = 'Nenhuma propriedade dispon\u00edvel no momento.'; return; }
+      _chacarasAll = props;
+      try {
+        const rb = await fetch(`${_SB_H}/rest/v1/blocked_dates?select=property_id,blocked_date`, { cache: 'no-store', headers: { apikey: _AN_H, Authorization: `Bearer ${_AN_H}` } });
+        const bd = await rb.json();
+        (bd||[]).forEach(x => { (_bloqueios[x.property_id] = _bloqueios[x.property_id] || {})[x.blocked_date] = true; });
+      } catch (e) {}
+      aplicarFiltros();
+      ['f-cidade','f-pessoas','f-preco','f-ordem','f-data','f-data-inicio','f-data-fim'].forEach(id => { const el = document.getElementById(id); if (el) el.addEventListener('input', aplicarFiltros); });
+    } catch(e) { loading.innerHTML = 'Erro ao carregar propriedades. Tente novamente.'; console.error(e); }
   })();
   </script>
 </section>
