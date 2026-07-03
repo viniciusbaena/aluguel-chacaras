@@ -405,19 +405,19 @@ class="hero-fornecedor">
       </div>
 
       <div class="info-rapida">
-        <div class="info-row">
+        <div class="info-row" id="info-area">
           <span class="info-row-label">Área de atuação</span>
           <span class="info-row-val">Maringá e região</span>
         </div>
-        <div class="info-row">
+        <div class="info-row" id="info-antecedencia">
           <span class="info-row-label">Antecedência</span>
           <span class="info-row-val">Mínimo 1 semana</span>
         </div>
-        <div class="info-row">
+        <div class="info-row" id="info-pagamento">
           <span class="info-row-label">Pagamento</span>
           <span class="info-row-val">Pix e transferência</span>
         </div>
-        <div class="info-row">
+        <div class="info-row" id="info-sinal">
           <span class="info-row-label">Sinal</span>
           <span class="info-row-val">30% na reserva</span>
         </div>
@@ -434,8 +434,8 @@ class="hero-fornecedor">
       <div class="fornecedor-mini-info">
         <div class="mini-avatar">🎵</div>
         <div style="flex:1;">
-          <div class="mini-nome">Marcos Silva</div>
-          <div class="mini-desde">Fornecedor desde 2026</div>
+          <div class="mini-nome" id="mini-nome">Marcos Silva</div>
+          <div class="mini-desde" id="mini-desde">Fornecedor desde 2026</div>
           <div class="mini-verificado">✓ Perfil verificado</div>
         </div>
       </div>
@@ -477,7 +477,7 @@ class="hero-fornecedor">
 
     const { data, error } = await _supa
       .from('suppliers')
-      .select('*')
+      .select('id,name,slug,category,city,state,description,whatsapp,price_range,price_min,price_notes,payment_methods,service_area,min_notice,instagram,avatar_emoji,tags,rating,rating_count,photos,active,created_at')
       .eq('slug', slug)
       .eq('active', true)
       .single();
@@ -505,9 +505,11 @@ class="hero-fornecedor">
 
     // Avaliação
     const avalEl = document.getElementById('forn-avaliacao');
-    if (avalEl && data.rating) {
+    if (avalEl && data.rating_count > 0) {
       const stars = '★'.repeat(Math.round(data.rating)) + '☆'.repeat(5 - Math.round(data.rating));
       avalEl.innerHTML = `<span class="estrelas">${stars}</span><span class="aval-num">${data.rating}</span><span class="aval-qtd">(${data.rating_count || 0} avaliações)</span>`;
+    } else if (avalEl) {
+      avalEl.innerHTML = '<span class="aval-num" style="color:var(--cinza)">Novo · sem avaliações ainda</span>';
     }
 
     // Tags
@@ -568,6 +570,44 @@ class="hero-fornecedor">
       const wppNum = data.whatsapp.replace(/\D/g,'');
       wppCard.textContent = data.whatsapp;
       wppCard.href = `https://wa.me/${wppNum}?text=Olá,%20vi%20seu%20perfil%20no%20AluguelDeChácaras.com%20e%20gostaria%20de%20saber%20mais%20sobre%20seus%20serviços.`;
+    }
+
+    // Esconder seções sem dados reais (pacotes e avaliações ainda não existem no banco)
+    ['.pacotes-grid', '.avaliacoes-lista'].forEach(function(sel){
+      const el = document.querySelector(sel);
+      const sec = el ? el.closest('.secao') : null;
+      if (sec) {
+        sec.style.display = 'none';
+        const prev = sec.previousElementSibling;
+        if (prev && prev.tagName === 'HR') prev.style.display = 'none';
+      }
+    });
+
+    // Info rápida com dados reais (esconde item sem valor)
+    const setInfo = function(rowId, val){
+      const row = document.getElementById(rowId);
+      if (!row) return;
+      if (Array.isArray(val)) val = val.join(', ');
+      if (val) {
+        const v = row.querySelector('.info-row-val');
+        if (v) v.textContent = val; else row.style.display = 'none';
+      } else {
+        row.style.display = 'none';
+      }
+    };
+    setInfo('info-area', data.service_area);
+    setInfo('info-antecedencia', data.min_notice);
+    setInfo('info-pagamento', data.payment_methods);
+    setInfo('info-sinal', data.price_notes);
+
+    // Mini-perfil com dados reais
+    const miniNome = document.getElementById('mini-nome');
+    if (miniNome && data.name) miniNome.textContent = data.name;
+    const miniDesde = document.getElementById('mini-desde');
+    if (miniDesde) {
+      const anoCad = data.created_at ? new Date(data.created_at).getFullYear() : null;
+      if (anoCad) miniDesde.textContent = 'Fornecedor desde ' + anoCad;
+      else miniDesde.style.display = 'none';
     }
   }
 
