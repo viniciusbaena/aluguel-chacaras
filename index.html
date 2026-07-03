@@ -1510,6 +1510,26 @@
     return _supaHome;
   }
 
+  async function refletirSessaoHome() {
+    const supa = getSupaHome();
+    if (!supa) { setTimeout(refletirSessaoHome, 400); return; }
+    let session = null;
+    try { ({ data: { session } } = await supa.auth.getSession()); } catch (e) { return; }
+    if (!session) return;
+    const cta = document.querySelector('.nav-cta');
+    if (!cta) return;
+    let painel = '/painel-proprietario.html';
+    try { const { data: sup } = await supa.from('suppliers').select('id').eq('email', session.user.email).maybeSingle(); if (sup) painel = '/painel-fornecedor.html'; } catch (e) {}
+    cta.innerHTML = '<a href="' + painel + '" class="btn btn-primary">Meu painel</a> <a href="#" class="btn btn-outline" onclick="sairHome(event)">Sair</a>';
+  }
+  async function sairHome(ev) {
+    if (ev) ev.preventDefault();
+    const supa = getSupaHome();
+    try { if (supa) await supa.auth.signOut(); } catch (e) {}
+    window.location.reload();
+  }
+  window.addEventListener('DOMContentLoaded', refletirSessaoHome);
+
   async function fazerLoginHome() {
     const email = document.getElementById('home-login-email').value.trim();
     const senha = document.getElementById('home-login-senha').value;
