@@ -1116,7 +1116,7 @@
     try {
       const r = await fetch(
         `${SUPABASE_URL}/rest/v1/properties?active=eq.true&order=created_at.desc&select=id,name,slug,city,address,description,price_per_day,max_guests`,
-        { headers: { apikey: SUPABASE_ANON, Authorization: `Bearer ${SUPABASE_ANON}` } }
+        { cache: 'no-store', headers: { apikey: SUPABASE_ANON, Authorization: `Bearer ${SUPABASE_ANON}` } }
       );
       const props = await r.json();
 
@@ -1205,7 +1205,7 @@
     try {
       const r = await fetch(
         `${SUPABASE_URL}/rest/v1/suppliers?active=eq.true&order=created_at.desc&limit=8&select=name,slug,category,city,state,description,whatsapp,price_range,avatar_emoji,rating,rating_count`,
-        { headers: { apikey: SUPABASE_ANON, Authorization: `Bearer ${SUPABASE_ANON}` } }
+        { cache: 'no-store', headers: { apikey: SUPABASE_ANON, Authorization: `Bearer ${SUPABASE_ANON}` } }
       );
       const forns = await r.json();
 
@@ -1529,6 +1529,7 @@
     window.location.reload();
   }
   window.addEventListener('DOMContentLoaded', refletirSessaoHome);
+  window.addEventListener('pageshow', function(e){ if (e.persisted) window.location.reload(); });
 
   async function fazerLoginHome() {
     const email = document.getElementById('home-login-email').value.trim();
