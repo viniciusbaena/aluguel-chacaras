@@ -5,7 +5,7 @@
   <meta charset="UTF-8"/>
   <!-- SEGURANÇA -->
   <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self' https: data: blob:; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://fonts.googleapis.com https://www.googletagmanager.com https://js.mercadopago.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self' https://tathqoyhcuxthsrghrzx.supabase.co https://api.mercadopago.com https://n8n.alugueldechacaras.com; frame-ancestors 'none';"/>
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self' https: data: blob:; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://fonts.googleapis.com https://www.googletagmanager.com https://js.mercadopago.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self' https://tathqoyhcuxthsrghrzx.supabase.co https://api.mercadopago.com https://n8n.alugueldechacaras.com https://nominatim.openstreetmap.org; frame-ancestors 'none';"/>
   <meta name="referrer" content="strict-origin-when-cross-origin"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Painel do Proprietário — AluguelDeChácaras.com</title>
@@ -1150,7 +1150,7 @@
 
       <div class="card">
         <div class="card-title">🔒 Informações liberadas só após o pagamento</div>
-        <div style="font-size:12px;color:var(--cinza);margin-bottom:12px;">Estas informações <strong>não aparecem no anúncio público</strong>. O cliente só recebe (por WhatsApp e e-mail) depois de pagar e confirmar a reserva.</div>
+        <div style="font-size:12px;color:var(--cinza);margin-bottom:12px;">Estas informações <strong>não aparecem no anúncio público</strong>. O cliente só recebe (por WhatsApp e e-mail) depois de pagar e confirmar a reserva. No anúncio aparece só um <strong>mapa aproximado (raio ~1&nbsp;km)</strong> a partir deste endereço — nunca o ponto exato.</div>
         <div class="form-grid">
           <div class="field form-full">
             <label for="f-endereco-completo">Endereço completo (rua, número, ponto de referência)</label>
@@ -2596,6 +2596,21 @@
         full_address: document.getElementById('f-endereco-completo')?.value.trim() || null,
         access_instructions: document.getElementById('f-acesso')?.value.trim() || null
       };
+
+      // Mapa aproximado: geocodifica o endereço (com jitter) — endereço exato nunca vira público
+      const _endMapa = (document.getElementById('f-endereco-completo')?.value || '').trim();
+      if (_endMapa) {
+        try {
+          const _q = encodeURIComponent(_endMapa + ', ' + (document.getElementById('f-cidade')?.value || '') + ', PR, Brasil');
+          const _gr = await fetch('https://nominatim.openstreetmap.org/search?format=json&limit=1&q=' + _q, { headers: { 'Accept': 'application/json' } });
+          const _gj = await _gr.json();
+          if (_gj && _gj[0]) {
+            const _jit = () => (Math.random() - 0.5) * 0.007;
+            payload.approx_lat = Math.round((parseFloat(_gj[0].lat) + _jit()) * 100000) / 100000;
+            payload.approx_lng = Math.round((parseFloat(_gj[0].lon) + _jit()) * 100000) / 100000;
+          }
+        } catch (e) { /* geocode falhou: salva sem mapa */ }
+      }
 
       const { data, error } = await _supa.from('properties').update(payload).eq('id', propriedadeAtual.id).select().maybeSingle();
       if (error) { mostrarToast('⚠️ Erro ao salvar: ' + error.message); return; }
