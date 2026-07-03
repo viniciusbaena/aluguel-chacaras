@@ -1418,7 +1418,7 @@
       if (galMain) {
         galMain.style.fontSize = '0';
         galMain.style.background = '#000';
-        galMain.innerHTML = `<img src="${dados.fotos[0]}" style="width:100%;height:100%;object-fit:cover;" onclick="abrirGaleria(0)"/><button class="galeria-ver-mais" onclick="abrirGaleria(0)">📷 Ver todas as ${dados.fotos.length} fotos</button>`;
+        galMain.innerHTML = `<img src="${dados.fotos[0]}" alt="Foto da chácara" style="width:100%;height:100%;object-fit:cover;" onclick="abrirGaleria(0)"/><button class="galeria-ver-mais" onclick="abrirGaleria(0)">📷 Ver todas as ${dados.fotos.length} fotos</button>`;
       }
       // Thumbs
       const thumbs = document.querySelectorAll('.galeria-thumb');
@@ -1426,7 +1426,7 @@
         if (dados.fotos[i + 1]) {
           t.style.fontSize = '0';
           t.style.background = '#000';
-          t.innerHTML = `<img src="${dados.fotos[i+1]}" style="width:100%;height:100%;object-fit:cover;" onclick="abrirGaleria(${i+1})"/>`;
+          t.innerHTML = `<img src="${dados.fotos[i+1]}" alt="Foto da chácara" style="width:100%;height:100%;object-fit:cover;" onclick="abrirGaleria(${i+1})"/>`;
         }
       });
       // Atualizar array de fotos para o lightbox
@@ -1447,7 +1447,7 @@
     if (window._fotosBase64 && window._fotosBase64[fotoAtual]) {
       const img = document.getElementById('modal-img');
       img.style.background = '#111';
-      img.innerHTML = `<img src="${window._fotosBase64[fotoAtual]}" style="width:100%;height:100%;object-fit:contain;border-radius:16px;"/>`;
+      img.innerHTML = `<img src="${window._fotosBase64[fotoAtual]}" alt="Foto da chácara ampliada" style="width:100%;height:100%;object-fit:contain;border-radius:16px;"/>`;
       document.getElementById('modal-contador').textContent = `${fotoAtual+1} / ${window._fotosBase64.length}`;
       document.querySelectorAll('.modal-thumb').forEach((t,i) => t.classList.toggle('ativo', i===fotoAtual));
     } else {
