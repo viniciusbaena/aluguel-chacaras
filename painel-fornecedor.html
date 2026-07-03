@@ -333,7 +333,7 @@
       <div class="user-info">
         <div class="user-avatar" id="sidebar-avatar-forn">DM</div>
         <div>
-          <div class="user-nome" id="sidebar-nome-forn">DJ Marquinhos</div>
+          <div class="user-nome" id="sidebar-nome-forn">Fornecedor</div>
           <div class="user-plano">Cadastro gratuito</div>
         </div>
       </div>
@@ -358,22 +358,22 @@
       <div class="stats-grid">
         <div class="stat-card">
           <div class="stat-label">Visualizações</div>
-          <div class="stat-value">183</div>
+          <div class="stat-value">0</div>
           <span class="stat-tag tag-terra">este mês</span>
         </div>
         <div class="stat-card">
           <div class="stat-label">Contatos recebidos</div>
-          <div class="stat-value">12</div>
+          <div class="stat-value">0</div>
           <span class="stat-tag tag-verde">este mês</span>
         </div>
         <div class="stat-card">
           <div class="stat-label">Eventos atendidos</div>
-          <div class="stat-value">4</div>
+          <div class="stat-value">0</div>
           <span class="stat-tag tag-amarelo">em junho</span>
         </div>
         <div class="stat-card">
           <div class="stat-label">Avaliação média</div>
-          <div class="stat-value">4.9</div>
+          <div class="stat-value">—</div>
           <span class="stat-tag tag-verde">⭐ de 5</span>
         </div>
       </div>
@@ -384,8 +384,8 @@
           <div style="background:var(--cinza-bg); border-radius:10px; padding:16px; display:flex; align-items:center; gap:14px;">
             <div style="width:48px;height:48px;border-radius:12px;background:var(--terra-claro);display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0;">🎵</div>
             <div>
-              <div id="stat-categoria" style="font-size:11px;font-weight:700;color:var(--terra);text-transform:uppercase;letter-spacing:0.5px;">DJ e Música</div>
-              <div id="stat-nome-servico" style="font-size:16px;font-weight:700;color:var(--terra-escuro);margin-top:2px;">DJ Marquinhos Events</div>
+              <div id="stat-categoria" style="font-size:11px;font-weight:700;color:var(--terra);text-transform:uppercase;letter-spacing:0.5px;">—</div>
+              <div id="stat-nome-servico" style="font-size:16px;font-weight:700;color:var(--terra-escuro);margin-top:2px;">—</div>
               <div id="stat-cidade" style="font-size:12px;color:var(--cinza);margin-top:2px;">📍 Maringá — PR</div>
             </div>
           </div>
@@ -607,7 +607,7 @@
         <div class="form-grid">
           <div class="field form-full">
             <label for="ff-nome">Nome do negócio / serviço</label>
-            <input type="text" id="ff-nome" value="DJ Marquinhos Events"/>
+            <input type="text" id="ff-nome" value=""/>
           </div>
           <div class="field">
             <label for="ff-whatsapp">WhatsApp para contato</label>
@@ -866,10 +866,10 @@
     const catEl = document.getElementById('select-categoria');
     const cat   = catEl ? catEl.options[catEl.selectedIndex]?.text : '—';
 
-    // Pagamento e antecedência
-    const selects = document.querySelectorAll('#tab-meu-servico select');
-    const pagamento  = selects[1] ? selects[1].options[selects[1].selectedIndex]?.text : '—';
-    const antec = document.querySelectorAll('#tab-meu-servico input[type="text"]')[4]?.value || '—';
+    // Pagamento e antecedência (por id, não por índice)
+    const pagEl = document.getElementById('ff-pagamento');
+    const pagamento = pagEl ? pagEl.options[pagEl.selectedIndex]?.text : '—';
+    const antec = document.getElementById('ff-antecedencia')?.value || '—';
 
     // Preencher preview
     document.getElementById('prev-forn-nome').textContent  = nome;
