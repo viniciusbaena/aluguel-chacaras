@@ -920,7 +920,7 @@
   carregarPropriedade();
 
   // GALERIA
-  const fotos = ['🏡','🏊','🍖','⚽','🌳','🏠','💡','🅿️','🚿','🎉','🌅','🎊'];
+  let fotos = ['🏡','🏊','🍖','⚽','🌳','🏠','💡','🅿️','🚿','🎉','🌅','🎊'];
   const cores = [
     'linear-gradient(135deg,#c8e6c9,#66bb6a)',
     'linear-gradient(135deg,#b3e5fc,#29b6f6)',
@@ -944,7 +944,9 @@
     // thumbs
     const thumbs = document.getElementById('modal-thumbs');
     thumbs.innerHTML = fotos.map((f,i) =>
-      `<div class="modal-thumb ${i===idx?'ativo':''}" style="background:${cores[i]}" onclick="irFoto(${i})">${f}</div>`
+      (typeof f === 'string' && f.startsWith('http'))
+        ? `<div class="modal-thumb ${i===idx?'ativo':''}" style="background-image:url('${f}');background-size:cover;background-position:center;" onclick="irFoto(${i})"></div>`
+        : `<div class="modal-thumb ${i===idx?'ativo':''}" style="background:${cores[i%cores.length]}" onclick="irFoto(${i})">${f}</div>`
     ).join('');
   }
 
@@ -960,8 +962,19 @@
 
   function renderGaleria() {
     const img = document.getElementById('modal-img');
-    img.style.background = cores[fotoAtual];
-    img.textContent = fotos[fotoAtual];
+    const f = fotos[fotoAtual];
+    if (typeof f === 'string' && f.startsWith('http')) {
+      img.textContent = '';
+      img.style.background = '#111';
+      img.style.backgroundImage = "url('"+f+"')";
+      img.style.backgroundSize = 'contain';
+      img.style.backgroundPosition = 'center';
+      img.style.backgroundRepeat = 'no-repeat';
+    } else {
+      img.style.backgroundImage = 'none';
+      img.style.background = cores[fotoAtual % cores.length];
+      img.textContent = f;
+    }
     document.getElementById('modal-contador').textContent = `${fotoAtual+1} / ${fotos.length}`;
     document.querySelectorAll('.modal-thumb').forEach((t,i) => t.classList.toggle('ativo', i===fotoAtual));
   }
@@ -1169,6 +1182,35 @@
     });
     document.querySelectorAll('[data-prop="max_guests"]').forEach(el => el.textContent = prop.max_guests || '');
     document.querySelectorAll('[data-prop="address"]').forEach(el => el.textContent = prop.address || '');
+
+    // === Comodidades reais ===
+    const MAPA_COMOD_REV = {"piscina":"🏊 Piscina","churrasqueira":"🍖 Churrasqueira","campo de futebol":"⚽ Campo de futebol","lago / pesca":"🎣 Lago / Pesca","estacionamento":"🅿️ Estacionamento","hospedagem / quartos":"🛌 Hospedagem / Quartos","casa sede":"🏠 Casa sede","salão de jogos":"🎮 Salão de jogos","quadra poliesportiva":"🏐 Quadra poliesportiva","energia elétrica":"💡 Energia elétrica","água encanada":"💧 Água encanada","acessibilidade":"♿ Acessibilidade","aceita pets":"🐾 Aceita pets","espaço gourmet":"🍽️ Espaço gourmet","salão coberto":"🎪 Salão coberto","pomar":"🌳 Pomar"};
+    const estruturaGrid = document.querySelector('.estrutura-grid');
+    if (estruturaGrid && Array.isArray(prop.amenities) && prop.amenities.length) {
+      estruturaGrid.innerHTML = prop.amenities.map(function(a){
+        const label = MAPA_COMOD_REV[a] || ('✅ ' + (a.charAt(0).toUpperCase()+a.slice(1)));
+        const icon = label.split(' ')[0];
+        const txt = label.split(' ').slice(1).join(' ');
+        return '<div class="estrutura-item"><span class="estrutura-icon">'+icon+'</span> '+txt+'</div>';
+      }).join('');
+    }
+
+    // === Fotos reais ===
+    if (Array.isArray(prop.photos) && prop.photos.length) {
+      fotos = prop.photos.slice();
+      const main = document.querySelector('.galeria-main');
+      if (main) {
+        main.style.backgroundImage = "url('"+prop.photos[0]+"')";
+        main.style.backgroundSize = 'cover';
+        main.style.backgroundPosition = 'center';
+        main.style.color = 'transparent';
+        const vm = main.querySelector('.galeria-ver-mais');
+        if (vm) { vm.style.color = '#1e4d2b'; vm.textContent = '📷 Ver todas as ' + prop.photos.length + ' foto' + (prop.photos.length>1?'s':''); }
+      }
+      document.querySelectorAll('.galeria-thumb').forEach(function(th,i){
+        if (prop.photos[i+1]) { th.textContent=''; th.style.backgroundImage="url('"+prop.photos[i+1]+"')"; th.style.backgroundSize='cover'; th.style.backgroundPosition='center'; }
+      });
+    }
   }
 
   
