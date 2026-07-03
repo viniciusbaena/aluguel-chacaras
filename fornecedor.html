@@ -516,6 +516,33 @@ class="hero-fornecedor">
       tagsEl.innerHTML = data.tags.map(t => `<span class="hero-tag">${t}</span>`).join('');
     }
 
+    // Portfólio (fotos reais)
+    if (Array.isArray(data.photos) && data.photos.length) {
+      fotos = data.photos.slice();
+      const galeria = document.getElementById('galeria');
+      if (galeria) {
+        galeria.innerHTML = data.photos.slice(0,6).map(function(url,i){
+          const cls = i===0 ? 'galeria-foto principal' : 'galeria-foto';
+          const extra = (i===5 && data.photos.length>6) ? '<div style="position:absolute;inset:0;background:rgba(0,0,0,0.45);border-radius:12px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:14px;font-weight:700;">+'+(data.photos.length-6)+' fotos</div>' : '';
+          return '<div class="'+cls+'" style="background-image:url(\''+url+'\');background-size:cover;background-position:center;position:relative;" onclick="abrirGaleria('+i+')">'+extra+'</div>';
+        }).join('');
+      }
+    }
+
+    // Diferenciais reais (a partir das tags)
+    const MAPA_DIF_REV = {"entrega e montagem inclusa":"🚚 Entrega e montagem inclusa","iluminação inclusa":"💡 Iluminação inclusa","microfone sem fio":"🎤 Microfone sem fio","playlist personalizada":"📻 Playlist personalizada","mais de 5 anos de experiência":"🏆 Mais de 5 anos de experiência","contrato de serviço":"📋 Contrato de serviço","reposição em caso de problema":"🔄 Reposição em caso de problema","profissional certificado":"🎓 Profissional certificado","atende toda a região":"📍 Atende toda a região","aceita parcelamento":"💳 Aceita parcelamento"};
+    if (Array.isArray(data.tags) && data.tags.length) {
+      const difGrid = document.querySelector('.diferenciais-grid');
+      if (difGrid) {
+        difGrid.innerHTML = data.tags.map(function(t){
+          const label = MAPA_DIF_REV[t] || ('✅ ' + t);
+          const icon = label.split(' ')[0];
+          const txt = label.split(' ').slice(1).join(' ');
+          return '<div class="diferencial-item"><span class="diferencial-icon">'+icon+'</span> '+txt+'</div>';
+        }).join('');
+      }
+    }
+
     // Descrição
     const descEl = document.getElementById('desc-curto');
     const descMais = document.getElementById('desc-mais');
@@ -546,7 +573,7 @@ class="hero-fornecedor">
 
   document.addEventListener('DOMContentLoaded', carregarFornecedor);
 
-    const fotos = [
+    let fotos = [
     { icon: '🎵', bg: 'linear-gradient(135deg,#fbd38d,#ed8936)' },
     { icon: '💡', bg: 'linear-gradient(135deg,#b3e5fc,#4fc3f7)' },
     { icon: '🎤', bg: 'linear-gradient(135deg,#f8bbd0,#f48fb1)' },
@@ -564,7 +591,9 @@ class="hero-fornecedor">
     renderGal();
     const thumbs = document.getElementById('modal-thumbs');
     thumbs.innerHTML = fotos.map((f,idx) =>
-      `<div class="modal-thumb ${idx===i?'ativo':''}" style="background:${f.bg}" onclick="irFoto(${idx})">${f.icon}</div>`
+      (typeof f === 'string' && f.startsWith('http'))
+        ? `<div class="modal-thumb ${idx===i?'ativo':''}" style="background-image:url('${f}');background-size:cover;background-position:center;" onclick="irFoto(${idx})"></div>`
+        : `<div class="modal-thumb ${idx===i?'ativo':''}" style="background:${f.bg}" onclick="irFoto(${idx})">${f.icon}</div>`
     ).join('');
   }
 
@@ -575,8 +604,12 @@ class="hero-fornecedor">
 
   function renderGal() {
     const img = document.getElementById('modal-img');
-    img.style.background = fotos[fotoAtual].bg;
-    img.textContent = fotos[fotoAtual].icon;
+    const f = fotos[fotoAtual];
+    if (typeof f === 'string' && f.startsWith('http')) {
+      img.textContent=''; img.style.background='#111'; img.style.backgroundImage="url('"+f+"')"; img.style.backgroundSize='contain'; img.style.backgroundPosition='center'; img.style.backgroundRepeat='no-repeat';
+    } else {
+      img.style.backgroundImage='none'; img.style.background=f.bg; img.textContent=f.icon;
+    }
     document.getElementById('modal-contador').textContent = `${fotoAtual+1} / ${fotos.length}`;
     document.querySelectorAll('.modal-thumb').forEach((t,i) => t.classList.toggle('ativo', i===fotoAtual));
   }
