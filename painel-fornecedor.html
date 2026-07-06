@@ -431,6 +431,10 @@
           <label for="novo-servico-whatsapp">WhatsApp de contato</label>
           <input type="text" id="novo-servico-whatsapp" placeholder="(44) 99999-9999" />
         </div>
+        <label class="field" style="display:flex;flex-direction:row;align-items:flex-start;gap:8px;font-weight:400;font-size:12px;color:#374151;cursor:pointer;">
+          <input type="checkbox" id="novo-servico-termos" style="margin-top:3px;flex-shrink:0;width:auto;"/>
+          <span>Li e aceito o <a href="/termo-responsabilidade-fornecedor.html" target="_blank" style="color:var(--verde-escuro);font-weight:600;">Termo de Responsabilidade do Fornecedor</a> para este serviço.</span>
+        </label>
         <div id="novo-servico-erro" style="display:none; margin-bottom:12px; padding:10px 12px; background:#fee2e2; border-radius:8px; font-size:13px; color:#b91c1c; text-align:center;"></div>
         <div style="display:flex; gap:10px; justify-content:flex-end;">
           <button onclick="fecharNovoServico()" style="background:#f3f4f6;border:none;border-radius:8px;padding:10px 18px;font-size:13px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif;">Cancelar</button>
@@ -959,6 +963,7 @@
   // SUPABASE
   const SUPA_URL  = 'https://tathqoyhcuxthsrghrzx.supabase.co';
   const SUPA_ANON = 'sb_publishable_fLpPGAodcCvJxPkQ223ABQ_ApJKDLRU';
+  const TERMOS_VERSAO = '2.0';
   const _supa = window.supabase.createClient(SUPA_URL, SUPA_ANON);
 
   async function fazerLogin() {
@@ -1196,6 +1201,7 @@
     document.getElementById('novo-servico-categoria').value = '';
     document.getElementById('novo-servico-cidade').value = '';
     document.getElementById('novo-servico-whatsapp').value = '';
+    document.getElementById('novo-servico-termos').checked = false;
     document.getElementById('novo-servico-erro').style.display = 'none';
     document.getElementById('modal-novo-servico').classList.add('open');
   }
@@ -1215,6 +1221,8 @@
     if (!nome) { erroEl.textContent = 'Informe o nome do negócio.'; erroEl.style.display = 'block'; return; }
     if (!categoria) { erroEl.textContent = 'Selecione uma categoria.'; erroEl.style.display = 'block'; return; }
     if (!whatsapp || whatsapp.replace(/\D/g,'').length < 10) { erroEl.textContent = 'Informe um WhatsApp válido.'; erroEl.style.display = 'block'; return; }
+    const termosAceitos = document.getElementById('novo-servico-termos').checked;
+    if (!termosAceitos) { erroEl.textContent = 'É necessário aceitar o Termo de Responsabilidade do Fornecedor.'; erroEl.style.display = 'block'; return; }
 
     const btn = document.getElementById('btn-confirmar-novo-servico');
     btn.disabled = true;
@@ -1231,7 +1239,9 @@
           tipo: 'fornecedor',
           access_token: session.access_token,
           nome_negocio: nome,
-          categoria, cidade, whatsapp
+          categoria, cidade, whatsapp,
+          termos_aceitos: termosAceitos,
+          termos_versao: TERMOS_VERSAO
         })
       });
       const result = await resp.json();
