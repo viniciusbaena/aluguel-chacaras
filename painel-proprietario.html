@@ -1004,6 +1004,10 @@
           <label for="nova-chacara-whatsapp">WhatsApp de contato</label>
           <input type="text" id="nova-chacara-whatsapp" placeholder="(44) 99999-9999" />
         </div>
+        <label class="field" style="display:flex;flex-direction:row;align-items:flex-start;gap:8px;font-weight:400;font-size:12px;color:#374151;cursor:pointer;">
+          <input type="checkbox" id="nova-chacara-termos" style="margin-top:3px;flex-shrink:0;width:auto;"/>
+          <span>Li e aceito o <a href="/termo-responsabilidade-proprietario.html" target="_blank" style="color:var(--verde-escuro);font-weight:600;">Termo de Responsabilidade do Proprietário</a> para esta chácara.</span>
+        </label>
         <div id="nova-chacara-erro" style="display:none; margin-bottom:12px; padding:10px 12px; background:#fee2e2; border-radius:8px; font-size:13px; color:#b91c1c; text-align:center;"></div>
         <div style="display:flex; gap:10px; justify-content:flex-end;">
           <button onclick="fecharNovaChacara()" style="background:#f3f4f6;border:none;border-radius:8px;padding:10px 18px;font-size:13px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif;">Cancelar</button>
@@ -1487,6 +1491,7 @@
   // SUPABASE CONFIG
   const SUPA_URL  = 'https://tathqoyhcuxthsrghrzx.supabase.co';
   const SUPA_ANON = 'sb_publishable_fLpPGAodcCvJxPkQ223ABQ_ApJKDLRU';
+  const TERMOS_VERSAO = '2.0';
   const _supa = window.supabase.createClient(SUPA_URL, SUPA_ANON);
 
   // AUTH
@@ -1695,6 +1700,7 @@
     document.getElementById('nova-chacara-nome').value = '';
     document.getElementById('nova-chacara-cidade').value = '';
     document.getElementById('nova-chacara-whatsapp').value = '';
+    document.getElementById('nova-chacara-termos').checked = false;
     document.getElementById('nova-chacara-erro').style.display = 'none';
     document.getElementById('modal-nova-chacara').classList.add('open');
   }
@@ -1712,6 +1718,8 @@
 
     if (!nome) { erroEl.textContent = 'Informe o nome da chácara.'; erroEl.style.display = 'block'; return; }
     if (!whatsapp || whatsapp.replace(/\D/g,'').length < 10) { erroEl.textContent = 'Informe um WhatsApp válido.'; erroEl.style.display = 'block'; return; }
+    const termosAceitos = document.getElementById('nova-chacara-termos').checked;
+    if (!termosAceitos) { erroEl.textContent = 'É necessário aceitar o Termo de Responsabilidade do Proprietário.'; erroEl.style.display = 'block'; return; }
 
     const btn = document.getElementById('btn-confirmar-nova-chacara');
     btn.disabled = true;
@@ -1728,7 +1736,9 @@
           tipo: 'chacara',
           access_token: session.access_token,
           nome_negocio: nome,
-          cidade, whatsapp
+          cidade, whatsapp,
+          termos_aceitos: termosAceitos,
+          termos_versao: TERMOS_VERSAO
         })
       });
       const result = await resp.json();
