@@ -773,6 +773,11 @@
           Endereço e contato do proprietário serão liberados somente após confirmação e pagamento.
         </div>
 
+        <div class="campo-reserva" style="display:flex;align-items:flex-start;gap:8px;flex-direction:row;">
+          <input type="checkbox" id="r-termos" style="margin-top:3px;flex-shrink:0;width:auto;"/>
+          <span style="font-size:12px;color:#4b5563;">Li e concordo com o <a href="/termo-ciencia-cliente.html" target="_blank" style="color:var(--verde-escuro);font-weight:600;">Termo de Ciência e Responsabilidade do Cliente</a> e os <a href="/termos-de-uso.html" target="_blank" style="color:var(--verde-escuro);font-weight:600;">Termos de Uso</a>.</span>
+        </div>
+
         <button class="btn-reservar" style="margin-top:12px;" onclick="enviarSolicitacao()">
           📅 Solicitar reserva
         </button>
@@ -1138,6 +1143,7 @@
   const SUPABASE_URL  = 'https://tathqoyhcuxthsrghrzx.supabase.co';
   const SUPABASE_ANON = 'sb_publishable_fLpPGAodcCvJxPkQ223ABQ_ApJKDLRU';
   const N8N_WEBHOOK   = 'https://n8n.alugueldechacaras.com/webhook/nova-reserva';
+  const TERMOS_VERSAO = '2.0';
   let   PROPERTY_ID    = '';
   let   PROPERTY_PRICE = 0;
   let   datasBlockeadas = [];
@@ -1275,6 +1281,8 @@
     if (checkout < checkin) { mostrarToast('⚠️ Check-out não pode ser antes do check-in'); return; }
     if (!nome)               { mostrarToast('⚠️ Informe seu nome'); return; }
     if (!wpp && !email)      { mostrarToast('⚠️ Informe WhatsApp ou e-mail'); return; }
+    const termosAceitos = document.getElementById('r-termos')?.checked || false;
+    if (!termosAceitos)      { mostrarToast('⚠️ É necessário aceitar o Termo de Ciência e Responsabilidade do Cliente'); return; }
 
     const fmt = d => new Date(d + 'T12:00:00').toLocaleDateString('pt-BR', { day:'2-digit', month:'long', year:'numeric' });
     const dias = Math.round((new Date(checkout+'T12:00:00') - new Date(checkin+'T12:00:00')) / 86400000) + 1; // inclusivo
@@ -1292,7 +1300,9 @@
         num_guests:      parseInt(pessoas) || 1,
         check_in:        checkin,
         check_out:       checkout,
-        message:         [tipo, msgExtra].filter(Boolean).join(' — ')
+        message:         [tipo, msgExtra].filter(Boolean).join(' — '),
+        termos_aceitos:  termosAceitos,
+        termos_versao:   TERMOS_VERSAO
       };
 
       // URLSearchParams evita CORS preflight (Content-Type: application/x-www-form-urlencoded é "simple request")
