@@ -914,6 +914,34 @@
         </button>
       </div>
 
+      <!-- CHAT PRÉ-RESERVA -->
+      <div id="chat-pre-reserva-card" style="margin-top:20px;padding-top:18px;border-top:1px solid var(--cinza-borda);">
+        <div style="font-family:'Fraunces',serif;font-size:16px;font-weight:700;color:var(--verde-escuro);margin-bottom:4px;">💬 Tire dúvidas com o proprietário</div>
+        <div style="font-size:12px;color:var(--cinza);margin-bottom:12px;">Converse antes de reservar. Sua mensagem chega direto pra ele, sem trocar telefone.</div>
+
+        <div id="cpr-form">
+          <div class="campo-reserva">
+            <input type="text" id="cpr-nome" placeholder="Seu nome" style="margin-bottom:8px;"/>
+          </div>
+          <div class="campo-reserva">
+            <input type="text" id="cpr-wpp" placeholder="WhatsApp (opcional, pra te avisar da resposta)" inputmode="numeric" oninput="mascaraWhatsApp(this)" style="margin-bottom:8px;"/>
+          </div>
+          <div class="campo-reserva">
+            <textarea id="cpr-msg" placeholder="Ex: A chácara tem espaço coberto?" style="min-height:60px;margin-bottom:8px;"></textarea>
+          </div>
+          <button class="btn-reservar" style="padding:10px;font-size:13px;" onclick="cprEnviar()" id="cpr-btn-enviar">Enviar pergunta</button>
+          <div style="font-size:11px;color:var(--cinza);margin-top:8px;">Por segurança, não compartilhe telefone, e-mail ou redes sociais — toda comunicação fica por aqui.</div>
+        </div>
+
+        <div id="cpr-thread" style="display:none;">
+          <div id="cpr-mensagens" style="max-height:220px;overflow-y:auto;display:flex;flex-direction:column;gap:8px;margin-bottom:10px;padding-right:4px;"></div>
+          <div style="display:flex;gap:8px;">
+            <input type="text" id="cpr-msg-nova" placeholder="Escreva sua mensagem..." style="flex:1;border:1px solid var(--cinza-borda);border-radius:20px;padding:10px 14px;font-size:13px;font-family:inherit;"/>
+            <button onclick="cprEnviarNova()" style="background:var(--verde-escuro);color:#fff;border:none;border-radius:50%;width:40px;height:40px;cursor:pointer;font-size:16px;flex-shrink:0;">➤</button>
+          </div>
+        </div>
+      </div>
+
     </div>
   </div>
 
@@ -936,6 +964,113 @@
 
 <script>
   carregarPropriedade();
+
+  // ── CHAT PRÉ-RESERVA ──
+  const CPR_N8N = 'https://n8n.alugueldechacaras.com/webhook';
+  let cprInquiryId = null;
+  let cprPolling = null;
+
+  function cprEsc(s) {
+    return (s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>');
+  }
+
+  function cprAguardarPropertyId(cb, tentativas) {
+    tentativas = tentativas || 0;
+    if (PROPERTY_ID) { cb(); return; }
+    if (tentativas > 40) return; // ~10s, desiste
+    setTimeout(() => cprAguardarPropertyId(cb, tentativas + 1), 250);
+  }
+
+  function cprInit() {
+    cprAguardarPropertyId(() => {
+      const saved = localStorage.getItem('cpr_inquiry_' + PROPERTY_ID);
+      if (saved) {
+        cprInquiryId = saved;
+        cprMostrarThread();
+      }
+      const nomeSalvo = localStorage.getItem('cpr_nome');
+      if (nomeSalvo) document.getElementById('cpr-nome').value = nomeSalvo;
+      const wppSalvo = localStorage.getItem('cpr_wpp');
+      if (wppSalvo) document.getElementById('cpr-wpp').value = wppSalvo;
+    });
+  }
+
+  function cprMostrarThread() {
+    document.getElementById('cpr-form').style.display = 'none';
+    document.getElementById('cpr-thread').style.display = 'block';
+    cprCarregarMensagens(true);
+    if (cprPolling) clearInterval(cprPolling);
+    cprPolling = setInterval(() => cprCarregarMensagens(false), 5000);
+  }
+
+  async function cprCarregarMensagens(inicial) {
+    try {
+      const r = await fetch(`${CPR_N8N}/chat-pre-reserva-get-mensagens?inquiry_id=${cprInquiryId}`);
+      const text = await r.text();
+      const msgs = text.trim() ? JSON.parse(text) : [];
+      const box = document.getElementById('cpr-mensagens');
+      const arr = Array.isArray(msgs) ? msgs : [];
+      arr.forEach(m => {
+        if (document.querySelector(`[data-cpr-id="${m.id}"]`)) return;
+        const mine = m.sender === 'client';
+        const el = document.createElement('div');
+        el.dataset.cprId = m.id;
+        el.style.cssText = `max-width:85%;padding:8px 12px;border-radius:12px;font-size:13px;line-height:1.5;align-self:${mine ? 'flex-end' : 'flex-start'};background:${mine ? 'var(--verde-escuro)' : '#f0f4f0'};color:${mine ? '#fff' : '#333'};`;
+        el.innerHTML = cprEsc(m.message);
+        box.appendChild(el);
+      });
+      if (inicial) box.scrollTop = box.scrollHeight;
+    } catch (e) { /* silencioso, tenta de novo no próximo poll */ }
+  }
+
+  async function cprEnviar() {
+    const nome = document.getElementById('cpr-nome').value.trim();
+    const wpp = document.getElementById('cpr-wpp').value.trim();
+    const msg = document.getElementById('cpr-msg').value.trim();
+    if (!msg) { mostrarToast('Escreva sua pergunta antes de enviar.'); return; }
+    if (!PROPERTY_ID) { mostrarToast('Ainda carregando a página, tente novamente em instantes.'); return; }
+
+    const btn = document.getElementById('cpr-btn-enviar');
+    btn.disabled = true;
+    localStorage.setItem('cpr_nome', nome);
+    if (wpp) localStorage.setItem('cpr_wpp', wpp);
+
+    try {
+      const r = await fetch(`${CPR_N8N}/chat-pre-reserva-mensagem`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ property_id: PROPERTY_ID, client_name: nome, client_whatsapp: wpp, message: msg })
+      });
+      const data = await r.json();
+      if (!data.inquiry_id) throw new Error('sem inquiry_id');
+      cprInquiryId = data.inquiry_id;
+      localStorage.setItem('cpr_inquiry_' + PROPERTY_ID, cprInquiryId);
+      cprMostrarThread();
+    } catch (e) {
+      mostrarToast('Erro ao enviar. Tente novamente.');
+      btn.disabled = false;
+    }
+  }
+
+  async function cprEnviarNova() {
+    const inp = document.getElementById('cpr-msg-nova');
+    const msg = inp.value.trim();
+    if (!msg || !cprInquiryId) return;
+    inp.value = '';
+    try {
+      await fetch(`${CPR_N8N}/chat-pre-reserva-mensagem`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ property_id: PROPERTY_ID, inquiry_id: cprInquiryId, message: msg })
+      });
+      await cprCarregarMensagens(false);
+    } catch (e) {
+      mostrarToast('Erro ao enviar. Tente novamente.');
+      inp.value = msg;
+    }
+  }
+
+  cprInit();
 
   // GALERIA
   let fotos = ['🏡','🏊','🍖','⚽','🌳','🏠','💡','🅿️','🚿','🎉','🌅','🎊'];
