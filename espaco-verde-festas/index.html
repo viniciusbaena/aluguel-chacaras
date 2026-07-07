@@ -734,6 +734,7 @@
         </div>
         <div id="resumo-periodo" style="display:none; background:var(--verde-claro); border-radius:8px; padding:8px 12px; font-size:12px; color:var(--verde-escuro); font-weight:600; margin-bottom:4px;"></div>
         <div id="aviso-data-bloqueada" style="display:none; background:#ffebee; color:#b71c1c; border-radius:8px; padding:8px 12px; font-size:12px; font-weight:600; margin-bottom:4px;"></div>
+        <div id="resumo-cancelamento" style="display:none; background:#f9fafb; border:1px solid var(--cinza-borda); border-radius:8px; padding:8px 12px; font-size:11.5px; color:#4b5563; margin-bottom:4px; line-height:1.5;"></div>
         <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
           <div class="campo-reserva">
             <label for="r-pessoas">Nº de convidados</label>
@@ -1248,6 +1249,31 @@
     }
     calcularTotal();
     verificarDatasBloqueadasNoPeriodo();
+    atualizarResumoCancelamento();
+  }
+
+  function atualizarResumoCancelamento() {
+    const checkinStr = document.getElementById('r-checkin').value;
+    const box = document.getElementById('resumo-cancelamento');
+    if (!checkinStr) { box.style.display = 'none'; return; }
+
+    const hoje = new Date(); hoje.setHours(0,0,0,0);
+    const checkin = new Date(checkinStr + 'T00:00:00');
+    const fmt = d => d.toLocaleDateString('pt-BR', { day:'2-digit', month:'2-digit' });
+
+    const limite100 = new Date(hoje); limite100.setDate(limite100.getDate() + 7);
+    const limite50 = new Date(checkin); limite50.setDate(limite50.getDate() - 15);
+
+    let texto;
+    if (limite100 >= checkin) {
+      texto = `🔒 Cancelamento grátis até a véspera do check-in (política de 7 dias cobre todo o período até o evento).`;
+    } else if (limite50 <= limite100) {
+      texto = `🔒 Cancelamento grátis até <b>${fmt(limite100)}</b>. Depois disso, sem reembolso (evento muito próximo pra faixa intermediária).`;
+    } else {
+      texto = `🔒 Cancelamento grátis até <b>${fmt(limite100)}</b>. Depois, 50% de reembolso até <b>${fmt(limite50)}</b>. Sem reembolso depois disso.`;
+    }
+    box.innerHTML = texto + ' <a href="/termo-ciencia-cliente.html" target="_blank" style="color:var(--verde-escuro);font-weight:600;">Ver política completa</a>';
+    box.style.display = 'block';
   }
 
   function calcularTotal() {
