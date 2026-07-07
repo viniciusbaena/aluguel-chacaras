@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Minha Reserva — AluguelDeChácaras.com</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22%3E%3Ctext y=%22.9em%22 font-size=%2290%22%3E%F0%9F%8C%BF%3C/text%3E%3C/svg%3E" />
+<meta name="robots" content="noindex" />
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,700;0,900;1,700&family=Inter:wght@400;500;600&display=swap');
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+  :root{
+    --verde-escuro:#1e4d2b; --verde:#2d7a45; --verde-claro:#e8f5ed;
+    --terra:#c8622a; --terra-claro:#fdf0e8; --creme:#faf8f3;
+    --cinza:#6b7280; --cinza-borda:#e5e7eb; --preto:#111827; --branco:#fff;
+    --vermelho:#b91c1c; --vermelho-claro:#fef2f2;
+  }
+  body{font-family:'Inter',sans-serif;background:var(--creme);color:var(--preto);line-height:1.6;}
+  header{background:rgba(250,248,243,0.95);border-bottom:1px solid var(--cinza-borda);padding:16px 24px;}
+  .logo{font-family:'Fraunces',serif;font-size:19px;color:var(--verde-escuro);text-decoration:none;}
+  .logo span{color:var(--terra);}
+  main{max-width:640px;margin:0 auto;padding:32px 20px 80px;}
+  .card{background:var(--branco);border:1px solid var(--cinza-borda);border-radius:16px;padding:28px;box-shadow:0 4px 24px rgba(0,0,0,0.04);}
+  h1{font-family:'Fraunces',serif;font-size:24px;color:var(--verde-escuro);margin-bottom:4px;}
+  .badge{display:inline-block;font-size:12px;font-weight:700;padding:4px 12px;border-radius:999px;margin-bottom:16px;text-transform:uppercase;letter-spacing:0.3px;}
+  .badge.paid{background:var(--verde-claro);color:var(--verde-escuro);}
+  .badge.cancelled{background:#f3f4f6;color:var(--cinza);}
+  .badge.pending{background:#fef3c7;color:#92400e;}
+  .linha{display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid #f3f4f6;font-size:14px;}
+  .linha:last-child{border-bottom:none;}
+  .linha .label{color:var(--cinza);}
+  .linha .valor{font-weight:600;}
+  .politica-box{background:var(--verde-claro);border:1px solid #cfe8d8;border-radius:12px;padding:16px;margin-top:20px;font-size:14px;}
+  .politica-box.zero{background:#fef2f2;border-color:#fecaca;}
+  .politica-box.parcial{background:#fffbeb;border-color:#fde68a;}
+  .politica-titulo{font-weight:700;margin-bottom:6px;color:var(--verde-escuro);}
+  .politica-box.zero .politica-titulo{color:var(--vermelho);}
+  .politica-box.parcial .politica-titulo{color:#92400e;}
+  .btn-cancelar{width:100%;margin-top:16px;background:var(--branco);color:var(--vermelho);border:1.5px solid var(--vermelho);border-radius:10px;padding:13px;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit;transition:background .15s;}
+  .btn-cancelar:hover{background:var(--vermelho-claro);}
+  .btn-cancelar:disabled{opacity:0.5;cursor:default;}
+  .modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);align-items:center;justify-content:center;z-index:100;padding:20px;}
+  .modal-bg.open{display:flex;}
+  .modal{background:#fff;border-radius:16px;padding:24px;max-width:400px;width:100%;}
+  .modal h3{font-family:'Fraunces',serif;font-size:19px;color:var(--verde-escuro);margin-bottom:12px;}
+  .modal p{font-size:14px;color:#374151;margin-bottom:16px;}
+  .modal .btns{display:flex;gap:10px;}
+  .modal button{flex:1;padding:11px;border-radius:10px;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit;border:none;}
+  .btn-modal-cancelar{background:#f3f4f6;color:var(--preto);}
+  .btn-modal-confirmar{background:var(--vermelho);color:#fff;}
+  .btn-modal-confirmar:disabled{opacity:0.6;cursor:default;}
+  .loading,.erro{text-align:center;padding:60px 20px;color:var(--cinza);}
+  .erro{color:var(--vermelho);}
+  .aviso-sucesso{background:var(--verde-claro);color:var(--verde-escuro);border-radius:10px;padding:14px;font-size:14px;margin-top:16px;}
+  .aviso-erro{background:#fef2f2;color:var(--vermelho);border-radius:10px;padding:14px;font-size:14px;margin-top:16px;}
+  footer{text-align:center;padding:24px;font-size:13px;color:var(--cinza);}
+  footer a{color:var(--verde);}
+</style>
+</head>
+<body>
+<header><a href="/" class="logo">🌿 Aluguel de <span>Chácaras</span></a></header>
+<main>
+  <div id="conteudo" class="card"><div class="loading">Carregando sua reserva...</div></div>
+</main>
+<footer>© 2026 Aluguel de Chácaras. <a href="/">Voltar ao início</a></footer>
+
+<div class="modal-bg" id="modal-bg">
+  <div class="modal">
+    <h3>Confirmar cancelamento?</h3>
+    <p id="modal-texto"></p>
+    <div class="btns">
+      <button class="btn-modal-cancelar" onclick="fecharModal()">Voltar</button>
+      <button class="btn-modal-confirmar" id="btn-confirmar" onclick="confirmarCancelamento()">Sim, cancelar</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const N8N = 'https://n8n.alugueldechacaras.com/webhook';
+const params = new URLSearchParams(location.search);
+const bookingId = params.get('id');
+let dadosReserva = null;
+
+function fmtData(iso) {
+  return new Date(iso + 'T12:00:00').toLocaleDateString('pt-BR');
+}
+function fmtMoeda(v) {
+  return 'R$ ' + Number(v).toFixed(2).replace('.', ',');
+}
+function statusLabel(s) {
+  const map = {
+    paid: 'Confirmada', cancelled: 'Cancelada', pending: 'Aguardando',
+    owner_notified: 'Aguardando proprietário', approved: 'Aprovada, aguardando pagamento',
+    payment_pending: 'Aguardando pagamento', rejected: 'Recusada pelo proprietário'
+  };
+  return map[s] || s;
+}
+function statusBadgeClass(s) {
+  if (s === 'paid') return 'paid';
+  if (s === 'cancelled' || s === 'rejected') return 'cancelled';
+  return 'pending';
+}
+
+function render() {
+  const el = document.getElementById('conteudo');
+  const d = dadosReserva;
+
+  let politicaHtml = '';
+  if (d.status === 'paid' && d.politica && d.politica.pode_cancelar) {
+    const p = d.politica;
+    let cls = p.pct === 100 ? '' : (p.pct === 0 ? 'zero' : 'parcial');
+    let titulo, texto;
+    if (p.pct === 100) {
+      titulo = '✅ Cancelamento gratuito disponível';
+      texto = `Se cancelar agora, você recebe <b>${fmtMoeda(p.valor_reembolso)}</b> de volta (100% — dentro do prazo de arrependimento).`;
+    } else if (p.pct === 50) {
+      titulo = '⚠️ Cancelamento com reembolso parcial';
+      texto = `Se cancelar agora, você recebe <b>${fmtMoeda(p.valor_reembolso)}</b> de volta (50% do valor pago).`;
+    } else {
+      titulo = '❌ Sem reembolso';
+      texto = `Está a menos de 15 dias do check-in, então o cancelamento agora não gera reembolso.`;
+    }
+    politicaHtml = `
+      <div class="politica-box ${cls}">
+        <div class="politica-titulo">${titulo}</div>
+        <div>${texto}</div>
+      </div>
+      <button class="btn-cancelar" onclick="abrirModal()">Solicitar cancelamento</button>
+    `;
+  }
+
+  let cancelInfoHtml = '';
+  if (d.status === 'cancelled') {
+    cancelInfoHtml = `
+      <div class="politica-box" style="background:#f3f4f6;border-color:#e5e7eb;">
+        <div class="politica-titulo" style="color:var(--cinza);">Reserva cancelada</div>
+        <div>Reembolso: <b>${fmtMoeda(d.refund_amount || 0)}</b> (${d.refund_percentage ?? 0}%)</div>
+      </div>
+    `;
+  }
+
+  el.innerHTML = `
+    <span class="badge ${statusBadgeClass(d.status)}">${statusLabel(d.status)}</span>
+    <h1>${d.property_name}</h1>
+    <div style="color:var(--cinza);font-size:14px;margin-bottom:16px;">${d.city}</div>
+    <div class="linha"><span class="label">Check-in</span><span class="valor">${fmtData(d.check_in)}</span></div>
+    <div class="linha"><span class="label">Check-out</span><span class="valor">${fmtData(d.check_out)}</span></div>
+    <div class="linha"><span class="label">Convidados</span><span class="valor">${d.num_guests}</span></div>
+    <div class="linha"><span class="label">Valor total</span><span class="valor">${fmtMoeda(d.total_price)}</span></div>
+    ${d.status === 'paid' ? `<div class="linha"><span class="label">Endereço</span><span class="valor">${d.address}</span></div>` : ''}
+    ${politicaHtml}
+    ${cancelInfoHtml}
+    <div id="resultado-acao"></div>
+  `;
+}
+
+function abrirModal() {
+  const p = dadosReserva.politica;
+  document.getElementById('modal-texto').innerHTML = p.pct > 0
+    ? `Você vai receber <b>${fmtMoeda(p.valor_reembolso)}</b> de volta (${p.pct}%). Essa ação não pode ser desfeita.`
+    : `Essa reserva está fora do prazo de reembolso — o cancelamento agora <b>não gera devolução de valor</b>. Essa ação não pode ser desfeita.`;
+  document.getElementById('modal-bg').classList.add('open');
+}
+function fecharModal() {
+  document.getElementById('modal-bg').classList.remove('open');
+}
+
+async function confirmarCancelamento() {
+  const btn = document.getElementById('btn-confirmar');
+  btn.disabled = true;
+  btn.textContent = 'Cancelando...';
+  try {
+    const r = await fetch(`${N8N}/cancelar-reserva`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ booking_id: bookingId, confirmado: true })
+    });
+    const data = await r.json();
+    fecharModal();
+    const resDiv = document.getElementById('resultado-acao');
+    if (data.success) {
+      resDiv.innerHTML = `<div class="aviso-sucesso">Reserva cancelada. Reembolso de ${fmtMoeda(data.valor_reembolso)} (${data.pct}%) foi solicitado.</div>`;
+      await carregar();
+    } else {
+      resDiv.innerHTML = `<div class="aviso-erro">${data.error || 'Não foi possível cancelar. Tente novamente ou fale conosco.'}</div>`;
+    }
+  } catch (e) {
+    fecharModal();
+    document.getElementById('resultado-acao').innerHTML = `<div class="aviso-erro">Erro de conexão. Tente novamente.</div>`;
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Sim, cancelar';
+  }
+}
+
+async function carregar() {
+  const el = document.getElementById('conteudo');
+  try {
+    const r = await fetch(`${N8N}/minha-reserva-dados?id=${bookingId}`);
+    const data = await r.json();
+    if (!data.found) {
+      el.innerHTML = '<div class="erro">Reserva não encontrada. Verifique o link recebido por e-mail.</div>';
+      return;
+    }
+    dadosReserva = data;
+    render();
+  } catch (e) {
+    el.innerHTML = '<div class="erro">Erro ao carregar sua reserva. Tente novamente em instantes.</div>';
+  }
+}
+
+if (!bookingId) {
+  document.getElementById('conteudo').innerHTML = '<div class="erro">Link inválido — ID da reserva não encontrado.</div>';
+} else {
+  carregar();
+}
+</script>
+</body>
+</html>
