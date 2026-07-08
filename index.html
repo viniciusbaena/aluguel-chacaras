@@ -894,18 +894,52 @@
     </div>
     <div class="hero-stats">
       <div class="stat">
-        <span class="stat-num">38</span>
+        <span class="stat-num" id="stat-num-chacaras">…</span>
         <span class="stat-label">Chácaras cadastradas</span>
       </div>
       <div class="stat">
-        <span class="stat-num">120+</span>
+        <span class="stat-num" id="stat-num-fornecedores">…</span>
         <span class="stat-label">Fornecedores parceiros</span>
       </div>
       <div class="stat">
-        <span class="stat-num">12</span>
+        <span class="stat-num" id="stat-num-cidades">…</span>
         <span class="stat-label">Cidades atendidas</span>
       </div>
     </div>
+    <script>
+    (async function atualizarHeroStats() {
+      const SB = 'https://tathqoyhcuxthsrghrzx.supabase.co';
+      const AN = 'sb_publishable_fLpPGAodcCvJxPkQ223ABQ_ApJKDLRU';
+      const h = { apikey: AN, Authorization: `Bearer ${AN}` };
+      const norm = s => (s || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim();
+      try {
+        const [rp, rf] = await Promise.all([
+          fetch(`${SB}/rest/v1/properties?active=eq.true&select=city`, { cache: 'no-store', headers: h }),
+          fetch(`${SB}/rest/v1/suppliers?active=eq.true&select=city`, { cache: 'no-store', headers: h }),
+        ]);
+        const props = await rp.json();
+        const forns = await rf.json();
+        const numChacaras = Array.isArray(props) ? props.length : 0;
+        const numFornecedores = Array.isArray(forns) ? forns.length : 0;
+        const cidades = new Set();
+        (props || []).forEach(p => { if (p.city) cidades.add(norm(p.city)); });
+        (forns || []).forEach(f => { if (f.city) cidades.add(norm(f.city)); });
+
+        const elC = document.getElementById('stat-num-chacaras');
+        const elF = document.getElementById('stat-num-fornecedores');
+        const elCid = document.getElementById('stat-num-cidades');
+        if (elC) elC.textContent = String(numChacaras);
+        if (elF) elF.textContent = numFornecedores > 0 ? String(numFornecedores) : 'Em breve';
+        if (elCid) elCid.textContent = cidades.size > 0 ? String(cidades.size) : '—';
+      } catch (e) {
+        ['stat-num-chacaras','stat-num-fornecedores','stat-num-cidades'].forEach(id => {
+          const el = document.getElementById(id);
+          if (el) el.textContent = '—';
+        });
+        console.error(e);
+      }
+    })();
+    </script>
   </div>
   <div class="hero-right">
     <div class="hero-img-grid">
