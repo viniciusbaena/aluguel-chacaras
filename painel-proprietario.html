@@ -756,6 +756,7 @@
             <button class="btn btn-outline btn-sm" onclick="mostrarTab('calendario', null)">📅 Ver calendário</button>
             <button class="btn btn-sm" id="btn-toggle-anuncio-visao" onclick="toggleAnuncio()" style="background:var(--vermelho);color:#fff;margin-left:auto;">⏸ Pausar anúncio</button>
           </div>
+          <div id="aviso-cancelamentos-proprietario" style="display:none; margin-top:12px; font-size:12px; color:var(--cinza); background:#f9fafb; border-radius:8px; padding:8px 12px;"></div>
         </div>
 
         <div class="card">
@@ -2065,6 +2066,19 @@
     const lista = reservasDaPropriedadeAtual();
     renderReservas(lista);
     atualizarStats(lista);
+    atualizarAvisoCancelamentosProprietario(lista);
+  }
+
+  function atualizarAvisoCancelamentosProprietario(lista) {
+    const el = document.getElementById('aviso-cancelamentos-proprietario');
+    if (!el) return;
+    const n = (lista || []).filter(b => b.cancelled_by === 'owner').length;
+    if (n > 0) {
+      el.style.display = 'block';
+      el.innerHTML = `📋 Histórico: você cancelou <b>${n}</b> reserva${n > 1 ? 's' : ''} paga${n > 1 ? 's' : ''} como proprietário desta chácara (reembolso de 100% ao cliente em cada caso, conforme o Termo de Responsabilidade do Proprietário).`;
+    } else {
+      el.style.display = 'none';
+    }
   }
 
   // Verificar sessão ao carregar
