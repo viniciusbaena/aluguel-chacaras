@@ -1016,6 +1016,20 @@
       </div>
     </div>
 
+    <!-- MODAL CANCELAR RESERVA (PROPRIETÁRIO) -->
+    <div class="modal-overlay" id="modal-cancelar-proprietario" onclick="if(event.target===this)fecharModalCancelarProprietario()">
+      <div class="modal">
+        <div class="modal-titulo">🚫 Cancelar esta reserva?</div>
+        <div class="modal-sub">O cliente recebe <b>100% de reembolso</b> do valor pago, automaticamente. Essa ação não pode ser desfeita.</div>
+        <textarea id="cancelar-proprietario-motivo" placeholder="Motivo do cancelamento (opcional, o cliente vai ver essa mensagem)..." style="width:100%;border:1.5px solid var(--cinza-borda);border-radius:8px;padding:10px;font-family:'Inter',sans-serif;font-size:13px;resize:none;height:70px;outline:none;margin-bottom:12px;"></textarea>
+        <div id="cancelar-proprietario-erro" style="display:none; margin-bottom:12px; padding:10px 12px; background:#fee2e2; border-radius:8px; font-size:13px; color:#b91c1c; text-align:center;"></div>
+        <div style="display:flex; gap:10px; justify-content:flex-end;">
+          <button onclick="fecharModalCancelarProprietario()" style="background:#f3f4f6;border:none;border-radius:8px;padding:10px 18px;font-size:13px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif;">Voltar</button>
+          <button id="btn-confirmar-cancelar-proprietario" onclick="confirmarCancelamentoProprietario()" style="background:var(--vermelho);color:#fff;border:none;border-radius:8px;padding:10px 18px;font-size:13px;font-weight:700;cursor:pointer;font-family:'Inter',sans-serif;">Sim, cancelar reserva</button>
+        </div>
+      </div>
+    </div>
+
     <!-- MINHA CHÁCARA -->
     <div class="tabs" id="tab-minha-chacara">
       <div class="topbar">
@@ -1763,6 +1777,72 @@
     }
   }
 
+  let reservaParaCancelarProprietario = null;
+
+  function abrirModalCancelarProprietario(id) {
+    reservaParaCancelarProprietario = id;
+    document.getElementById('cancelar-proprietario-motivo').value = '';
+    const erro = document.getElementById('cancelar-proprietario-erro');
+    erro.style.display = 'none';
+    document.getElementById('modal-cancelar-proprietario').classList.add('open');
+  }
+
+  function fecharModalCancelarProprietario() {
+    document.getElementById('modal-cancelar-proprietario').classList.remove('open');
+    reservaParaCancelarProprietario = null;
+  }
+
+  async function confirmarCancelamentoProprietario() {
+    if (!reservaParaCancelarProprietario) return;
+    const id = reservaParaCancelarProprietario;
+    const motivo = document.getElementById('cancelar-proprietario-motivo').value.trim();
+    const erroEl = document.getElementById('cancelar-proprietario-erro');
+    erroEl.style.display = 'none';
+    const btn = document.getElementById('btn-confirmar-cancelar-proprietario');
+    btn.disabled = true;
+    btn.textContent = 'Cancelando...';
+
+    try {
+      const { data: { session } } = await _supa.auth.getSession();
+      if (!session) { erroEl.textContent = 'Sessão expirada. Recarregue a página e entre novamente.'; erroEl.style.display = 'block'; return; }
+
+      const resp = await fetch('https://n8n.alugueldechacaras.com/webhook/cancelar-reserva-proprietario', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          booking_id: id,
+          access_token: session.access_token,
+          confirmado: true,
+          motivo
+        })
+      });
+      const result = await resp.json();
+      if (!result.success) {
+        erroEl.textContent = result.error || 'Não foi possível cancelar. Tente novamente.';
+        erroEl.style.display = 'block';
+        return;
+      }
+
+      fecharModalCancelarProprietario();
+      const card = document.getElementById('res-' + id);
+      if (card) {
+        const badge = card.querySelector('.reserva-badge');
+        if (badge) { badge.className = 'reserva-badge badge-recusada'; badge.textContent = '✕ Cancelada'; }
+        const acoes = card.querySelector('.reserva-acoes');
+        if (acoes) acoes.innerHTML = `<span style="font-size:12px;color:var(--cinza);">Reserva cancelada. Cliente recebeu 100% de reembolso.</span>`;
+      }
+      if (window._reservas) window._reservas = window._reservas.map(r => r.id === id ? {...r, status: 'cancelled', refund_percentage: 100, refund_amount: result.valor_reembolso} : r);
+      renderParaPropriedade();
+      mostrarToast('✅ Reserva cancelada. Cliente notificado e reembolso de 100% solicitado.');
+    } catch (e) {
+      erroEl.textContent = 'Erro de conexão. Tente novamente.';
+      erroEl.style.display = 'block';
+    } finally {
+      btn.disabled = false;
+      btn.textContent = 'Sim, cancelar reserva';
+    }
+  }
+
   function fmtDate(d) {
     if (!d) return '—';
     const [y,m,day] = d.split('-');
@@ -1858,12 +1938,16 @@
     const initials = b.client_name.split(' ').map(p=>p[0]).join('').toUpperCase().slice(0,2);
     const isPending = ['owner_notified','pending','payment_pending'].includes(b.status);
     const wpp = b.client_whatsapp ? b.client_whatsapp.replace(/\D/g,'') : '';
+    const isPaid = b.status === 'paid';
     const acoesHtml = isPending ? `
       <div class="reserva-acoes">
         <button class="btn-confirmar" onclick="confirmarReservaDB('${b.id}', this)">✅ Confirmar reserva</button>
         <button class="btn-recusar" onclick="recusarReservaDB('${b.id}', this)">✕ Recusar</button>
         ${wpp ? `<button class="btn-msg-cliente" onclick="msgCliente('${wpp}')">💬 Perguntar ao cliente</button>` : ''}
-      </div>` : (wpp ? `<div style="margin-top:8px;"><button class="btn-msg-cliente" onclick="msgCliente('${wpp}')">💬 WhatsApp do cliente</button></div>` : '');
+      </div>` : ((wpp || isPaid) ? `<div class="reserva-acoes" style="margin-top:8px;">
+        ${wpp ? `<button class="btn-msg-cliente" onclick="msgCliente('${wpp}')">💬 WhatsApp do cliente</button>` : ''}
+        ${isPaid ? `<button class="btn-recusar" onclick="abrirModalCancelarProprietario('${b.id}')">🚫 Cancelar reserva</button>` : ''}
+      </div>` : '');
 
     return `<div class="reserva-card ${isPending?'pendente':''}" id="res-${b.id}">
       <div class="reserva-header">
