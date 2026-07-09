@@ -1682,6 +1682,32 @@
 
   const TERMOS_VERSAO = '3.1';
 
+  function formatarTelBR(value) {
+    let n = (value || '').replace(/\D/g, '').slice(0, 11);
+    if (n.length <= 2) return n.length ? '(' + n : '';
+    const ddd = n.slice(0, 2);
+    const rest = n.slice(2);
+    let meio, fim;
+    if (rest.length >= 9) { meio = rest.slice(0, 5); fim = rest.slice(5, 9); }
+    else if (rest.length > 4) { meio = rest.slice(0, rest.length - 4); fim = rest.slice(-4); }
+    else { return '(' + ddd + ') ' + rest; }
+    return '(' + ddd + ') ' + meio + '-' + fim;
+  }
+
+  function inicializarMascarasCadastro() {
+    ['cad-chacara-whatsapp', 'cad-fornecedor-whatsapp'].forEach(id => {
+      const el = document.getElementById(id);
+      if (!el) return;
+      el.setAttribute('inputmode', 'tel');
+      if (!el._maskAttached) {
+        el._maskAttached = true;
+        el.addEventListener('input', () => { el.value = formatarTelBR(el.value); });
+      }
+      if (el.value) el.value = formatarTelBR(el.value);
+    });
+  }
+  window.addEventListener('DOMContentLoaded', inicializarMascarasCadastro);
+
   async function enviarCadastro(tipo) {
     const prefixo = tipo === 'chacara' ? 'cad-chacara' : 'cad-fornecedor';
     const erroEl = document.getElementById(prefixo + '-erro');
