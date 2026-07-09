@@ -603,12 +603,13 @@
             <input type="text" id="cpr-nome" placeholder="Seu nome" style="margin-bottom:8px;"/>
           </div>
           <div class="campo-reserva">
-            <input type="text" id="cpr-wpp" placeholder="WhatsApp (opcional, pra te avisar da resposta)" inputmode="numeric" oninput="mascaraWhatsApp(this)" style="margin-bottom:8px;"/>
+            <input type="text" id="cpr-wpp" placeholder="Seu WhatsApp (obrigatório)" inputmode="numeric" oninput="mascaraWhatsApp(this)" style="margin-bottom:8px;" required/>
           </div>
           <div class="campo-reserva">
             <textarea id="cpr-msg" placeholder="Ex: A chácara tem espaço coberto?" style="min-height:60px;margin-bottom:8px;"></textarea>
           </div>
           <button class="btn-reservar" style="padding:10px;font-size:13px;" onclick="cprEnviar()" id="cpr-btn-enviar">Enviar pergunta</button>
+          <div style="font-size:11px;color:var(--cinza);margin-top:4px;">📲 O WhatsApp é obrigatório porque é por lá que o proprietário te responde — sem trocar contato direto, sua mensagem passa pela nossa central.</div>
           <div style="font-size:11px;color:var(--cinza);margin-top:8px;">Por segurança, não compartilhe telefone, e-mail ou redes sociais — toda comunicação fica por aqui.</div>
         </div>
 
@@ -914,6 +915,7 @@
     const wpp = document.getElementById('cpr-wpp').value.trim();
     const msg = document.getElementById('cpr-msg').value.trim();
     if (!msg) { mostrarToast('Escreva sua pergunta antes de enviar.'); return; }
+    if (wpp.replace(/\D/g,'').length < 10) { mostrarToast('Informe um WhatsApp válido — é por ele que o proprietário te responde.'); return; }
     if (!PROPERTY_ID) { mostrarToast('Ainda carregando a página, tente novamente em instantes.'); return; }
 
     const btn = document.getElementById('cpr-btn-enviar');
