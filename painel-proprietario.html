@@ -1203,6 +1203,7 @@
           <label class="tag-check"><input type="checkbox"/> 🍽️ Espaço gourmet</label>
           <label class="tag-check"><input type="checkbox"/> 🎪 Salão coberto</label>
           <label class="tag-check"><input type="checkbox"/> 🌳 Pomar</label>
+          <label class="tag-check"><input type="checkbox"/> 🛣️ Acesso asfaltado</label>
         </div>
         <button class="btn btn-verde btn-sm" style="margin-top:14px;" onclick="salvar('anuncio')">💾 Salvar estrutura e comodidades</button>
       </div>
@@ -1378,6 +1379,7 @@
             <input type="text" id="perfil-whatsapp" value="(44) 9 9999-9999"/>
           </div>
         </div>
+        <button class="btn btn-verde btn-sm" style="margin-top:14px;" onclick="salvar('config')">💾 Salvar dados pessoais</button>
       </div>
 
       <div class="card">
@@ -1499,7 +1501,7 @@
   let propriedadeAtual = null;
   let minhasPropriedades = [];
 
-  const MAPA_COMODIDADES = {"🏊 Piscina": "piscina", "🍖 Churrasqueira": "churrasqueira", "⚽ Campo de futebol": "campo de futebol", "🎣 Lago / Pesca": "lago / pesca", "🅿️ Estacionamento": "estacionamento", "🛌 Hospedagem / Quartos": "hospedagem / quartos", "🏠 Casa sede": "casa sede", "🎮 Salão de jogos": "salão de jogos", "🏐 Quadra poliesportiva": "quadra poliesportiva", "💡 Energia elétrica": "energia elétrica", "💧 Água encanada": "água encanada", "♿ Acessibilidade": "acessibilidade", "🐾 Aceita pets": "aceita pets", "🍽️ Espaço gourmet": "espaço gourmet", "🎪 Salão coberto": "salão coberto", "🌳 Pomar": "pomar"};
+  const MAPA_COMODIDADES = {"🏊 Piscina": "piscina", "🍖 Churrasqueira": "churrasqueira", "⚽ Campo de futebol": "campo de futebol", "🎣 Lago / Pesca": "lago / pesca", "🅿️ Estacionamento": "estacionamento", "🛌 Hospedagem / Quartos": "hospedagem / quartos", "🏠 Casa sede": "casa sede", "🎮 Salão de jogos": "salão de jogos", "🏐 Quadra poliesportiva": "quadra poliesportiva", "💡 Energia elétrica": "energia elétrica", "💧 Água encanada": "água encanada", "♿ Acessibilidade": "acessibilidade", "🐾 Aceita pets": "aceita pets", "🍽️ Espaço gourmet": "espaço gourmet", "🎪 Salão coberto": "salão coberto", "🌳 Pomar": "pomar", "🛣️ Acesso asfaltado": "acesso asfaltado"};
 
   const MAPA_EVENTOS = {"🎂 Aniversários": "aniversários", "💒 Casamentos": "casamentos", "🤝 Confraternizações": "confraternizações", "🏖️ Lazer / Final de semana": "lazer / final de semana", "👔 Eventos corporativos": "eventos corporativos", "🍖 Churrascos": "churrascos", "🎓 Formaturas": "formaturas", "👧 Festas infantis": "festas infantis"};
 
@@ -2019,6 +2021,12 @@
   }
 
   // === Helpers: mascara telefone, escopo por chacara, config (add sessao 02/07) ===
+  function stripCountryCode55(value) {
+    const d = (value || '').toString().replace(/\D/g, '');
+    if (d.length >= 12 && d.startsWith('55')) return d.slice(2);
+    return d;
+  }
+
   function formatarTelBR(value) {
     let n = (value || '').replace(/\D/g, '').slice(0, 11);
     if (n.length <= 2) return n.length ? '(' + n : '';
@@ -2051,7 +2059,7 @@
     const p = propriedadeAtual || {};
     if (s('perfil-nome')) s('perfil-nome').value = p.owner_name || (u.user_metadata && u.user_metadata.full_name) || '';
     if (s('perfil-email')) { s('perfil-email').value = u.email || p.owner_email || ''; s('perfil-email').setAttribute('readonly', ''); s('perfil-email').style.background = '#f9fafb'; }
-    if (s('perfil-whatsapp')) s('perfil-whatsapp').value = formatarTelBR(p.owner_whatsapp || '');
+    if (s('perfil-whatsapp')) s('perfil-whatsapp').value = formatarTelBR(stripCountryCode55(p.owner_whatsapp || ''));
     const cpf = s('perfil-cpf');
     if (cpf && (cpf.value === '000.000.000-00' || !cpf.value)) { cpf.value = ''; cpf.placeholder = 'Opcional'; }
   }
@@ -2148,7 +2156,7 @@
     set('f-nome', prop.name);
     set('f-cidade', prop.city);
     set('f-bairro', prop.neighborhood);
-    set('f-whatsapp', prop.owner_whatsapp);
+    set('f-whatsapp', formatarTelBR(stripCountryCode55(prop.owner_whatsapp)));
     set('f-telefone-alt', prop.phone_alt);
     set('f-descricao', prop.description);
     set('f-capacidade', prop.max_guests);
