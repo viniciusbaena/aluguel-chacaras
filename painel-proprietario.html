@@ -1185,6 +1185,16 @@
 
       <div class="card">
         <div class="card-title">🏗️ Estrutura e comodidades</div>
+        <div class="form-2" style="margin-bottom:14px;">
+          <div class="field">
+            <label for="f-area-m2">Área aproximada (m²)</label>
+            <input type="number" id="f-area-m2" placeholder="Ex: 5000"/>
+          </div>
+          <div class="field">
+            <label for="f-vagas">Vagas de estacionamento</label>
+            <input type="number" id="f-vagas" placeholder="Ex: 30"/>
+          </div>
+        </div>
         <div style="font-size:12px;color:var(--cinza);margin-bottom:12px;">Clique para marcar ou desmarcar as comodidades da sua chácara.</div>
         <div class="tags-grid" id="tags-estrutura">
           <label class="tag-check selecionado"><input type="checkbox" checked/> 🏊 Piscina</label>
@@ -1206,6 +1216,15 @@
           <label class="tag-check"><input type="checkbox"/> 🛣️ Acesso asfaltado</label>
         </div>
         <button class="btn btn-verde btn-sm" style="margin-top:14px;" onclick="salvar('anuncio')">💾 Salvar estrutura e comodidades</button>
+      </div>
+
+      <div class="card">
+        <div class="card-title">📋 Regras e informações</div>
+        <div style="font-size:12px;color:var(--cinza);margin-bottom:12px;">Aparece na página pública da chácara, no formato de lista. Escreva uma regra ou informação por linha.</div>
+        <div class="field form-full">
+          <textarea id="f-regras" placeholder="Ex: Som permitido até meia-noite&#10;Não aceita pets&#10;Check-in a partir das 10h&#10;Exige sinal de 50% na reserva"></textarea>
+        </div>
+        <button class="btn btn-verde btn-sm" style="margin-top:14px;" onclick="salvar('anuncio')">💾 Salvar regras e informações</button>
       </div>
 
       <!-- FOTOS E VÍDEOS INCORPORADOS -->
@@ -2162,6 +2181,9 @@
     set('f-capacidade', prop.max_guests);
     set('f-diaria', prop.price_per_day);
     set('f-fds', prop.price_weekend);
+    set('f-area-m2', prop.area_m2);
+    set('f-vagas', prop.parking_spots);
+    set('f-regras', prop.rules_info);
     set('input-video', prop.video_url);
     set('f-endereco-completo', prop.full_address);
     set('f-acesso', prop.access_instructions);
@@ -2710,6 +2732,9 @@
         price_weekend: parseFloat(document.getElementById('f-fds')?.value) || null,
         amenities: amenitiesFinal,
         full_address: document.getElementById('f-endereco-completo')?.value.trim() || null,
+        area_m2: parseFloat(document.getElementById('f-area-m2')?.value) || null,
+        parking_spots: parseInt(document.getElementById('f-vagas')?.value) || null,
+        rules_info: document.getElementById('f-regras')?.value.trim() || null,
         access_instructions: document.getElementById('f-acesso')?.value.trim() || null
       };
 
