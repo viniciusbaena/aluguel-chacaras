@@ -368,6 +368,7 @@
       border: 1.5px solid var(--cinza-borda); border-radius: 8px;
       padding: 9px 12px; font-size: 13px; font-family: 'Inter', sans-serif;
       outline: none; transition: border 0.15s; color: var(--preto); background: #fff;
+      width: 100%; box-sizing: border-box; max-width: 100%;
     }
     .campo-reserva input:focus, .campo-reserva select:focus, .campo-reserva textarea:focus { border-color: var(--verde); }
     .campo-reserva textarea { resize: none; height: 70px; }
@@ -498,10 +499,6 @@
     <!-- DESTAQUES RÁPIDOS -->
     <div class="tags-row">
       <span class="tag">👥 Até <span data-prop="max_guests">150</span> pessoas</span>
-      <span class="tag">📐 5.000 m²</span>
-      <span class="tag">🅿️ 30 vagas</span>
-      <span class="tag">🛣️ Acesso asfaltado</span>
-      <span class="tag">📍 8 km do centro</span>
     </div>
 
     <hr class="divider"/>
@@ -509,12 +506,7 @@
     <!-- DESCRIÇÃO -->
     <div class="secao">
       <div class="secao-titulo">Sobre a chácara</div>
-      <div class="secao-texto" id="desc-texto">
-        Espaço amplo e arborizado com 5.000 m², ideal para festas, confraternizações e eventos em família. Contamos com piscina adulto e infantil, churrasqueira coberta com bancada completa, campo de futebol gramado com iluminação e casa sede com 3 quartos e 2 banheiros.
-        <span id="desc-mais" style="display:none"> O estacionamento comporta até 30 veículos dentro da propriedade. Acesso fácil pela PR-317, com asfalto até o portão. Próximo a Maringá, a apenas 8 km do centro, com boa sinalização e fácil de encontrar.
-        A chácara é aberta para eventos de todos os tipos — desde churrascos em família até festas com DJ e iluminação completa. Temos gerador de energia para garantir que sua festa não pare.</span>
-        <button onclick="toggleDesc()" id="desc-btn" style="background:none;border:none;color:var(--verde);font-weight:700;cursor:pointer;font-family:'Inter',sans-serif;font-size:15px;margin-left:6px;">Ver mais ↓</button>
-      </div>
+      <div class="secao-texto" id="desc-texto" data-prop="description">Descrição não informada pelo proprietário.</div>
     </div>
 
     <hr class="divider"/>
@@ -549,23 +541,6 @@
 
     <hr class="divider" id="mapa-divider" style="display:none;"/>
 
-    <!-- REGRAS -->
-    <div class="secao">
-      <div class="secao-titulo">Regras e informações</div>
-      <div class="regras-grid">
-        <div class="regra-item"><span class="regra-ok">✓</span> Som permitido até meia-noite</div>
-        <div class="regra-item"><span class="regra-ok">✓</span> Permite gerador externo</div>
-        <div class="regra-item"><span class="regra-ok">✓</span> Aceita fornecedores externos</div>
-        <div class="regra-item"><span class="regra-ok">✓</span> Check-in a partir das 10h</div>
-        <div class="regra-item"><span class="regra-ok">✓</span> Devolução até 23h</div>
-        <div class="regra-item"><span class="regra-nao">✗</span> Não permite acampamento</div>
-        <div class="regra-item"><span class="regra-nao">✗</span> Não aceita pets</div>
-        <div class="regra-item"><span class="regra-ok">✓</span> Exige sinal de 50% na reserva</div>
-      </div>
-    </div>
-
-    <hr class="divider"/>
-
     <!-- DISPONIBILIDADE -->
     <div class="secao">
       <div class="secao-titulo">Disponibilidade</div>
@@ -587,98 +562,18 @@
       </div>
     </div>
 
-    <hr class="divider"/>
-
-    <!-- AVALIAÇÕES -->
-    <div class="secao">
-      <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:16px;">
-        <div class="secao-titulo" style="margin-bottom:0;">Avaliações</div>
-        <div style="display:flex; align-items:center; gap:8px;">
-          <span style="font-size:24px; color:#f59e0b;">★</span>
-          <span style="font-family:'Fraunces',serif; font-size:28px; font-weight:700; color:var(--verde-escuro);">4.8</span>
-          <span style="font-size:13px; color:var(--cinza);">de 24 avaliações</span>
-        </div>
-      </div>
-      <div class="avaliacoes-lista">
-        <div class="avaliacao-item">
-          <div class="avaliacao-header">
-            <div class="avaliacao-avatar">MF</div>
-            <div>
-              <div class="avaliacao-nome">Maria Fernanda</div>
-              <div class="avaliacao-data">Maio de 2026</div>
-            </div>
-            <div class="avaliacao-estrelas" style="margin-left:auto;">★★★★★</div>
-          </div>
-          <div class="avaliacao-texto">Lugar incrível! Fizemos o aniversário de 15 anos da minha filha lá e foi perfeito. A piscina é enorme, a churrasqueira é muito bem equipada e o João foi super atencioso. Recomendo demais!</div>
-        </div>
-        <div class="avaliacao-item">
-          <div class="avaliacao-header">
-            <div class="avaliacao-avatar">RS</div>
-            <div>
-              <div class="avaliacao-nome">Ricardo Santos</div>
-              <div class="avaliacao-data">Abril de 2026</div>
-            </div>
-            <div class="avaliacao-estrelas" style="margin-left:auto;">★★★★★</div>
-          </div>
-          <div class="avaliacao-texto">Fizemos a confraternização da empresa com 80 pessoas. Espaço mais do que suficiente, estacionamento ótimo e o campo de futebol foi um sucesso. Com certeza voltamos!</div>
-        </div>
-        <div class="avaliacao-item">
-          <div class="avaliacao-header">
-            <div class="avaliacao-avatar">AC</div>
-            <div>
-              <div class="avaliacao-nome">Ana Carvalho</div>
-              <div class="avaliacao-data">Março de 2026</div>
-            </div>
-            <div class="avaliacao-estrelas" style="margin-left:auto;">★★★★☆</div>
-          </div>
-          <div class="avaliacao-texto">Ótima chácara, muito bem cuidada e limpa. O acesso é fácil e a localização é boa. Tiramos um estrela porque o som cortou no final da noite, mas o proprietário resolveu rápido.</div>
-        </div>
-      </div>
-      <button style="background:none;border:1.5px solid var(--cinza-borda);border-radius:10px;padding:12px;width:100%;margin-top:16px;font-size:14px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif;transition:background 0.15s;" onmouseover="this.style.background='#f9fafb'" onmouseout="this.style.background='none'">
-        Ver todas as 24 avaliações →
-      </button>
+    <div class="secao" id="secao-avaliacoes" style="display:none;">
+      <div class="secao-titulo">Avaliações</div>
+      <div style="font-size:13px;color:var(--cinza);">Ainda não há avaliações desta chácara.</div>
     </div>
 
     <hr class="divider"/>
 
     <!-- FORNECEDORES SUGERIDOS -->
-    <div class="secao">
+    <div class="secao" id="secao-fornecedores-sugeridos" style="display:none;">
       <div class="secao-titulo">Fornecedores para seu evento</div>
       <div style="font-size:14px; color:var(--cinza); margin-bottom:16px;">Parceiros disponíveis para atender nesta chácara e região</div>
-      <div class="fornecedores-mini">
-        <div class="fornecedor-mini">
-          <div class="fornecedor-mini-icon">🎠</div>
-          <div>
-            <div class="fornecedor-mini-cat">Brinquedos Infantis</div>
-            <div class="fornecedor-mini-nome">Alegria Kids Locações</div>
-            <div style="font-size:11px; color:var(--cinza); margin-top:2px;">📍 Sarandi</div>
-          </div>
-        </div>
-        <div class="fornecedor-mini">
-          <div class="fornecedor-mini-icon">🥩</div>
-          <div>
-            <div class="fornecedor-mini-cat">Churrasqueiro</div>
-            <div class="fornecedor-mini-nome">Churrasco do Toninho</div>
-            <div style="font-size:11px; color:var(--cinza); margin-top:2px;">📍 Maringá</div>
-          </div>
-        </div>
-        <div class="fornecedor-mini">
-          <div class="fornecedor-mini-icon">🎂</div>
-          <div>
-            <div class="fornecedor-mini-cat">Bolos e Doces</div>
-            <div class="fornecedor-mini-nome">Doce Arte Confeitaria</div>
-            <div style="font-size:11px; color:var(--cinza); margin-top:2px;">📍 Maringá</div>
-          </div>
-        </div>
-        <div class="fornecedor-mini">
-          <div class="fornecedor-mini-icon">🎊</div>
-          <div>
-            <div class="fornecedor-mini-cat">Decoração e Balões</div>
-            <div class="fornecedor-mini-nome">Decora Festa Maringá</div>
-            <div style="font-size:11px; color:var(--cinza); margin-top:2px;">📍 Maringá</div>
-          </div>
-        </div>
-      </div>
+      <div class="fornecedores-mini" id="fornecedores-mini-real"></div>
       <a href="/#fornecedores" style="display:block; text-align:center; margin-top:14px; font-size:14px; font-weight:600; color:var(--terra); text-decoration:none;">Ver todos os fornecedores →</a>
     </div>
 
@@ -695,7 +590,35 @@
           <span class="preco-valor" data-prop="price">R$ 1.200</span>
           <span class="preco-periodo">/dia</span>
         </div>
-        <div class="preco-fds">Final de semana: <strong>R$ 1.800</strong></div>
+        <div class="preco-fds" id="preco-fds-linha" style="display:none;">Final de semana: <strong id="preco-fds-valor">—</strong></div>
+      </div>
+
+      <!-- CHAT PRÉ-RESERVA -->
+      <div id="chat-pre-reserva-card" style="margin-top:20px;padding-top:18px;border-top:1px solid var(--cinza-borda);">
+        <div style="font-family:'Fraunces',serif;font-size:16px;font-weight:700;color:var(--verde-escuro);margin-bottom:4px;">💬 Tire dúvidas com o proprietário</div>
+        <div style="font-size:12px;color:var(--cinza);margin-bottom:12px;">Converse antes de reservar. Sua mensagem chega direto pra ele, sem trocar telefone.</div>
+
+        <div id="cpr-form">
+          <div class="campo-reserva">
+            <input type="text" id="cpr-nome" placeholder="Seu nome" style="margin-bottom:8px;"/>
+          </div>
+          <div class="campo-reserva">
+            <input type="text" id="cpr-wpp" placeholder="WhatsApp (opcional, pra te avisar da resposta)" inputmode="numeric" oninput="mascaraWhatsApp(this)" style="margin-bottom:8px;"/>
+          </div>
+          <div class="campo-reserva">
+            <textarea id="cpr-msg" placeholder="Ex: A chácara tem espaço coberto?" style="min-height:60px;margin-bottom:8px;"></textarea>
+          </div>
+          <button class="btn-reservar" style="padding:10px;font-size:13px;" onclick="cprEnviar()" id="cpr-btn-enviar">Enviar pergunta</button>
+          <div style="font-size:11px;color:var(--cinza);margin-top:8px;">Por segurança, não compartilhe telefone, e-mail ou redes sociais — toda comunicação fica por aqui.</div>
+        </div>
+
+        <div id="cpr-thread" style="display:none;">
+          <div id="cpr-mensagens" style="max-height:220px;overflow-y:auto;display:flex;flex-direction:column;gap:8px;margin-bottom:10px;padding-right:4px;"></div>
+          <div style="display:flex;gap:8px;">
+            <input type="text" id="cpr-msg-nova" placeholder="Escreva sua mensagem..." style="flex:1;border:1px solid var(--cinza-borda);border-radius:20px;padding:10px 14px;font-size:13px;font-family:inherit;"/>
+            <button onclick="cprEnviarNova()" style="background:var(--verde-escuro);color:#fff;border:none;border-radius:50%;width:40px;height:40px;cursor:pointer;font-size:16px;flex-shrink:0;">➤</button>
+          </div>
+        </div>
       </div>
 
       <!-- PROGRESS DAS ETAPAS -->
@@ -739,9 +662,7 @@
           <div class="campo-reserva">
             <label for="r-pessoas">Nº de convidados</label>
             <select id="r-pessoas">
-              <option value="50">Até 50 pessoas</option>
-              <option value="100">50 a 100 pessoas</option>
-              <option value="150" selected>100 a 150 pessoas</option>
+              <option value="" selected>Carregando...</option>
             </select>
           </div>
           <div class="campo-reserva">
@@ -785,14 +706,6 @@
           📅 Solicitar reserva
         </button>
 
-        <div class="proprietario-info" style="margin-top:16px; padding-top:14px; border-top:1px solid var(--cinza-borda);">
-          <div class="prop-avatar">JP</div>
-          <div style="flex:1;">
-            <div class="prop-nome">João Proprietário</div>
-            <div class="prop-membro">Anunciante desde 2026</div>
-            <div class="prop-verificado">✓ Perfil verificado</div>
-          </div>
-        </div>
       </div>
 
       <!-- ETAPA 2: AGUARDANDO CONFIRMAÇÃO -->
@@ -913,34 +826,6 @@
         <button onclick="irParaInicio()" style="background:var(--verde-claro);color:var(--verde-escuro);border:none;border-radius:8px;padding:10px;width:100%;font-size:13px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif;">
           🏠 Buscar mais chácaras
         </button>
-      </div>
-
-      <!-- CHAT PRÉ-RESERVA -->
-      <div id="chat-pre-reserva-card" style="margin-top:20px;padding-top:18px;border-top:1px solid var(--cinza-borda);">
-        <div style="font-family:'Fraunces',serif;font-size:16px;font-weight:700;color:var(--verde-escuro);margin-bottom:4px;">💬 Tire dúvidas com o proprietário</div>
-        <div style="font-size:12px;color:var(--cinza);margin-bottom:12px;">Converse antes de reservar. Sua mensagem chega direto pra ele, sem trocar telefone.</div>
-
-        <div id="cpr-form">
-          <div class="campo-reserva">
-            <input type="text" id="cpr-nome" placeholder="Seu nome" style="margin-bottom:8px;"/>
-          </div>
-          <div class="campo-reserva">
-            <input type="text" id="cpr-wpp" placeholder="WhatsApp (opcional, pra te avisar da resposta)" inputmode="numeric" oninput="mascaraWhatsApp(this)" style="margin-bottom:8px;"/>
-          </div>
-          <div class="campo-reserva">
-            <textarea id="cpr-msg" placeholder="Ex: A chácara tem espaço coberto?" style="min-height:60px;margin-bottom:8px;"></textarea>
-          </div>
-          <button class="btn-reservar" style="padding:10px;font-size:13px;" onclick="cprEnviar()" id="cpr-btn-enviar">Enviar pergunta</button>
-          <div style="font-size:11px;color:var(--cinza);margin-top:8px;">Por segurança, não compartilhe telefone, e-mail ou redes sociais — toda comunicação fica por aqui.</div>
-        </div>
-
-        <div id="cpr-thread" style="display:none;">
-          <div id="cpr-mensagens" style="max-height:220px;overflow-y:auto;display:flex;flex-direction:column;gap:8px;margin-bottom:10px;padding-right:4px;"></div>
-          <div style="display:flex;gap:8px;">
-            <input type="text" id="cpr-msg-nova" placeholder="Escreva sua mensagem..." style="flex:1;border:1px solid var(--cinza-borda);border-radius:20px;padding:10px 14px;font-size:13px;font-family:inherit;"/>
-            <button onclick="cprEnviarNova()" style="background:var(--verde-escuro);color:#fff;border:none;border-radius:50%;width:40px;height:40px;cursor:pointer;font-size:16px;flex-shrink:0;">➤</button>
-          </div>
-        </div>
       </div>
 
     </div>
@@ -1316,9 +1201,9 @@
     const propId = document.documentElement.dataset.propid || '';
     let url;
     if (slug) {
-      url = `https://tathqoyhcuxthsrghrzx.supabase.co/rest/v1/properties?slug=eq.${slug}&active=eq.true&select=id,name,description,address,city,state,price_per_day,max_guests,amenities,photos,active,created_at,updated_at,slug,approx_lat,approx_lng&limit=1`;
+      url = `https://tathqoyhcuxthsrghrzx.supabase.co/rest/v1/properties?slug=eq.${slug}&active=eq.true&select=id,name,description,address,city,state,price_per_day,price_weekend,max_guests,amenities,photos,active,created_at,updated_at,slug,approx_lat,approx_lng&limit=1`;
     } else if (propId) {
-      url = `https://tathqoyhcuxthsrghrzx.supabase.co/rest/v1/properties?id=eq.${propId}&active=eq.true&select=id,name,description,address,city,state,price_per_day,max_guests,amenities,photos,active,created_at,updated_at,slug,approx_lat,approx_lng&limit=1`;
+      url = `https://tathqoyhcuxthsrghrzx.supabase.co/rest/v1/properties?id=eq.${propId}&active=eq.true&select=id,name,description,address,city,state,price_per_day,price_weekend,max_guests,amenities,photos,active,created_at,updated_at,slug,approx_lat,approx_lng&limit=1`;
     } else return;
 
     const r = await fetch(url, {
@@ -1328,7 +1213,7 @@
     // Fallback: if slug returns empty (column not yet created), try by ID
     if ((!data || !data.length) && propId) {
       const r2 = await fetch(
-        `https://tathqoyhcuxthsrghrzx.supabase.co/rest/v1/properties?id=eq.${propId}&active=eq.true&select=id,name,description,address,city,state,price_per_day,max_guests,amenities,photos,active,created_at,updated_at,slug,approx_lat,approx_lng&limit=1`,
+        `https://tathqoyhcuxthsrghrzx.supabase.co/rest/v1/properties?id=eq.${propId}&active=eq.true&select=id,name,description,address,city,state,price_per_day,price_weekend,max_guests,amenities,photos,active,created_at,updated_at,slug,approx_lat,approx_lng&limit=1`,
         { headers: { apikey: 'sb_publishable_fLpPGAodcCvJxPkQ223ABQ_ApJKDLRU', Authorization: `Bearer sb_publishable_fLpPGAodcCvJxPkQ223ABQ_ApJKDLRU` } }
       );
       data = await r2.json();
@@ -1355,7 +1240,61 @@
     document.title = prop.name + ' — AluguelDeChácaras.com';
     document.querySelectorAll('[data-prop="name"]').forEach(el => el.textContent = prop.name);
     document.querySelectorAll('[data-prop="city"]').forEach(el => el.textContent = prop.city || '');
-    document.querySelectorAll('[data-prop="description"]').forEach(el => el.textContent = prop.description || '');
+    document.querySelectorAll('[data-prop="description"]').forEach(el => el.textContent = prop.description || 'Descrição não informada pelo proprietário.');
+    // Valor de final de semana (fonte real: price_weekend)
+    (function() {
+      const linha = document.getElementById('preco-fds-linha');
+      const valorEl = document.getElementById('preco-fds-valor');
+      if (prop.price_weekend && linha && valorEl) {
+        const [i,d] = parseFloat(prop.price_weekend).toFixed(2).split('.');
+        valorEl.textContent = 'R$ ' + i.replace(/\B(?=(\d{3})+(?!\d))/g, '.') + ',' + d;
+        linha.style.display = '';
+      }
+    })();
+    // Nº de convidados dinâmico (limitado ao max_guests real do proprietário)
+    (function() {
+      const rPessoas = document.getElementById('r-pessoas');
+      if (!rPessoas) return;
+      const max = parseInt(prop.max_guests) || 0;
+      if (!max) { rPessoas.innerHTML = '<option value="">Não informado</option>'; return; }
+      let opts;
+      if (max <= 20) {
+        opts = `<option value="${max}" selected>Até ${max} pessoas</option>`;
+      } else {
+        const b1 = Math.max(1, Math.round(max / 3));
+        const b2 = Math.max(b1 + 1, Math.round(max * 2 / 3));
+        opts = `<option value="${b1}">Até ${b1} pessoas</option>`;
+        opts += `<option value="${b2}">${b1} a ${b2} pessoas</option>`;
+        opts += `<option value="${max}" selected>${b2} a ${max} pessoas</option>`;
+      }
+      rPessoas.innerHTML = opts;
+    })();
+    // Fornecedores reais da região (mesma cidade da chácara)
+    (function() {
+      const SUPABASE_URL2  = 'https://tathqoyhcuxthsrghrzx.supabase.co';
+      const SUPABASE_ANON2 = 'sb_publishable_fLpPGAodcCvJxPkQ223ABQ_ApJKDLRU';
+      const wrap = document.getElementById('fornecedores-mini-real');
+      const secao = document.getElementById('secao-fornecedores-sugeridos');
+      if (!wrap || !secao) return;
+      const cityFilter = prop.city ? `&city=eq.${encodeURIComponent(prop.city)}` : '';
+      fetch(`${SUPABASE_URL2}/rest/v1/suppliers?active=eq.true${cityFilter}&order=created_at.desc&limit=4&select=name,slug,category,city,avatar_emoji`,
+        { headers: { apikey: SUPABASE_ANON2, Authorization: `Bearer ${SUPABASE_ANON2}` } })
+        .then(r => r.json())
+        .then(forns => {
+          if (!forns || !forns.length) return;
+          wrap.innerHTML = forns.map(f => `
+            <div class="fornecedor-mini">
+              <div class="fornecedor-mini-icon">${f.avatar_emoji || '🎉'}</div>
+              <div>
+                <div class="fornecedor-mini-cat">${f.category || ''}</div>
+                <div class="fornecedor-mini-nome">${f.name}</div>
+                <div style="font-size:11px; color:var(--cinza); margin-top:2px;">📍 ${f.city || ''}</div>
+              </div>
+            </div>`).join('');
+          secao.style.display = '';
+        })
+        .catch(() => {});
+    })();
     document.querySelectorAll('[data-prop="price"]').forEach(el => {
       const [i,d] = parseFloat(prop.price_per_day).toFixed(2).split('.');
       el.textContent = 'R$ ' + i.replace(/\B(?=(\d{3})+(?!\d))/g, '.') + ',' + d;
@@ -1364,15 +1303,19 @@
     document.querySelectorAll('[data-prop="address"]').forEach(el => el.textContent = prop.address || '');
 
     // === Comodidades reais ===
-    const MAPA_COMOD_REV = {"piscina":"🏊 Piscina","churrasqueira":"🍖 Churrasqueira","campo de futebol":"⚽ Campo de futebol","lago / pesca":"🎣 Lago / Pesca","estacionamento":"🅿️ Estacionamento","hospedagem / quartos":"🛌 Hospedagem / Quartos","casa sede":"🏠 Casa sede","salão de jogos":"🎮 Salão de jogos","quadra poliesportiva":"🏐 Quadra poliesportiva","energia elétrica":"💡 Energia elétrica","água encanada":"💧 Água encanada","acessibilidade":"♿ Acessibilidade","aceita pets":"🐾 Aceita pets","espaço gourmet":"🍽️ Espaço gourmet","salão coberto":"🎪 Salão coberto","pomar":"🌳 Pomar"};
+    const MAPA_COMOD_REV = {"piscina":"🏊 Piscina","churrasqueira":"🍖 Churrasqueira","campo de futebol":"⚽ Campo de futebol","lago / pesca":"🎣 Lago / Pesca","estacionamento":"🅿️ Estacionamento","hospedagem / quartos":"🛌 Hospedagem / Quartos","casa sede":"🏠 Casa sede","salão de jogos":"🎮 Salão de jogos","quadra poliesportiva":"🏐 Quadra poliesportiva","energia elétrica":"💡 Energia elétrica","água encanada":"💧 Água encanada","acessibilidade":"♿ Acessibilidade","aceita pets":"🐾 Aceita pets","espaço gourmet":"🍽️ Espaço gourmet","salão coberto":"🎪 Salão coberto","pomar":"🌳 Pomar","acesso asfaltado":"🛣️ Acesso asfaltado"};
     const estruturaGrid = document.querySelector('.estrutura-grid');
-    if (estruturaGrid && Array.isArray(prop.amenities) && prop.amenities.length) {
-      estruturaGrid.innerHTML = prop.amenities.map(function(a){
-        const label = MAPA_COMOD_REV[a] || ('✅ ' + (a.charAt(0).toUpperCase()+a.slice(1)));
-        const icon = label.split(' ')[0];
-        const txt = label.split(' ').slice(1).join(' ');
-        return '<div class="estrutura-item"><span class="estrutura-icon">'+icon+'</span> '+txt+'</div>';
-      }).join('');
+    if (estruturaGrid) {
+      if (Array.isArray(prop.amenities) && prop.amenities.length) {
+        estruturaGrid.innerHTML = prop.amenities.map(function(a){
+          const label = MAPA_COMOD_REV[a] || ('✅ ' + (a.charAt(0).toUpperCase()+a.slice(1)));
+          const icon = label.split(' ')[0];
+          const txt = label.split(' ').slice(1).join(' ');
+          return '<div class="estrutura-item"><span class="estrutura-icon">'+icon+'</span> '+txt+'</div>';
+        }).join('');
+      } else {
+        estruturaGrid.innerHTML = '<div style="font-size:13px;color:var(--cinza);grid-column:1/-1;">Nenhuma informação de estrutura cadastrada pelo proprietário.</div>';
+      }
     }
 
     // === Fotos reais ===
