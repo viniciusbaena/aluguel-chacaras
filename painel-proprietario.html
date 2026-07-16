@@ -2080,7 +2080,7 @@
     if (s('perfil-email')) { s('perfil-email').value = u.email || p.owner_email || ''; s('perfil-email').setAttribute('readonly', ''); s('perfil-email').style.background = '#f9fafb'; }
     if (s('perfil-whatsapp')) s('perfil-whatsapp').value = formatarTelBR(stripCountryCode55(p.owner_whatsapp || ''));
     const cpf = s('perfil-cpf');
-    if (cpf && (cpf.value === '000.000.000-00' || !cpf.value)) { cpf.value = ''; cpf.placeholder = 'Opcional'; }
+    if (cpf) { cpf.value = p.cpf || ''; if (!cpf.value) cpf.placeholder = 'Opcional'; }
   }
 
   function reservasDaPropriedadeAtual() {
@@ -2709,6 +2709,24 @@
     }
 
     if (!propriedadeAtual) { mostrarToast('⚠️ Não foi possível identificar sua chácara.'); return; }
+
+    if (tipo === 'config') {
+      const nome = document.getElementById('perfil-nome')?.value.trim() || null;
+      const whatsappRaw = document.getElementById('perfil-whatsapp')?.value.trim() || '';
+      const whatsappDigits = whatsappRaw.replace(/\D/g, '');
+      const cpfEl = document.getElementById('perfil-cpf');
+      const cpf = (cpfEl && cpfEl.value.trim() && cpfEl.value.trim() !== '000.000.000-00') ? cpfEl.value.trim() : null;
+      const payloadConfig = {
+        owner_name: nome,
+        owner_whatsapp: whatsappDigits ? (whatsappDigits.length <= 11 ? '55' + whatsappDigits : whatsappDigits) : null,
+        cpf: cpf
+      };
+      const { data, error } = await _supa.from('properties').update(payloadConfig).eq('id', propriedadeAtual.id).select().maybeSingle();
+      if (error) { mostrarToast('⚠️ Erro ao salvar dados pessoais: ' + error.message); return; }
+      propriedadeAtual = { ...propriedadeAtual, ...data };
+      mostrarToast('✅ Dados pessoais salvos!');
+      return;
+    }
 
     if (tipo === 'anuncio') {
       const comodidadesMarcadas = [];
