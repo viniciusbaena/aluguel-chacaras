@@ -144,6 +144,17 @@
 
     .aviso-contato { font-size: 12px; color: var(--cinza); text-align: center; margin-top: 14px; line-height: 1.6; }
 
+    /* AVALIAÇÕES */
+    .avaliacao-card { padding: 14px 0; border-bottom: 1px solid var(--cinza-borda); }
+    .avaliacao-card:last-child { border-bottom: none; }
+    .avaliacao-topo { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
+    .avaliacao-nome { font-weight: 700; font-size: 14px; }
+    .avaliacao-estrelas { color: #f59e0b; font-size: 14px; }
+    .avaliacao-data { font-size: 12px; color: var(--cinza); }
+    .avaliacao-comentario { font-size: 14px; color: #374151; line-height: 1.6; }
+    .btn-deixar-avaliacao { display: inline-block; margin-top: 14px; background: var(--terra-claro); color: var(--terra-escuro); padding: 10px 18px; border-radius: 10px; text-decoration: none; font-weight: 700; font-size: 13px; }
+    .btn-deixar-avaliacao:hover { background: #f5e0cf; }
+
     .fornecedor-mini-info { display: flex; align-items: center; gap: 12px; padding: 14px 0; border-top: 1px solid var(--cinza-borda); margin-top: 14px; }
     .mini-avatar { width: 44px; height: 44px; border-radius: 50%; background: var(--terra-claro); display: flex; align-items: center; justify-content: center; font-size: 20px; flex-shrink: 0; }
     .mini-nome { font-weight: 600; font-size: 14px; }
@@ -251,6 +262,15 @@
     <div class="secao">
       <div class="secao-titulo">Diferenciais</div>
       <div class="diferenciais-grid"></div>
+    </div>
+
+    <hr class="divider"/>
+
+    <!-- AVALIAÇÕES -->
+    <div class="secao">
+      <div class="secao-titulo">Avaliações</div>
+      <div id="avaliacoes-lista"><div style="color:var(--cinza);font-size:14px;">Carregando avaliações...</div></div>
+      <a id="link-avaliar" class="btn-deixar-avaliacao" href="#">✍️ Deixar uma avaliação</a>
     </div>
 
   </div>
@@ -466,6 +486,49 @@
       if (anoCad) miniDesde.textContent = 'Fornecedor desde ' + anoCad;
       else miniDesde.style.display = 'none';
     }
+
+    carregarAvaliacoes(data.id, data.slug);
+  }
+
+  function escapeHtml(s) {
+    const d = document.createElement('div');
+    d.textContent = s || '';
+    return d.innerHTML;
+  }
+
+  async function carregarAvaliacoes(supplierId, slug) {
+    const linkAvaliar = document.getElementById('link-avaliar');
+    if (linkAvaliar) linkAvaliar.href = `/avaliar.html?fornecedor=${encodeURIComponent(slug)}`;
+
+    const lista = document.getElementById('avaliacoes-lista');
+    if (!lista) return;
+
+    const { data: reviews, error } = await _supa
+      .from('reviews')
+      .select('client_name, rating, comment, created_at')
+      .eq('supplier_id', supplierId)
+      .eq('status', 'approved')
+      .order('created_at', { ascending: false })
+      .limit(20);
+
+    if (error || !reviews || !reviews.length) {
+      lista.innerHTML = '<div style="color:var(--cinza);font-size:14px;">Ainda não há avaliações públicas. Seja o primeiro a avaliar!</div>';
+      return;
+    }
+
+    lista.innerHTML = reviews.map(function(r) {
+      const stars = '★'.repeat(r.rating) + '☆'.repeat(5 - r.rating);
+      const dataFmt = new Date(r.created_at).toLocaleDateString('pt-BR');
+      const comentarioHtml = r.comment ? `<div class="avaliacao-comentario">${escapeHtml(r.comment)}</div>` : '';
+      return `<div class="avaliacao-card">
+        <div class="avaliacao-topo">
+          <span class="avaliacao-nome">${escapeHtml(r.client_name)}</span>
+          <span class="avaliacao-data">${dataFmt}</span>
+        </div>
+        <div class="avaliacao-estrelas">${stars}</div>
+        ${comentarioHtml}
+      </div>`;
+    }).join('');
   }
 
   document.addEventListener('DOMContentLoaded', carregarFornecedor);
