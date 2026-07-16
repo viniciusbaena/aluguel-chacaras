@@ -117,32 +117,6 @@
     }
     .diferencial-icon { font-size: 20px; }
 
-    /* PACOTES */
-    .pacotes-grid { display: flex; flex-direction: column; gap: 12px; }
-    .pacote-item {
-      background: #fff; border-radius: 12px; padding: 18px 20px;
-      border: 1.5px solid var(--cinza-borda);
-      display: flex; align-items: center; justify-content: space-between; gap: 16px;
-      transition: border-color 0.15s;
-    }
-    .pacote-item:hover { border-color: var(--terra); }
-    .pacote-nome { font-weight: 700; font-size: 15px; color: var(--preto); margin-bottom: 4px; }
-    .pacote-desc { font-size: 13px; color: var(--cinza); line-height: 1.5; }
-    .pacote-preco { text-align: right; flex-shrink: 0; }
-    .pacote-valor { font-family: 'Fraunces', serif; font-size: 22px; color: var(--terra-escuro); font-weight: 700; }
-    .pacote-periodo { font-size: 12px; color: var(--cinza); }
-
-    /* AVALIAÇÕES */
-    .avaliacoes-lista { display: flex; flex-direction: column; gap: 14px; }
-    .avaliacao-item { background: #fff; border-radius: 12px; padding: 16px; border: 1px solid var(--cinza-borda); }
-    .avaliacao-header { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
-    .av-avatar { width: 36px; height: 36px; border-radius: 50%; background: var(--terra-claro); display: flex; align-items: center; justify-content: center; font-weight: 700; color: var(--terra-escuro); font-size: 13px; flex-shrink: 0; }
-    .av-nome { font-weight: 600; font-size: 14px; }
-    .av-data { font-size: 12px; color: var(--cinza); }
-    .av-estrelas { margin-left: auto; color: #f59e0b; font-size: 13px; }
-    .av-texto { font-size: 13px; color: #374151; line-height: 1.6; }
-    .av-evento { font-size: 11px; color: var(--terra); font-weight: 600; margin-top: 6px; }
-
     /* CARD CONTATO */
     .card-contato {
       position: sticky; top: 84px;
@@ -231,21 +205,13 @@
 <div class="hero-fornecedor">
   <div class="fornecedor-avatar-grande" id="forn-avatar">🎵</div>
   <div class="hero-info">
-    <div class="hero-cat" id="forn-cat">🎵 DJ e Música</div>
-    <div class="hero-nome" id="forn-nome">DJ Marquinhos Events</div>
-    <div class="hero-local" id="forn-local">📍 Maringá, PR</div>
+    <div class="hero-cat" id="forn-cat">Carregando...</div>
+    <div class="hero-nome" id="forn-nome">Carregando...</div>
+    <div class="hero-local" id="forn-local">📍 Carregando...</div>
     <div class="hero-avaliacao" id="forn-avaliacao">
-      <span class="estrelas">★★★★★</span>
-      <span class="aval-num">4.9</span>
-      <span class="aval-qtd">(31 avaliações)</span>
+      <span class="aval-num" style="color:var(--cinza)">Carregando...</span>
     </div>
-    <div class="hero-tags" id="forn-tags">
-      <span class="hero-tag">🚚 Entrega e montagem inclusa</span>
-      <span class="hero-tag">💡 Iluminação LED</span>
-      <span class="hero-tag">🎤 Microfone sem fio</span>
-      <span class="hero-tag">📻 Playlist personalizada</span>
-      <span class="hero-tag">📍 Atende toda a região</span>
-    </div>
+    <div class="hero-tags" id="forn-tags"></div>
   </div>
   <button onclick="compartilhar()" style="background:rgba(255,255,255,0.15);border:1.5px solid rgba(255,255,255,0.3);border-radius:10px;padding:10px 16px;font-size:13px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:6px;font-family:'Inter',sans-serif;color:#fff;align-self:flex-start;">
     🔗 Compartilhar
@@ -262,15 +228,7 @@
     <div class="secao">
       <div class="secao-titulo">Portfólio</div>
       <div class="galeria-fotos" id="galeria">
-        <div class="galeria-foto principal" style="background:linear-gradient(135deg,#fbd38d,#ed8936);" onclick="abrirGaleria(0)">🎵</div>
-        <div class="galeria-foto" style="background:linear-gradient(135deg,#b3e5fc,#4fc3f7);" onclick="abrirGaleria(1)">💡</div>
-        <div class="galeria-foto" style="background:linear-gradient(135deg,#f8bbd0,#f48fb1);" onclick="abrirGaleria(2)">🎤</div>
-        <div class="galeria-foto" style="background:linear-gradient(135deg,#c8e6c9,#66bb6a);" onclick="abrirGaleria(3)">🎊</div>
-        <div class="galeria-foto" style="background:linear-gradient(135deg,#ffe0b2,#ffa726);" onclick="abrirGaleria(4)">🎉</div>
-        <div class="galeria-foto" style="background:linear-gradient(135deg,#e1bee7,#9c27b0); position:relative;" onclick="abrirGaleria(5)">
-          🎶
-          <div style="position:absolute;inset:0;background:rgba(0,0,0,0.45);border-radius:12px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:14px;font-weight:700;">+4 fotos</div>
-        </div>
+        <div class="galeria-foto principal" style="background:var(--cinza-bg);color:var(--cinza);display:flex;align-items:center;justify-content:center;font-size:14px;">📷 Fotos em breve</div>
       </div>
     </div>
 
@@ -281,10 +239,8 @@
       <div class="secao-titulo">Sobre o serviço</div>
     <div id="forn-descricao-container">
       <div class="secao-texto" id="desc-texto">
-        <span id="desc-curto">Som profissional para festas e eventos de todos os tamanhos, com mais de 10 anos de experiência na região de Maringá. Sistema de som potente com caixas de alta qualidade, ideal para espaços abertos como chácaras e sítios.</span>
-        <span id="desc-mais" style="display:none"> Iluminação LED cênica inclusa em todos os pacotes, criando a atmosfera perfeita para cada tipo de evento. Trabalhamos com playlist 100% personalizada conforme o estilo do evento — sertanejo, pagode, funk, eletrônico, anos 80/90, ou o que você preferir.
-
-        Atendemos Maringá, Sarandi, Paiçandu, Marialva e cidades da região. Para cidades acima de 40 km, pode haver taxa de deslocamento. Exigimos sinal de 30% na reserva para confirmação da data.</span>
+        <span id="desc-curto">Carregando descrição...</span>
+        <span id="desc-mais" style="display:none"></span>
         <button onclick="toggleDesc()" id="desc-btn" style="background:none;border:none;color:var(--terra);font-weight:700;cursor:pointer;font-family:'Inter',sans-serif;font-size:15px;margin-left:6px;">Ver mais ↓</button>
       </div>
     </div>
@@ -294,103 +250,7 @@
     <!-- DIFERENCIAIS -->
     <div class="secao">
       <div class="secao-titulo">Diferenciais</div>
-      <div class="diferenciais-grid">
-        <div class="diferencial-item"><span class="diferencial-icon">🚚</span> Entrega e montagem inclusa</div>
-        <div class="diferencial-item"><span class="diferencial-icon">💡</span> Iluminação LED cênica</div>
-        <div class="diferencial-item"><span class="diferencial-icon">🎤</span> Microfone sem fio</div>
-        <div class="diferencial-item"><span class="diferencial-icon">📻</span> Playlist personalizada</div>
-        <div class="diferencial-item"><span class="diferencial-icon">🔊</span> Som para até 500 pessoas</div>
-        <div class="diferencial-item"><span class="diferencial-icon">⚡</span> Equipamento backup</div>
-        <div class="diferencial-item"><span class="diferencial-icon">🕐</span> Pontualidade garantida</div>
-        <div class="diferencial-item"><span class="diferencial-icon">📋</span> Contrato de serviço</div>
-        <div class="diferencial-item"><span class="diferencial-icon">🏆</span> +10 anos de experiência</div>
-      </div>
-    </div>
-
-    <hr class="divider"/>
-
-    <!-- PACOTES -->
-    <div class="secao">
-      <div class="secao-titulo">Pacotes disponíveis</div>
-      <div class="pacotes-grid">
-        <div class="pacote-item">
-          <div>
-            <div class="pacote-nome">🎵 Pacote Básico</div>
-            <div class="pacote-desc">Sistema de som 2 caixas + 1 microfone. Ideal para eventos até 80 pessoas. Duração até 6h.</div>
-          </div>
-          <div class="pacote-preco">
-            <div class="pacote-valor">R$ 800</div>
-            <div class="pacote-periodo">por evento</div>
-          </div>
-        </div>
-        <div class="pacote-item" style="border-color:var(--terra); box-shadow: 0 0 0 1px var(--terra);">
-          <div>
-            <div class="pacote-nome">🎊 Pacote Festa <span style="background:var(--terra);color:#fff;font-size:10px;padding:2px 8px;border-radius:20px;margin-left:6px;">+ Popular</span></div>
-            <div class="pacote-desc">Sistema de som 4 caixas + 2 microfones + iluminação LED. Até 200 pessoas. Duração até 8h.</div>
-          </div>
-          <div class="pacote-preco">
-            <div class="pacote-valor">R$ 1.400</div>
-            <div class="pacote-periodo">por evento</div>
-          </div>
-        </div>
-        <div class="pacote-item">
-          <div>
-            <div class="pacote-nome">👑 Pacote Premium</div>
-            <div class="pacote-desc">Sistema completo + iluminação cênica + strobo + fumaça + 3 microfones. Até 500 pessoas. Sem limite de horário.</div>
-          </div>
-          <div class="pacote-preco">
-            <div class="pacote-valor">R$ 2.200</div>
-            <div class="pacote-periodo">por evento</div>
-          </div>
-        </div>
-      </div>
-      <div style="font-size:13px;color:var(--cinza);margin-top:12px;">💬 Pacotes personalizados disponíveis. Consulte para eventos especiais ou datas comemorativas.</div>
-    </div>
-
-    <hr class="divider"/>
-
-    <!-- AVALIAÇÕES -->
-    <div class="secao">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
-        <div class="secao-titulo" style="margin-bottom:0;">Avaliações</div>
-        <div style="display:flex;align-items:center;gap:8px;">
-          <span style="font-size:22px;color:#f59e0b;">★</span>
-          <span style="font-family:'Fraunces',serif;font-size:26px;color:var(--terra-escuro);">4.9</span>
-          <span style="font-size:13px;color:var(--cinza);">de 31 avaliações</span>
-        </div>
-      </div>
-      <div class="avaliacoes-lista">
-        <div class="avaliacao-item">
-          <div class="avaliacao-header">
-            <div class="av-avatar">CF</div>
-            <div><div class="av-nome">Carlos Ferreira</div><div class="av-data">Maio de 2026</div></div>
-            <div class="av-estrelas">★★★★★</div>
-          </div>
-          <div class="av-texto">O Marquinhos arrasou na nossa festa de aniversário! Som impecável, iluminação linda e leu perfeitamente o público. A festa não parou um segundo. Super recomendo!</div>
-          <div class="av-evento">🎂 Aniversário de 40 anos — Chácara das Palmeiras, Maringá</div>
-        </div>
-        <div class="avaliacao-item">
-          <div class="avaliacao-header">
-            <div class="av-avatar">JP</div>
-            <div><div class="av-nome">Juliana Pereira</div><div class="av-data">Abril de 2026</div></div>
-            <div class="av-estrelas">★★★★★</div>
-          </div>
-          <div class="av-texto">Contratei para meu casamento e foi perfeito! Ele fez uma playlist super especial pra cerimônia e animou a festa até o final. Pontualíssimo e muito profissional.</div>
-          <div class="av-evento">💒 Casamento — Espaço Verde Festas, Paiçandu</div>
-        </div>
-        <div class="avaliacao-item">
-          <div class="avaliacao-header">
-            <div class="av-avatar">RM</div>
-            <div><div class="av-nome">Roberto Martins</div><div class="av-data">Março de 2026</div></div>
-            <div class="av-estrelas">★★★★★</div>
-          </div>
-          <div class="av-texto">Confraternização da empresa com 120 pessoas. Equipamento de ponta, não tivemos nenhum problema técnico. Preço justo e atendimento excelente desde o primeiro contato.</div>
-          <div class="av-evento">🤝 Confraternização corporativa — Sítio Boa Vista, Sarandi</div>
-        </div>
-      </div>
-      <button style="background:none;border:1.5px solid var(--cinza-borda);border-radius:10px;padding:12px;width:100%;margin-top:16px;font-size:14px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif;" onmouseover="this.style.background='#f9fafb'" onmouseout="this.style.background='none'">
-        Ver todas as 31 avaliações →
-      </button>
+      <div class="diferenciais-grid"></div>
     </div>
 
   </div>
@@ -399,9 +259,9 @@
   <div>
     <div class="card-contato">
       <div class="preco-destaque">
-        <div class="preco-label">A partir de</div>
-        <div class="preco-valor">R$ 800</div>
-        <div class="preco-obs">por evento • pacotes a partir de R$ 800</div>
+        <div class="preco-label" id="preco-label">Valores</div>
+        <div class="preco-valor" id="preco-valor">Consulte</div>
+        <div class="preco-obs" id="preco-obs">Solicite um orçamento sem compromisso</div>
       </div>
 
       <div class="info-rapida">
@@ -418,8 +278,8 @@
           <span class="info-row-val">Pix e transferência</span>
         </div>
         <div class="info-row" id="info-sinal">
-          <span class="info-row-label">Sinal</span>
-          <span class="info-row-val">30% na reserva</span>
+          <span class="info-row-label">Observações</span>
+          <span class="info-row-val">—</span>
         </div>
       </div>
 
@@ -432,10 +292,10 @@
       <div class="aviso-contato">Entre em contato e solicite um orçamento sem compromisso.</div>
 
       <div class="fornecedor-mini-info">
-        <div class="mini-avatar">🎵</div>
+        <div class="mini-avatar" id="mini-avatar">🎪</div>
         <div style="flex:1;">
-          <div class="mini-nome" id="mini-nome">Marcos Silva</div>
-          <div class="mini-desde" id="mini-desde">Fornecedor desde 2026</div>
+          <div class="mini-nome" id="mini-nome">Carregando...</div>
+          <div class="mini-desde" id="mini-desde">Fornecedor</div>
           <div class="mini-verificado">✓ Perfil verificado</div>
         </div>
       </div>
@@ -470,8 +330,10 @@
     const slug = params.get('slug');
 
     if (!slug) {
-      // Demo mode - manter dados estáticos hardcoded
       document.getElementById('page-loading').style.display = 'none';
+      document.querySelector('.hero-fornecedor').style.display = 'none';
+      document.querySelector('.layout-detalhe').style.display = 'none';
+      document.getElementById('page-not-found').style.display = 'flex';
       return;
     }
 
@@ -498,8 +360,11 @@
 
     // Atualizar hero
     const set = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
-    set('forn-avatar', data.avatar_emoji || '🎵');
-    set('forn-cat', data.category || '');
+    const MAPA_CATEGORIAS = {"dj":"🎵 DJ","banda":"🎸 Banda","musico":"🎹 Músico / Instrumentista","trio_dupla":"🎶 Trio / Dupla / Solo","karaoke":"🎤 Karaokê","fotografo":"📷 Fotógrafo","filmagem":"🎬 Filmagem / Videógrafo","drone":"🚁 Drone / Filmagem aérea","cabine_foto":"🤳 Cabine de Fotos / Totem","buffet":"🍽️ Buffet completo","churrasqueiro":"🥩 Churrasqueiro profissional","salgados":"🍡 Salgados","bolos_doces":"🎂 Bolos e Doces","cozinheiro":"👨‍🍳 Cozinheiro / Chef","chopeira":"🍺 Chopeira / Serviço de Chope","bebidas":"🥤 Fornecedor de Bebidas","bartender":"🍹 Bartender / Bar móvel","pizzaria":"🍕 Pizzaria / Forno a lenha","food_truck":"🚚 Food Truck","decoracao":"🎈 Decorador(a) de Festas","baloes":"🎊 Balões / Baloeiros","flores":"💐 Flores e Arranjos florais","cenografia":"🎭 Cenografia / Painéis","iluminacao":"💡 Iluminação Cênica / LED","som_iluminacao":"🔊 Som e Iluminação (pacote)","brinquedos":"🎠 Brinquedos Infantis","recreador":"🤹 Recreador Infantil","animador":"🎪 Animador de Festa","personagem":"🦸 Personagens Fantasiados","magico":"🪄 Mágico","palhaco":"🤡 Palhaço","maquiador":"💄 Maquiador(a)","cabeleireiro":"💇 Cabeleireiro(a)","salao_beleza":"💅 Salão de Beleza","manicure":"💅 Manicure / Pedicure","dancarina":"💃 Dançarina(o) / Grupo de dança","show":"🎤 Show ao vivo / Cantor(a)","stand_up":"😂 Stand-up Comedy","drag":"🌟 Drag Queen / Artista","fogo":"🔥 Show de Fogo / Malabares","garcom":"🍷 Garçom / Garçonete","recepcao":"👋 Recepcionista","manobrista":"🚗 Manobrista","porteiro":"🚪 Porteiro","seguranca":"🔒 Segurança / Vigilância","copeira":"☕ Copeira / Auxiliar de serviço","tendas":"⛺ Tendas e Coberturas","mesas_cadeiras":"🪑 Mesas, Cadeiras e Móveis","geradores":"⚡ Geradores de energia","banheiros":"🚻 Banheiros químicos / Trailers","pista_danca":"🕺 Pista de dança / Tablado","palco":"🎤 Palco / Estrutura de palco","carro_luxo":"🚘 Carro de luxo / Limusine","lembrancas":"🎁 Lembranças personalizadas","convites":"📨 Convites e Papelaria","grafica":"🖨️ Gráfica / Impressão","bem_casado":"🍬 Bem-casados / Docinhos","cerimonialista":"📋 Cerimonialista / Wedding Planner","assessoria":"🗂️ Assessoria de eventos","transporte":"🚌 Transporte / Van / Ônibus","pet":"🐾 Pet sitter / Cuidador de animais","outros":"➕ Outro serviço"};
+    const MAPA_DIF_REV = {"entrega e montagem inclusa":"🚚 Entrega e montagem inclusa","iluminação inclusa":"💡 Iluminação inclusa","microfone sem fio":"🎤 Microfone sem fio","playlist personalizada":"📻 Playlist personalizada","mais de 5 anos de experiência":"🏆 Mais de 5 anos de experiência","contrato de serviço":"📋 Contrato de serviço","reposição em caso de problema":"🔄 Reposição em caso de problema","profissional certificado":"🎓 Profissional certificado","atende toda a região":"📍 Atende toda a região","aceita parcelamento":"💳 Aceita parcelamento"};
+
+    set('forn-avatar', data.avatar_emoji || '🎪');
+    set('forn-cat', MAPA_CATEGORIAS[data.category] || data.category || '');
     set('forn-nome', data.name);
     set('forn-local', `📍 ${data.city || ''}, ${data.state || 'PR'}`);
 
@@ -515,7 +380,7 @@
     // Tags
     const tagsEl = document.getElementById('forn-tags');
     if (tagsEl && data.tags && data.tags.length) {
-      tagsEl.innerHTML = data.tags.map(t => `<span class="hero-tag">${t}</span>`).join('');
+      tagsEl.innerHTML = data.tags.map(t => `<span class="hero-tag">${MAPA_DIF_REV[t] || t}</span>`).join('');
     }
 
     // Portfólio (fotos reais)
@@ -532,7 +397,6 @@
     }
 
     // Diferenciais reais (a partir das tags)
-    const MAPA_DIF_REV = {"entrega e montagem inclusa":"🚚 Entrega e montagem inclusa","iluminação inclusa":"💡 Iluminação inclusa","microfone sem fio":"🎤 Microfone sem fio","playlist personalizada":"📻 Playlist personalizada","mais de 5 anos de experiência":"🏆 Mais de 5 anos de experiência","contrato de serviço":"📋 Contrato de serviço","reposição em caso de problema":"🔄 Reposição em caso de problema","profissional certificado":"🎓 Profissional certificado","atende toda a região":"📍 Atende toda a região","aceita parcelamento":"💳 Aceita parcelamento"};
     if (Array.isArray(data.tags) && data.tags.length) {
       const difGrid = document.querySelector('.diferenciais-grid');
       if (difGrid) {
@@ -563,6 +427,8 @@
     // Preço
     const precoEl = document.getElementById('preco-valor');
     if (precoEl && data.price_range) precoEl.textContent = data.price_range;
+    const precoObsEl = document.getElementById('preco-obs');
+    if (precoObsEl && data.price_notes) precoObsEl.textContent = data.price_notes;
 
     // WhatsApp no card de contato
     const wppCard = document.getElementById('wpp-card-numero');
@@ -571,17 +437,6 @@
       wppCard.textContent = data.whatsapp;
       wppCard.href = `https://wa.me/${wppNum}?text=Olá,%20vi%20seu%20perfil%20no%20AluguelDeChácaras.com%20e%20gostaria%20de%20saber%20mais%20sobre%20seus%20serviços.`;
     }
-
-    // Esconder seções sem dados reais (pacotes e avaliações ainda não existem no banco)
-    ['.pacotes-grid', '.avaliacoes-lista'].forEach(function(sel){
-      const el = document.querySelector(sel);
-      const sec = el ? el.closest('.secao') : null;
-      if (sec) {
-        sec.style.display = 'none';
-        const prev = sec.previousElementSibling;
-        if (prev && prev.tagName === 'HR') prev.style.display = 'none';
-      }
-    });
 
     // Info rápida com dados reais (esconde item sem valor)
     const setInfo = function(rowId, val){
@@ -601,6 +456,8 @@
     setInfo('info-sinal', data.price_notes);
 
     // Mini-perfil com dados reais
+    const miniAvatar = document.getElementById('mini-avatar');
+    if (miniAvatar) miniAvatar.textContent = data.avatar_emoji || '🎪';
     const miniNome = document.getElementById('mini-nome');
     if (miniNome && data.name) miniNome.textContent = data.name;
     const miniDesde = document.getElementById('mini-desde');
@@ -613,27 +470,17 @@
 
   document.addEventListener('DOMContentLoaded', carregarFornecedor);
 
-    let fotos = [
-    { icon: '🎵', bg: 'linear-gradient(135deg,#fbd38d,#ed8936)' },
-    { icon: '💡', bg: 'linear-gradient(135deg,#b3e5fc,#4fc3f7)' },
-    { icon: '🎤', bg: 'linear-gradient(135deg,#f8bbd0,#f48fb1)' },
-    { icon: '🎊', bg: 'linear-gradient(135deg,#c8e6c9,#66bb6a)' },
-    { icon: '🎉', bg: 'linear-gradient(135deg,#ffe0b2,#ffa726)' },
-    { icon: '🎶', bg: 'linear-gradient(135deg,#e1bee7,#9c27b0)' },
-    { icon: '🔊', bg: 'linear-gradient(135deg,#b2dfdb,#00897b)' },
-    { icon: '🕺', bg: 'linear-gradient(135deg,#fce4ec,#e91e63)' },
-  ];
+    let fotos = [];
   let fotoAtual = 0;
 
   function abrirGaleria(i) {
+    if (!fotos.length) return;
     fotoAtual = i;
     document.getElementById('modal-galeria').classList.add('open');
     renderGal();
     const thumbs = document.getElementById('modal-thumbs');
     thumbs.innerHTML = fotos.map((f,idx) =>
-      (typeof f === 'string' && f.startsWith('http'))
-        ? `<div class="modal-thumb ${idx===i?'ativo':''}" style="background-image:url('${f}');background-size:cover;background-position:center;" onclick="irFoto(${idx})"></div>`
-        : `<div class="modal-thumb ${idx===i?'ativo':''}" style="background:${f.bg}" onclick="irFoto(${idx})">${f.icon}</div>`
+      `<div class="modal-thumb ${idx===i?'ativo':''}" style="background-image:url('${f}');background-size:cover;background-position:center;" onclick="irFoto(${idx})"></div>`
     ).join('');
   }
 
@@ -645,11 +492,8 @@
   function renderGal() {
     const img = document.getElementById('modal-img');
     const f = fotos[fotoAtual];
-    if (typeof f === 'string' && f.startsWith('http')) {
-      img.textContent=''; img.style.background='#111'; img.style.backgroundImage="url('"+f+"')"; img.style.backgroundSize='contain'; img.style.backgroundPosition='center'; img.style.backgroundRepeat='no-repeat';
-    } else {
-      img.style.backgroundImage='none'; img.style.background=f.bg; img.textContent=f.icon;
-    }
+    if (!f) return;
+    img.textContent=''; img.style.background='#111'; img.style.backgroundImage="url('"+f+"')"; img.style.backgroundSize='contain'; img.style.backgroundPosition='center'; img.style.backgroundRepeat='no-repeat';
     document.getElementById('modal-contador').textContent = `${fotoAtual+1} / ${fotos.length}`;
     document.querySelectorAll('.modal-thumb').forEach((t,i) => t.classList.toggle('ativo', i===fotoAtual));
   }
@@ -663,7 +507,8 @@
 
   function abrirWhatsapp() {
     const msg = encodeURIComponent('Olá! Vi seu serviço no AluguelDeChácaras.com.br e gostaria de mais informações sobre disponibilidade e valores.');
-    const wpp = window._fornecedor?.whatsapp || '5544999999999';
+    const wpp = _fornecedor?.whatsapp;
+    if (!wpp) { mostrarToast('📱 WhatsApp indisponível no momento'); return; }
     const num = wpp.replace(/\D/g,'');
     window.open(`https://wa.me/${num}?text=${msg}`, '_blank');
   }
@@ -671,8 +516,9 @@
   function ligar() { const tel = window._fornecedorTel; if (tel) { window.location.href = 'tel:' + tel; } else { mostrarToast('📱 Entre em contato pelo WhatsApp'); } }
 
   function compartilhar() {
+    const titulo = (_fornecedor && _fornecedor.name) || document.title;
     if (navigator.share) {
-      navigator.share({ title: 'DJ Marquinhos Events', url: window.location.href });
+      navigator.share({ title: titulo, url: window.location.href });
     } else {
       navigator.clipboard.writeText(window.location.href);
       mostrarToast('🔗 Link copiado!');
