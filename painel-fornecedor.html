@@ -369,7 +369,7 @@
         <div class="stat-card">
           <div class="stat-label">Eventos atendidos</div>
           <div class="stat-value">0</div>
-          <span class="stat-tag tag-amarelo">em junho</span>
+          <span class="stat-tag tag-amarelo">total</span>
         </div>
         <div class="stat-card">
           <div class="stat-label">Avaliação média</div>
@@ -1061,6 +1061,10 @@
 
     if (!suppliers || suppliers.length === 0) {
       mostrarToast('⚠️ Nenhum perfil encontrado com este e-mail.');
+      const nomeAtual = document.getElementById('picker-nome-atual-forn');
+      if (nomeAtual) nomeAtual.textContent = 'Nenhum serviço';
+      const badge = document.getElementById('badge-status-forn');
+      if (badge) { badge.textContent = 'Sem anúncio'; badge.className = 'status-badge'; }
       return;
     }
 
