@@ -802,9 +802,9 @@
           <select onchange="filtrarReservas(this.value)" style="border:1.5px solid var(--cinza-borda);border-radius:8px;padding:7px 12px;font-size:13px;font-family:'Inter',sans-serif;outline:none;">
             <option value="todas">Todas</option>
             <option value="pendente">Pendentes</option>
-            <option value="confirmada">Confirmadas</option>
+            <option value="confirmada">Confirmadas / pagas</option>
             <option value="concluida">Concluídas</option>
-            <option value="recusada">Recusadas</option>
+            <option value="recusada">Recusadas / canceladas</option>
           </select>
         </div>
       </div>
@@ -1629,7 +1629,11 @@
 
     if (!props || props.length === 0) {
       document.getElementById('reservas-container').innerHTML =
-        '<div style="text-align:center;padding:40px;color:var(--cinza);">📭 Nenhuma chácara cadastrada com este e-mail.<br><small>Entre em contato com o suporte.</small></div>';
+        '<div style="text-align:center;padding:40px;color:var(--cinza);">📭 Nenhuma chácara cadastrada com este e-mail.<br><small>Use o botão abaixo para cadastrar sua primeira chácara, ou entre em contato com o suporte.</small><br><br><button class="btn btn-verde btn-sm" onclick="abrirNovaChacara()">➕ Cadastrar minha chácara</button></div>';
+      const nomeAtual = document.getElementById('picker-nome-atual');
+      if (nomeAtual) nomeAtual.textContent = 'Nenhuma chácara';
+      const listaPicker = document.getElementById('picker-lista');
+      if (listaPicker) listaPicker.innerHTML = '<div class="picker-nova" onclick="abrirNovaChacara()">➕ Nova chácara</div>';
       return;
     }
 
@@ -1879,6 +1883,7 @@
     const map = {
       owner_notified:   ['⏳ Pendente',            'badge-pendente'],
       pending:          ['⏳ Pendente',            'badge-pendente'],
+      approved:         ['👍 Aprovada — aguard. pagamento', 'badge-pendente'],
       payment_pending:  ['💳 Aguard. pagamento',   'badge-pendente'],
       confirmed:        ['✅ Confirmada',           'badge-confirmada'],
       paid:             ['💰 Paga',                'badge-paga'],
@@ -1890,8 +1895,9 @@
   }
 
   function renderReservas(bookings) {
-    const pendentes  = bookings.filter(b => ['owner_notified','pending','payment_pending'].includes(b.status));
-    const ativas     = bookings.filter(b => ['confirmed','paid'].includes(b.status));
+    const pendentes  = bookings.filter(b => ['owner_notified','pending'].includes(b.status));
+    const aguardPgto = bookings.filter(b => ['approved','payment_pending'].includes(b.status));
+    const ativas     = bookings.filter(b => b.status === 'paid');
     const historico  = bookings.filter(b => ['completed','cancelled','rejected'].includes(b.status));
 
     // Badge
@@ -1911,24 +1917,36 @@
     }
 
     let html = '';
+    const filtro = window._filtroReservas || 'todas';
+    const mostrar = grupo => filtro === 'todas' || filtro === grupo;
 
-    if (pendentes.length > 0) {
+    if (mostrar('pendente') && pendentes.length > 0) {
       html += `<div style="font-size:12px;font-weight:700;color:var(--cinza);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:12px;">⏳ Aguardando resposta (${pendentes.length})</div>`;
       pendentes.forEach(b => { html += cardReserva(b); });
     }
 
-    if (ativas.length > 0) {
+    if ((mostrar('pendente') || mostrar('confirmada')) && aguardPgto.length > 0) {
+      html += `<div style="font-size:12px;font-weight:700;color:var(--cinza);text-transform:uppercase;letter-spacing:0.5px;margin:20px 0 12px;">💳 Aguardando pagamento (${aguardPgto.length})</div>`;
+      aguardPgto.forEach(b => { html += cardReserva(b); });
+    }
+
+    if (mostrar('confirmada') && ativas.length > 0) {
       html += `<div style="font-size:12px;font-weight:700;color:var(--cinza);text-transform:uppercase;letter-spacing:0.5px;margin:20px 0 12px;">✅ Reservas confirmadas (${ativas.length})</div>`;
       ativas.forEach(b => { html += cardReserva(b); });
     }
 
-    if (historico.length > 0) {
-      html += `<div style="font-size:12px;font-weight:700;color:var(--cinza);text-transform:uppercase;letter-spacing:0.5px;margin:20px 0 12px;">📋 Histórico (${historico.length})</div>`;
-      historico.forEach(b => { html += cardReserva(b); });
+    if ((mostrar('concluida') || mostrar('recusada')) && historico.length > 0) {
+      const histFiltrado = filtro === 'concluida' ? historico.filter(b => b.status === 'completed')
+                          : filtro === 'recusada' ? historico.filter(b => ['rejected','cancelled'].includes(b.status))
+                          : historico;
+      if (histFiltrado.length > 0) {
+        html += `<div style="font-size:12px;font-weight:700;color:var(--cinza);text-transform:uppercase;letter-spacing:0.5px;margin:20px 0 12px;">📋 Histórico (${histFiltrado.length})</div>`;
+        histFiltrado.forEach(b => { html += cardReserva(b); });
+      }
     }
 
     if (!html) {
-      html = '<div style="text-align:center;padding:60px;color:var(--cinza);">📭 Nenhuma reserva encontrada ainda.</div>';
+      html = '<div style="text-align:center;padding:60px;color:var(--cinza);">📭 Nenhuma reserva encontrada' + (filtro !== 'todas' ? ' com esse filtro.' : ' ainda.') + '</div>';
     }
 
     document.getElementById('reservas-container').innerHTML = html;
@@ -1995,39 +2013,37 @@
   }
 
   async function confirmarReservaDB(id, btn) {
+    if (!confirm('Confirmar esta reserva? O cliente receberá o link de pagamento automaticamente por WhatsApp/e-mail.')) return;
     btn.disabled = true; btn.textContent = '⏳ Confirmando...';
-    const { error } = await _supa.from('bookings').update({ status: 'confirmed', owner_response: 'accepted', owner_responded_at: new Date().toISOString() }).eq('id', id);
-    if (!error) {
-      mostrarToast('✅ Reserva confirmada!');
-      const card = document.getElementById('res-' + id);
-      if (card) { card.classList.remove('pendente'); card.classList.add('confirmada'); card.querySelector('.reserva-badge').className = 'reserva-badge badge-confirmada'; card.querySelector('.reserva-badge').textContent = '✅ Confirmada'; card.querySelector('.reserva-acoes')?.remove(); }
-      atualizarStats(window._reservas.map(r => r.id === id ? {...r, status: 'confirmed'} : r));
-    } else {
+    try {
+      const { data: sess } = await _supa.auth.getSession();
+      const token = sess?.session?.access_token || '';
+      const r = await fetch('https://n8n.alugueldechacaras.com/webhook/resposta-proprietario-painel', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ booking_id: id, acao: 'aprovar', access_token: token })
+      });
+      const result = await r.json().catch(() => ({}));
+      if (!r.ok || !result.success) throw new Error(result.error || 'Falha ao confirmar');
+      mostrarToast('✅ Reserva aprovada! O cliente recebeu o link de pagamento.');
+      if (window._reservas) window._reservas = window._reservas.map(x => x.id === id ? {...x, status: result.status || 'payment_pending'} : x);
+      renderParaPropriedade();
+    } catch (e) {
       btn.disabled = false; btn.textContent = '✅ Confirmar reserva';
-      mostrarToast('Erro ao confirmar. Tente novamente.');
+      mostrarToast('❌ ' + (e.message || 'Erro ao confirmar. Tente novamente.'));
     }
   }
 
-  async function recusarReservaDB(id, btn) {
-    if (!confirm('Tem certeza que quer recusar esta reserva?')) return;
-    btn.disabled = true; btn.textContent = '⏳ Recusando...';
-    const { error } = await _supa.from('bookings').update({ status: 'rejected', owner_response: 'rejected', owner_responded_at: new Date().toISOString() }).eq('id', id);
-    if (!error) {
-      mostrarToast('Reserva recusada.');
-      const card = document.getElementById('res-' + id);
-      if (card) { card.classList.remove('pendente'); card.querySelector('.reserva-badge').className = 'reserva-badge badge-recusada'; card.querySelector('.reserva-badge').textContent = '✕ Recusada'; card.querySelector('.reserva-acoes')?.remove(); }
-    } else {
-      btn.disabled = false; btn.textContent = '✕ Recusar';
-      mostrarToast('Erro ao recusar.');
-    }
+  function recusarReservaDB(id, btn) {
+    abrirModalRecusar(id);
   }
 
   function atualizarStats(bookings) {
-    const pendentes  = bookings.filter(b => ['owner_notified','pending','payment_pending'].includes(b.status)).length;
-    const confirmadas = bookings.filter(b => ['confirmed','paid'].includes(b.status)).length;
+    const pendentes  = bookings.filter(b => ['owner_notified','pending'].includes(b.status)).length;
+    const confirmadas = bookings.filter(b => b.status === 'paid').length;
     const receita = bookings.filter(b => b.status === 'paid').reduce((s,b) => s + Number(b.owner_amount||0), 0);
     const comissao = bookings.filter(b => b.status === 'paid').reduce((s,b) => s + Number(b.platform_fee||0), 0);
-    const aReceber = bookings.filter(b => ['confirmed','payment_pending'].includes(b.status)).reduce((s,b) => s + Number(b.owner_amount||0), 0);
+    const aReceber = bookings.filter(b => ['approved','payment_pending'].includes(b.status)).reduce((s,b) => s + Number(b.owner_amount||0), 0);
 
     const el = id => document.getElementById(id);
     if (el('stat-pendentes')) el('stat-pendentes').textContent = pendentes;
@@ -2087,6 +2103,11 @@
     const all = window._reservas || [];
     if (!propriedadeAtual) return all;
     return all.filter(b => b.property_id === propriedadeAtual.id);
+  }
+
+  function filtrarReservas(valor) {
+    window._filtroReservas = valor;
+    renderReservas(reservasDaPropriedadeAtual());
   }
 
   function renderParaPropriedade() {
@@ -2452,28 +2473,16 @@
     setTimeout(() => t.classList.remove('show'), 3000);
   }
 
-  // RESERVAS
+  // RESERVAS — recusa com motivo (fluxo real via backend)
   let reservaParaRecusar = null;
-
-  function confirmarReserva(id) {
-    const card = document.getElementById('reserva-' + id);
-    if (!card) return;
-    const badge = card.querySelector('.reserva-badge');
-    const acoes = card.querySelector('.reserva-acoes');
-    const timer = card.querySelector('[style*="Expira"]') || card.querySelector('.reserva-timer');
-
-    card.classList.remove('pendente');
-    card.classList.add('confirmada');
-    if (badge) { badge.className = 'reserva-badge badge-confirmada'; badge.textContent = '✅ Confirmada'; }
-    if (timer) timer.style.display = 'none';
-    if (acoes) acoes.innerHTML = `<button class="btn-msg-cliente" style="margin-left:0;" onclick="msgCliente('44999999999')">💬 Falar com cliente via WhatsApp</button><div style="margin-left:auto;font-size:12px;color:var(--cinza);display:flex;align-items:center;">Aguardando pagamento do cliente</div>`;
-
-    atualizarBadgeReservas();
-    mostrarToast('✅ Reserva registrada! O cliente recebe o link de pagamento automaticamente via WhatsApp.');
-  }
 
   function abrirModalRecusar(id) {
     reservaParaRecusar = id;
+    // limpa seleção anterior
+    document.querySelectorAll('#modal-recusar input[name="motivo"]').forEach(r => { r.checked = false; });
+    document.querySelectorAll('#modal-recusar label').forEach(l => { l.style.borderColor = 'var(--cinza-borda)'; l.style.background = ''; });
+    const txt = document.getElementById('motivo-texto');
+    if (txt) txt.value = '';
     const overlay = document.getElementById('modal-recusar');
     if (overlay) overlay.classList.add('open');
   }
@@ -2481,66 +2490,48 @@
   function fecharModalRecusar() {
     const overlay = document.getElementById('modal-recusar');
     if (overlay) overlay.classList.remove('open');
-  }
-
-  function recusarConfirmado() {
-    if (!reservaParaRecusar) return;
-    const card = document.getElementById('reserva-' + reservaParaRecusar);
-    if (!card) return;
-    const badge = card.querySelector('.reserva-badge');
-    const acoes = card.querySelector('.reserva-acoes');
-
-    card.classList.remove('pendente');
-    card.classList.add('recusada');
-    if (badge) { badge.className = 'reserva-badge badge-recusada'; badge.textContent = '✕ Recusada'; }
-    if (acoes) acoes.innerHTML = `<span style="font-size:12px;color:var(--cinza);">Solicitação recusada. Cliente foi notificado.</span>`;
-
-    fecharModalRecusar();
-    atualizarBadgeReservas();
-    mostrarToast('Reserva recusada. O cliente é notificado automaticamente via WhatsApp.');
     reservaParaRecusar = null;
   }
 
-  function atualizarBadgeReservas() {
-    const pendentes = document.querySelectorAll('.reserva-card.pendente').length;
-
-    // 1. Badge na sidebar
-    const badge = document.getElementById('badge-reservas');
-    if (badge) {
-      badge.textContent = pendentes;
-      badge.style.display = pendentes > 0 ? 'inline' : 'none';
-    }
-
-    // 2. Stat card visão geral
-    const statNum = document.getElementById('stat-pendentes');
-    if (statNum) statNum.textContent = pendentes;
-
-    // 3. Título na aba reservas
-    const titulo = document.getElementById('titulo-pendentes');
-    if (titulo) titulo.textContent = '⏳ Aguardando sua resposta (' + pendentes + ')';
-
-    // 4. Alerta na visão geral
-    const alerta = document.getElementById('alerta-pendentes');
-    const alertaTexto = document.getElementById('alerta-texto');
-    if (alerta) {
-      if (pendentes === 0) {
-        alerta.style.display = 'none';
-      } else {
-        alerta.style.display = 'flex';
-        if (alertaTexto) {
-          alertaTexto.textContent = 'Você tem ' + pendentes + ' solicitação' + (pendentes > 1 ? 'ões' : '') + ' de reserva aguardando resposta';
-        }
-      }
-    }
-
-    // 5. Stat card borda amarela — remover destaque se zero pendentes
-    const statCard = statNum ? statNum.closest('.stat-card') : null;
-    if (statCard) {
-      statCard.style.border = pendentes > 0 ? '1.5px solid #f59e0b' : '1px solid var(--cinza-borda)';
-    }
-    const statTag = document.getElementById('stat-pendentes-tag');
-    if (statTag) statTag.textContent = pendentes > 0 ? 'responda já!' : 'nenhuma pendente';
+  function selecionarMotivo(label) {
+    document.querySelectorAll('#modal-recusar label').forEach(l => { l.style.borderColor = 'var(--cinza-borda)'; l.style.background = ''; });
+    label.style.borderColor = 'var(--verde)';
+    label.style.background = 'var(--verde-claro, #e8f5ed)';
+    const radio = label.querySelector('input[type="radio"]');
+    if (radio) radio.checked = true;
   }
+
+  async function recusarConfirmado() {
+    if (!reservaParaRecusar) return;
+    const id = reservaParaRecusar;
+    const motivoSel = document.querySelector('#modal-recusar input[name="motivo"]:checked');
+    const motivoLabel = motivoSel ? motivoSel.closest('label').textContent.trim() : '';
+    const motivoExtra = (document.getElementById('motivo-texto')?.value || '').trim();
+    const motivo = [motivoLabel, motivoExtra].filter(Boolean).join(' — ');
+
+    const btn = document.querySelector('#modal-recusar button[onclick="recusarConfirmado()"]');
+    if (btn) { btn.disabled = true; btn.textContent = '⏳ Recusando...'; }
+    try {
+      const { data: sess } = await _supa.auth.getSession();
+      const token = sess?.session?.access_token || '';
+      const r = await fetch('https://n8n.alugueldechacaras.com/webhook/resposta-proprietario-painel', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ booking_id: id, acao: 'recusar', motivo: motivo, access_token: token })
+      });
+      const result = await r.json().catch(() => ({}));
+      if (!r.ok || !result.success) throw new Error(result.error || 'Falha ao recusar');
+      mostrarToast('Reserva recusada. O cliente foi notificado.');
+      if (window._reservas) window._reservas = window._reservas.map(x => x.id === id ? {...x, status: 'rejected'} : x);
+      fecharModalRecusar();
+      renderParaPropriedade();
+    } catch (e) {
+      mostrarToast('❌ ' + (e.message || 'Erro ao recusar. Tente novamente.'));
+    } finally {
+      if (btn) { btn.disabled = false; btn.textContent = 'Confirmar recusa'; }
+    }
+  }
+
 
   function msgCliente(numero) {
     const msg = encodeURIComponent('Olá! Sou o proprietário da chácara cadastrada no AluguelDeChácaras.com.br. Entro em contato sobre sua solicitação de reserva.');
