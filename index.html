@@ -1467,8 +1467,8 @@
       titulo: 'Solicitar reserva',
       sub: 'Preencha seus dados e enviaremos sua solicitação ao proprietário.',
       campos: `
-        <p style="text-align:center;font-size:14px;color:#374151;margin-bottom:16px;">Você será redirecionado para a página da chácara com o formulário completo de reserva.</p>
-        <button class="btn btn-verde" style="width:100%;justify-content:center;margin-top:4px;" onclick="window.location.href='/espaco-verde-festas/'">Ver detalhes e solicitar reserva →</button>
+        <p style="text-align:center;font-size:14px;color:#374151;margin-bottom:16px;">Escolha uma chácara na lista para ver os detalhes e enviar sua solicitação de reserva.</p>
+        <button class="btn btn-verde" style="width:100%;justify-content:center;margin-top:4px;" onclick="fecharModal();document.getElementById('chacaras').scrollIntoView({behavior:'smooth'})">Ver chácaras disponíveis →</button>
         <p style="text-align:center;margin-top:12px;font-size:12px;color:#6b7280;">🔒 Endereço e contato liberados somente após confirmação e pagamento.</p>
       `
     },
@@ -2112,47 +2112,7 @@
 </div>
 
 <script>
-  // DADOS DAS CHÁCARAS E FORNECEDORES (base de conhecimento da IA)
-  const BASE_CONHECIMENTO = `
-Você é o assistente virtual do site AluguelDeChácaras.com, plataforma de aluguel de chácaras para eventos em Maringá e região do Paraná. Seja simpático, objetivo e use emojis com moderação.
-
-CHÁCARAS CADASTRADAS:
-1. Chácara das Palmeiras — Maringá (Zona Rural)
-   - Capacidade: até 150 pessoas
-   - Estrutura: piscina, churrasqueira coberta, campo de futebol, casa sede, estacionamento
-   - Valor: a partir de R$ 1.200/dia
-   - Ideal para: festas, confraternizações, churrascos
-   - Contato: disponível no site
-
-2. Sítio Boa Vista — Sarandi/PR
-   - Capacidade: até 80 pessoas
-   - Estrutura: lago para pesca, espaço gourmet, hospedagem, área arborizada
-   - Valor: a partir de R$ 900/dia
-   - Ideal para: lazer, final de semana, grupos menores
-
-3. Espaço Verde Festas — Paiçandu/PR
-   - Capacidade: até 200 pessoas
-   - Estrutura: salão coberto, decoração inclusa, estacionamento amplo
-   - Valor: a partir de R$ 2.500/dia
-   - Ideal para: casamentos, debutantes, eventos grandes
-
-FORNECEDORES CADASTRADOS:
-- DJ Marquinhos Events (DJ e Música) — Maringá. Som profissional, iluminação LED inclusa.
-- Doce Arte Confeitaria (Bolos e Doces) — Maringá. Bolos artísticos, docinhos, mesa de doces.
-- Alegria Kids Locações (Brinquedos Infantis) — Sarandi. Pula-pula, escorregador, piscina de bolinhas.
-- Chopp Gelado Maringá (Chopeiras) — Maringá. Aluguel de chopeiras, várias marcas, frete grátis.
-
-CATEGORIAS DE FORNECEDORES DISPONÍVEIS: Bolos e Doces, DJ e Música, Chopeiras, Decoração e Balões, Brinquedos Infantis, Buffets, Animadores e Recreadores, Churrasqueiros, Salgados.
-
-INFORMAÇÕES GERAIS:
-- Reservas feitas com segurança pela plataforma — endereço liberado apenas após pagamento confirmado
-- Comissão de 8% cobrada do proprietário por reserva confirmada — sem custo adicional para o cliente
-- Fornecedores cadastrados gratuitamente na plataforma
-- Cidades atendidas: Maringá, Sarandi, Paiçandu, Marialva e região
-- Para cadastrar chácara ou serviço: clicar em "Anunciar" no menu
-
-Responda sempre em português brasileiro. Se não souber algo, sugira que o visitante use o formulário de contato ou navegue pelo site.
-  `;
+  // Base de conhecimento da IA agora é montada no servidor (n8n) com dados reais do banco.
 
   let chatAberto = false;
   let historico = [];
@@ -2233,24 +2193,14 @@ Responda sempre em português brasileiro. Se não souber algo, sugira que o visi
     document.getElementById('chat-send').disabled = true;
 
     try {
-      const mensagens = [
-        { role: 'user', content: BASE_CONHECIMENTO + '\n\nAgora responda a conversa abaixo:' },
-        { role: 'assistant', content: 'Entendido! Estou pronto para ajudar os visitantes do AluguelDeChácaras.com.' },
-        ...historico.slice(-10)
-      ];
-
-      const response = await fetch('https://api.anthropic.com/v1/messages', {
+      const response = await fetch('https://n8n.alugueldechacaras.com/webhook/chat-ia-home', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          model: 'claude-sonnet-4-6',
-          max_tokens: 1000,
-          messages: mensagens
-        })
+        body: JSON.stringify({ messages: historico.slice(-10) })
       });
 
       const data = await response.json();
-      const resposta = data.content?.map(b => b.text || '').join('') || 'Desculpe, não consegui processar sua pergunta. Tente novamente!';
+      const resposta = data.reply || 'Desculpe, não consegui processar sua pergunta. Tente novamente!';
 
       removerTyping();
       adicionarMensagem('ia', resposta);
